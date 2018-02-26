@@ -79,7 +79,7 @@ class FileProxy:
 
             otmstp = _get_mtime(target)
 
-            elif otmstp != itmstp or force:
+            if otmstp != itmstp or force:
 
                 # Make the directories if they do not exist
                 try:
