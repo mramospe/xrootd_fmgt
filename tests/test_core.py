@@ -6,7 +6,7 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import os
+import atexit, os
 
 # Custom
 import xrootd_fmgt
@@ -25,9 +25,10 @@ def test_get_mtime():
         fname = make_fname(i)
 
     with open(fname, 'wt') as f:
-        xrootd_fmgt.core._get_mtime(fname)
 
-    os.remove(fname)
+        atexit.register(lambda: os.remove(fname))
+
+        xrootd_fmgt.core._get_mtime(fname)
 
 
 def test_remote_name():
