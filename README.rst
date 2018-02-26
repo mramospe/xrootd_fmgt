@@ -29,7 +29,7 @@ This package is available on PyPi, so just type:
 
 .. code-block:: bash
 
-   pip install hep-spt
+   pip install xrootd-fmgt
 
 To use the **latest development version**, clone the repository and install with `pip`:
 
