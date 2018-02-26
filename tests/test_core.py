@@ -6,7 +6,7 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Custom
-import xrootd_fmg
+import xrootd_fmgt
 
 
 def test_get_mtime():
@@ -22,7 +22,7 @@ def test_get_mtime():
         fname = make_fname(i)
 
     with open(fname, 'wt') as f:
-        xrootd_fmg._get_mtime(fname(i))
+        xrootd_fmgt._get_mtime(fname(i))
 
     os.remove(fname)
 
@@ -33,17 +33,17 @@ def test_remote_name():
     '''
 
     # XROOTD
-    assert xrootd_fmg._is_xrootd('root://my-site//')
+    assert xrootd_fmgt._is_xrootd('root://my-site//')
 
-    assert not xrootd_fmg._is_xrootd('my-site')
+    assert not xrootd_fmgt._is_xrootd('my-site')
 
-    s, p = xrootd_fmg.split_remote('root://my-site//path/to/file')
+    s, p = xrootd_fmgt.split_remote('root://my-site//path/to/file')
     assert s == 'my-site' and p == 'path/to/file'
 
     # SSH
-    assert xrootd_fmg._is_ssh('username@server')
+    assert xrootd_fmgt._is_ssh('username@server')
 
-    assert not xrootd_fmg._is_ssh('username-server')
+    assert not xrootd_fmgt._is_ssh('username-server')
 
-    s, p = xrootd_fmg.split_remote('user@my-site:path/to/file')
+    s, p = xrootd_fmgt.split_remote('user@my-site:path/to/file')
     assert s == 'user@my-site' and p == 'path/to/file'

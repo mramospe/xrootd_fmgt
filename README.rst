@@ -1,12 +1,12 @@
-==========
-xrootd_fmg
-==========
+===========
+xrootd_fmgt
+===========
 
-.. image:: https://img.shields.io/travis/mramospe/xrootd_fmg.svg
-   :target: https://travis-ci.org/mramospe/xrootd_fmg
+.. image:: https://img.shields.io/travis/mramospe/xrootd_fmgt.svg
+   :target: https://travis-ci.org/mramospe/xrootd_fmgt
 
 .. image:: https://img.shields.io/badge/documentation-link-blue.svg
-   :target: https://mramospe.github.io/xrootd_fmg/
+   :target: https://mramospe.github.io/xrootd_fmgt/
 
 .. inclusion-marker-do-not-remove
 
@@ -35,6 +35,6 @@ To use the **latest development version**, clone the repository and install with
 
 .. code-block:: bash
 
-   git clone https://github.com/mramospe/xrootd_fmg.git
-   cd xrootd_fmg
+   git clone https://github.com/mramospe/xrootd_fmgt.git
+   cd xrootd_fmgt
    pip install .
