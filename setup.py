@@ -57,7 +57,7 @@ setup(
     packages = find_packages(),
 
     # Requisites
-    install_requires = ['pytest', 'xrootd'],
+    install_requires = ['pytest'],
 
     # Test requirements
     setup_requires = ['pytest-runner'],
