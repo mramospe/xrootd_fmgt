@@ -5,6 +5,9 @@ Main classes and functions to manage files using the ssh protocol.
 __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
+# Custom
+import protocols
+
 # Python
 import os, subprocess, socket
 
@@ -13,17 +16,8 @@ __all__ = [
     'copy_file',
     'FileProxy',
     'getmtime',
-    'is_remote',
-    'is_ssh',
-    'is_xrootd',
     'set_verbose_level'
     ]
-
-# Definition of the protocols to use
-__local_protocol__       = 1
-__ssh_protocol__         = 2
-__xrootd_protocol__      = 3
-__different_protocols__  = 4
 
 # Verbose level
 __verbose_level__ = 1
@@ -58,13 +52,13 @@ class FileProxy:
         '''
         host = socket.getfqdn()
 
-        if is_ssh(host):
+        if protocols.is_ssh(host):
             for s in self.targets:
                 if s.startswith(host):
                     _, path = _split_remote(s)
         else:
             for s in self.targets:
-                if not is_ssh(s):
+                if not protocols.is_ssh(s):
                     return s
 
         raise RuntimeError('Unable to find an available path')
@@ -115,13 +109,13 @@ def copy_file( source, target, force=False ):
     if getmtime(target) != itmstp or force:
 
         # Make the directories if they do not exist
-        if is_remote(target):
+        if protocols.is_remote(target):
 
             server, sepath = _split_remote(target)
 
             dpath = os.path.dirname(sepath)
 
-            if is_xrootd(target):
+            if protocols.is_xrootd(target):
                 proc = _process('xrd', server, 'mkdir', dpath)
             else:
                 proc = _process('ssh', '-X', server, 'mkdir', '-p', dpath)
@@ -138,10 +132,10 @@ def copy_file( source, target, force=False ):
                 pass
 
         # Copy the file
-        dec = _remote_protocol(source, target)
-        if dec == __different_protocols__:
+        dec = protocols._remote_protocol(source, target)
+        if dec == protocols.__different_protocols__:
             # Copy to a temporal file
-            if is_remote(source):
+            if protocols.is_remote(source):
                 _, path = _split_remote(source)
             else:
                 path = source
@@ -154,9 +148,9 @@ def copy_file( source, target, force=False ):
 
             _display('Trying to get file from "{}"'.format(source))
 
-            if dec == __ssh_protocol__:
+            if dec == protocols.__ssh_protocol__:
                 proc = _process('scp', '-q', '-p', source, target)
-            elif dec == __xrootd_protocol__:
+            elif dec == protocols.__xrootd_protocol__:
                 proc = _process('xrdcp', '-f', '-s', source, target)
             else:
                 proc = _process('cp', '-p', source, target)
@@ -196,7 +190,7 @@ def getmtime( path ):
     :returns: modification time.
     :rtype: float or None
     '''
-    if is_ssh(path):
+    if protocols.is_ssh(path):
 
         server, sepath = _split_remote(path)
 
@@ -207,7 +201,7 @@ def getmtime( path ):
         except:
             return None
 
-    elif is_xrootd(path):
+    elif protocols.is_xrootd(path):
 
         server, sepath = _split_remote(path)
 
@@ -225,42 +219,6 @@ def getmtime( path ):
             return None
 
 
-def is_remote( path ):
-    '''
-    Check whether the given path points to a remote file.
-
-    :param path: path to the input file.
-    :type path: str
-    :returns: output decision.
-    :rtype: bool
-    '''
-    return is_ssh(path) or is_xrootd(path)
-
-
-def is_ssh( path ):
-    '''
-    Return whether the standard ssh protocol must be used.
-
-    :param path: path to the input file.
-    :type path: str
-    :returns: output decision
-    :rtype: bool
-    '''
-    return '@' in path
-
-
-def is_xrootd( path ):
-    '''
-    Return whether the path is related to the xrootd protocol.
-
-    :param path: path to the input file.
-    :type path: str
-    :returns: output decision
-    :rtype: bool
-    '''
-    return path.startswith('root://')
-
-
 def _process( *args ):
     '''
     Create a subprocess object with a defined "stdout" and "stderr",
@@ -274,35 +232,6 @@ def _process( *args ):
     return subprocess.Popen( args,
                              stdout = subprocess.PIPE,
                              stderr = subprocess.PIPE)
-
-
-def _remote_protocol( a, b ):
-    '''
-    Determine the protocol to use given two paths to files. The protocol IDs
-    are defined as:
-    - 1: local
-    - 2: ssh
-    - 3: xrootd
-    - 4: different protocols ("a" and "b" are accessed using different \
-    protocols)
-
-    :param a: path to the firs file.
-    :type a: str
-    :param b: path to the second file.
-    :type b: str
-    :returns: protocol ID.
-    :rtype: int
-    '''
-    if is_ssh(a) and is_xrootd(b):
-        return __different_protocols__
-    elif is_xrootd(a) and is_ssh(b):
-        return __different_protocols__
-    elif is_ssh(a) or is_ssh(b):
-        return __ssh_protocol__
-    elif is_xrootd(a) or is_xrootd(b):
-        return __xrootd_protocol__
-    else:
-        return __local_protocol__
 
 
 def _set_username( source, uname, host=None ):
@@ -340,7 +269,7 @@ def _split_remote( path ):
     :returns: site and path to the file in the site.
     :rtype: str, str
     '''
-    if is_ssh(path):
+    if protocols.is_ssh(path):
         return path.split(':')
     else:
         rp = path.find('//', 7)
