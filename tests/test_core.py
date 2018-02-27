@@ -12,9 +12,9 @@ import atexit, os
 import hep_remfm
 
 
-def test_get_mtime():
+def _create_dummy_file():
     '''
-    Create a file and get the modification time.
+    Create a dummy file.
     '''
     make_fname = lambda i: 'dummy_{}.txt'.format(i)
     fname = 'dummy_0.txt'
@@ -24,11 +24,17 @@ def test_get_mtime():
         i += 1
         fname = make_fname(i)
 
-    with open(fname, 'wt') as f:
+    atexit.register(lambda: os.remove(fname))
 
-        atexit.register(lambda: os.remove(fname))
+    return open(fname, 'wt')
 
-        hep_remfm.core._get_mtime(fname)
+
+def test_get_mtime():
+    '''
+    Create a file and get the modification time.
+    '''
+    with _create_dummy_file() as f:
+        hep_remfm.core._get_mtime(f.name)
 
 
 def test_remote_name():
@@ -51,3 +57,16 @@ def test_remote_name():
 
     s, p = hep_remfm.core._split_remote('user@my-site:path/to/file')
     assert s == 'user@my-site' and p == 'path/to/file'
+
+
+def test_file_proxy():
+    '''
+    Test the behaviours of the FileProxy class.
+    '''
+    sf = _create_dummy_file()
+    tf = _create_dummy_file()
+
+    fp = hep_remfm.FileProxy(sf.name, tf.name)
+    fp.sync()
+
+    assert hep_remfm.core._get_mtime(sf.name) == hep_remfm.core._get_mtime(tf.name)
