@@ -1,0 +1,19 @@
+FileProxy
+=========
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: FileProxy
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~FileProxy.path
+      ~FileProxy.sync
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: path
+   .. automethod:: sync
