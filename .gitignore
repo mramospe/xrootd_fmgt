@@ -53,8 +53,8 @@ Thumbs.db
 # PIP installation files #
 ##########################
 .eggs/
-xrootd_fmgt.egg-info/
-xrootd_fmgt/version.py
+hep_remfm.egg-info/
+hep_remfm/version.py
 
 # Other files #
 *.txt
