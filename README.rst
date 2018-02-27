@@ -1,12 +1,12 @@
-===========
-xrootd_fmgt
-===========
+=====
+remfm
+=====
 
-.. image:: https://img.shields.io/travis/mramospe/xrootd_fmgt.svg
-   :target: https://travis-ci.org/mramospe/xrootd_fmgt
+.. image:: https://img.shields.io/travis/mramospe/remfm.svg
+   :target: https://travis-ci.org/mramospe/remfm
 
 .. image:: https://img.shields.io/badge/documentation-link-blue.svg
-   :target: https://mramospe.github.io/xrootd_fmgt/
+   :target: https://mramospe.github.io/remfm/
 
 .. inclusion-marker-do-not-remove
 
@@ -35,6 +35,6 @@ To use the **latest development version**, clone the repository and install with
 
 .. code-block:: bash
 
-   git clone https://github.com/mramospe/xrootd_fmgt.git
-   cd xrootd_fmgt
+   git clone https://github.com/mramospe/remfm.git
+   cd remfm
    pip install .

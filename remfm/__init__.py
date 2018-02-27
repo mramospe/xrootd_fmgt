@@ -16,7 +16,7 @@ for loader, module_name, ispkg in pkgutil.walk_packages(__path__):
 
     if not ispkg:
         # Import all classes and functions
-        mod = importlib.import_module('xrootd_fmgt.' + module_name)
+        mod = importlib.import_module('remfm.' + module_name)
 
         __all__ += mod.__all__
 

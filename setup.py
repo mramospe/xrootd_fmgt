@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 '''
-Setup script for the xrootd_fmgt package
+Setup script for the remfm package
 '''
 
 __author__ = 'Miguel Ramos Pernas'
@@ -40,7 +40,7 @@ version = frmt.format('.'.join(map(str, version_info[:3])), version_info[4])
 # Setup function
 setup(
 
-    name = 'xrootd_fmgt',
+    name = 'remfm',
 
     version = version,
 
@@ -67,10 +67,10 @@ setup(
 
 
 # Create a module with the versions
-version_file = open('xrootd_fmgt/version.py', 'wt')
+version_file = open('remfm/version.py', 'wt')
 version_file.write("""\
 '''
-Auto-generated module holding the version of the xrootd_fmgt package
+Auto-generated module holding the version of the "remfm" package
 '''
 
 __version__ = "{}"
