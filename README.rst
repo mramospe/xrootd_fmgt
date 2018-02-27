@@ -1,12 +1,12 @@
-=====
-remfm
-=====
+=========
+hep_remfm
+=========
 
-.. image:: https://img.shields.io/travis/mramospe/remfm.svg
-   :target: https://travis-ci.org/mramospe/remfm
+.. image:: https://img.shields.io/travis/mramospe/hep_remfm.svg
+   :target: https://travis-ci.org/mramospe/hep_remfm
 
 .. image:: https://img.shields.io/badge/documentation-link-blue.svg
-   :target: https://mramospe.github.io/remfm/
+   :target: https://mramospe.github.io/hep_remfm/
 
 .. inclusion-marker-do-not-remove
 
@@ -35,6 +35,6 @@ To use the **latest development version**, clone the repository and install with
 
 .. code-block:: bash
 
-   git clone https://github.com/mramospe/remfm.git
-   cd remfm
+   git clone https://github.com/mramospe/hep_remfm.git
+   cd hep_remfm
    pip install .

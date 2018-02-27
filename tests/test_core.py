@@ -9,7 +9,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 import atexit, os
 
 # Custom
-import remfm
+import hep_remfm
 
 
 def test_get_mtime():
@@ -28,7 +28,7 @@ def test_get_mtime():
 
         atexit.register(lambda: os.remove(fname))
 
-        remfm.core._get_mtime(fname)
+        hep_remfm.core._get_mtime(fname)
 
 
 def test_remote_name():
@@ -37,17 +37,17 @@ def test_remote_name():
     '''
 
     # XROOTD
-    assert remfm.core._is_xrootd('root://my-site//')
+    assert hep_remfm.core._is_xrootd('root://my-site//')
 
-    assert not remfm.core._is_xrootd('my-site')
+    assert not hep_remfm.core._is_xrootd('my-site')
 
-    s, p = remfm.core._split_remote('root://my-site//path/to/file')
+    s, p = hep_remfm.core._split_remote('root://my-site//path/to/file')
     assert s == 'my-site' and p == 'path/to/file'
 
     # SSH
-    assert remfm.core._is_ssh('username@server')
+    assert hep_remfm.core._is_ssh('username@server')
 
-    assert not remfm.core._is_ssh('username-server')
+    assert not hep_remfm.core._is_ssh('username-server')
 
-    s, p = remfm.core._split_remote('user@my-site:path/to/file')
+    s, p = hep_remfm.core._split_remote('user@my-site:path/to/file')
     assert s == 'user@my-site' and p == 'path/to/file'
