@@ -139,8 +139,7 @@ def copy_file( source, target, force=False ):
             else:
                 proc = _process('ssh', '-X', server, 'mkdir', '-p', dpath)
 
-            exitcode = proc.wait()
-            if exitcode != 0:
+            if proc.wait() != 0:
                 _, stderr = proc.communicate()
                 raise RuntimeError('Problem creating directories for "{}", '\
                                        'Error: "{}"'.format(target, stderr))
@@ -176,8 +175,7 @@ def copy_file( source, target, force=False ):
 
             _display('Output will be copied into "{}"'.format(target))
 
-            exitcode = proc.wait()
-            if exitcode != 0:
+            if proc.wait() != 0:
                 _, stderr = proc.communicate()
                 raise RuntimeError('Problem copying file "{}", Error: '\
                                        '"{}"'.format(source, stderr))
@@ -214,26 +212,25 @@ def getmtime( path ):
     :returns: modification time.
     :rtype: int or None
     '''
-    if protocols.is_ssh(path):
+    if protocols.is_remote(path):
 
         server, sepath = _split_remote(path)
 
-        tmpstp = _process('ssh', '-X', server, 'stat', '-c%Y', sepath).stdout.read()
+        if protocols.is_ssh(path):
+            proc = _process('ssh', '-X', server, 'stat', '-c%Y', sepath)
+        else:
+            proc = _process('xrd', server, 'stat', sepath)
+    else:
+        proc = _process('stat', '-c%Y', path)
 
-    elif protocols.is_xrootd(path):
+    if proc.wait() != 0:
+        return None
 
-        server, sepath = _split_remote(path)
-
-        tmpstp = _process('xrd', server, 'stat', sepath).stdout.read()
+    tmpstp = proc.stdout.read()
+    if protocols.is_xrootd(path):
         tmpstp = tmpstp[tmpstp.find('Modtime:') + len('Modtime:'):]
 
-    else:
-        tmpstp = _process('stat', '-c%Y', path).stdout.read()
-
-    try:
-        return int(tmpstp)
-    except:
-        return None
+    return int(tmpstp)
 
 
 def _process( *args ):
