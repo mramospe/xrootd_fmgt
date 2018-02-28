@@ -24,9 +24,9 @@ def _create_dummy_file():
         i += 1
         fname = make_fname(i)
 
-    atexit.register(lambda: os.remove(fname))
-
     open(fname, 'wt').close()
+
+    atexit.register(lambda: os.remove(fname))
 
     return fname
 
