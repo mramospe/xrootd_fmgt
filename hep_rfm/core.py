@@ -66,8 +66,9 @@ class FileProxy:
                 if server.endswith(host):
                     return sepath
 
-            elif protocols.is_xrootd(s) and xrdav:
-                return s
+            elif protocols.is_xrootd(s):
+                if xrdav:
+                    return s
             else:
                 return s
 
