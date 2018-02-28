@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="FileProxy" href="api/hep_rfm.FileProxy.html" />
+    <link rel="next" title="copy_file" href="api/hep_rfm.copy_file.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -73,7 +73,36 @@ pip install .
 <h2>Functions and classes<a class="headerlink" href="#functions-and-classes" title="Permalink to this headline">¶</a></h2>
 <p>Here you can find the documentation on the functions and classes
 of the hep_rfm package. The class inheritance diagram is also shown.</p>
-<span class="target" id="module-hep_rfm"></span><div class="section" id="classes">
+<span class="target" id="module-hep_rfm"></span><div class="section" id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h3>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;force])</td>
+<td>Main function to copy a file from a source to a target.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.getmtime.html#hep_rfm.getmtime" title="hep_rfm.getmtime"><code class="xref py py-obj docutils literal"><span class="pre">getmtime</span></code></a>(path)</td>
+<td>Get the modification time for the file in “path”.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.set_verbose_level.html#hep_rfm.set_verbose_level" title="hep_rfm.set_verbose_level"><code class="xref py py-obj docutils literal"><span class="pre">set_verbose_level</span></code></a>(lvl)</td>
+<td>Set the verbose level in this package.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal"><span class="pre">is_remote</span></code></a>(path)</td>
+<td>Check whether the given path points to a remote file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_ssh.html#hep_rfm.is_ssh" title="hep_rfm.is_ssh"><code class="xref py py-obj docutils literal"><span class="pre">is_ssh</span></code></a>(path)</td>
+<td>Return whether the standard ssh protocol must be used.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_xrootd.html#hep_rfm.is_xrootd" title="hep_rfm.is_xrootd"><code class="xref py py-obj docutils literal"><span class="pre">is_xrootd</span></code></a>(path)</td>
+<td>Return whether the path is related to the xrootd protocol.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="classes">
 <h3>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h3>
 <table border="1" class="longtable docutils">
 <colgroup>
@@ -122,6 +151,14 @@ of the hep_rfm package. The class inheritance diagram is also shown.</p>
 
 <h3>Navigation</h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.copy_file.html">copy_file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.getmtime.html">getmtime</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.set_verbose_level.html">set_verbose_level</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.is_remote.html">is_remote</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.is_ssh.html">is_ssh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.is_xrootd.html">is_xrootd</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.FileProxy.html">FileProxy</a></li>
 </ul>
 
@@ -129,7 +166,7 @@ of the hep_rfm package. The class inheritance diagram is also shown.</p>
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="api/hep_rfm.FileProxy.html" title="next chapter">FileProxy</a></li>
+      <li>Next: <a href="api/hep_rfm.copy_file.html" title="next chapter">copy_file</a></li>
   </ul></li>
 </ul>
 </div>
