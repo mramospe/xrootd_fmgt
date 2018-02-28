@@ -9,7 +9,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 import protocols
 
 # Python
-import os, subprocess, socket
+import os, subprocess, socket, warnings
 
 
 __all__ = [
