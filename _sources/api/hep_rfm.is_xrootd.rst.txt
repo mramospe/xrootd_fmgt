@@ -1,0 +1,6 @@
+is_xrootd
+=========
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: is_xrootd

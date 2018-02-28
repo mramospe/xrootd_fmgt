@@ -1,0 +1,183 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>hep_rfm.protocols &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0.dev1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hep_rfm.protocols</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Define functions to manage protocols.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miguel Ramos Pernas&#39;</span><span class="p">]</span>
+<span class="n">__email__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;is_remote&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;is_ssh&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;is_xrootd&#39;</span>
+    <span class="p">]</span>
+
+<span class="c1"># Definition of the protocols to use</span>
+<span class="n">__local_protocol__</span>      <span class="o">=</span> <span class="mi">1</span>
+<span class="n">__ssh_protocol__</span>        <span class="o">=</span> <span class="mi">2</span>
+<span class="n">__xrootd_protocol__</span>     <span class="o">=</span> <span class="mi">3</span>
+<span class="n">__different_protocols__</span> <span class="o">=</span> <span class="mi">4</span>
+
+
+<div class="viewcode-block" id="is_remote"><a class="viewcode-back" href="../../api/hep_rfm.is_remote.html#hep_rfm.is_remote">[docs]</a><span class="k">def</span> <span class="nf">is_remote</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Check whether the given path points to a remote file.</span>
+
+<span class="sd">    :param path: path to the input file.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :returns: output decision.</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">is_ssh</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_xrootd</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="is_ssh"><a class="viewcode-back" href="../../api/hep_rfm.is_ssh.html#hep_rfm.is_ssh">[docs]</a><span class="k">def</span> <span class="nf">is_ssh</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return whether the standard ssh protocol must be used.</span>
+
+<span class="sd">    :param path: path to the input file.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :returns: output decision</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="s1">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="is_xrootd"><a class="viewcode-back" href="../../api/hep_rfm.is_xrootd.html#hep_rfm.is_xrootd">[docs]</a><span class="k">def</span> <span class="nf">is_xrootd</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return whether the path is related to the xrootd protocol.</span>
+
+<span class="sd">    :param path: path to the input file.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :returns: output decision</span>
+<span class="sd">    :rtype: bool</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;root://&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_remote_protocol</span><span class="p">(</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Determine the protocol to use given two paths to files. The protocol IDs</span>
+<span class="sd">    are defined as:</span>
+<span class="sd">    - 1: local</span>
+<span class="sd">    - 2: ssh</span>
+<span class="sd">    - 3: xrootd</span>
+<span class="sd">    - 4: different protocols (&quot;a&quot; and &quot;b&quot; are accessed using different \</span>
+<span class="sd">    protocols)</span>
+
+<span class="sd">    :param a: path to the firs file.</span>
+<span class="sd">    :type a: str</span>
+<span class="sd">    :param b: path to the second file.</span>
+<span class="sd">    :type b: str</span>
+<span class="sd">    :returns: protocol ID.</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">is_ssh</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_xrootd</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">__different_protocols__</span>
+    <span class="k">elif</span> <span class="n">is_xrootd</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_ssh</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">__different_protocols__</span>
+    <span class="k">elif</span> <span class="n">is_ssh</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_ssh</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">__ssh_protocol__</span>
+    <span class="k">elif</span> <span class="n">is_xrootd</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="ow">or</span> <span class="n">is_xrootd</span><span class="p">(</span><span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">__xrootd_protocol__</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">__local_protocol__</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">hep_rfm</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.FileProxy.html">FileProxy</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

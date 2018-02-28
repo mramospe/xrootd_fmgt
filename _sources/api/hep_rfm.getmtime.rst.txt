@@ -1,0 +1,6 @@
+getmtime
+========
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: getmtime

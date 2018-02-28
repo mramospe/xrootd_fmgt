@@ -1,0 +1,6 @@
+is_ssh
+======
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: is_ssh

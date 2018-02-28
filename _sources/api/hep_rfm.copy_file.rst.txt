@@ -1,0 +1,6 @@
+copy_file
+=========
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: copy_file
