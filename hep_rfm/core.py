@@ -155,7 +155,6 @@ def copy_file( source, target, force=False ):
             else:
                 proc = _process('cp', '-p', source, target)
 
-
             _display('Output will be copied into "{}"'.format(target))
 
             exitcode = proc.wait()
@@ -163,6 +162,17 @@ def copy_file( source, target, force=False ):
                 _, stderr = proc.communicate()
                 raise RuntimeError('Problem copying file "{}", Error: '\
                                        '"{}"'.format(source, stderr))
+
+            if protocols.is_xrootd(target):
+                # The protocol xrootd does not allow to preserve the
+                # metadata when copying files.
+                warnings.warn(Warning, 'Target uses xrootd protocol, '\
+                                  'metadata will not be updated. The file '\
+                                  'will always be updated.')
+            elif dec == protocols.__xrootd_protocol__:
+                # Update the modification time since xrdcp does not
+                # preserve it.
+                os.utime(target, (os.stat(target).st_atime, itmstp))
 
             _display('Successfuly copied file')
 

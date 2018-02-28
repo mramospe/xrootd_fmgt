@@ -12,10 +12,10 @@ __all__ = [
     ]
 
 # Definition of the protocols to use
-__local_protocol__       = 1
-__ssh_protocol__         = 2
-__xrootd_protocol__      = 3
-__different_protocols__  = 4
+__local_protocol__      = 1
+__ssh_protocol__        = 2
+__xrootd_protocol__     = 3
+__different_protocols__ = 4
 
 
 def is_remote( path ):
