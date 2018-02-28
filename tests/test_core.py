@@ -6,7 +6,7 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import atexit, os, pytest
+import atexit, os, pytest, time
 
 # Custom
 import hep_rfm
@@ -44,7 +44,13 @@ def test_file_proxy():
     Test the behaviours of the FileProxy class.
     '''
     sf = _create_dummy_file()
+
+    # Add 2 seconds of delay between the creation of the two files
+    time.sleep(2)
+
     tf = _create_dummy_file()
+
+    assert str(hep_rfm.getmtime(sf)) != str(hep_rfm.getmtime(tf))
 
     fp = hep_rfm.FileProxy(sf, tf)
     fp.sync()
