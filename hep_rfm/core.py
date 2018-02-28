@@ -6,7 +6,7 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Custom
-import protocols
+from hep_rfm import protocols
 
 # Python
 import os, subprocess, socket, warnings
