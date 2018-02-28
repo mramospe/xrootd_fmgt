@@ -43,6 +43,14 @@ class FileProxy:
         self.source  = source
         self.targets = list(targets)
 
+        for t in self.targets:
+            if protocols.is_xrootd(t):
+                # The xrootd protocol does not allow to preserve the
+                # metadata when copying files.
+                warnings.warn('Target "{}" uses xrootd protocol, metadata '\
+                                  'will not be updated. The file will always '\
+                                  'be updated.'.format(t), Warning)
+
     def path( self, xrdav=False ):
         '''
         Get the most accessible path to one of the files in this class.
@@ -174,13 +182,7 @@ def copy_file( source, target, force=False ):
                 raise RuntimeError('Problem copying file "{}", Error: '\
                                        '"{}"'.format(source, stderr))
 
-            if protocols.is_xrootd(target):
-                # The protocol xrootd does not allow to preserve the
-                # metadata when copying files.
-                warnings.warn(Warning, 'Target uses xrootd protocol, '\
-                                  'metadata will not be updated. The file '\
-                                  'will always be updated.')
-            elif dec == protocols.__xrootd_protocol__:
+            if dec == protocols.__xrootd_protocol__ and not protocols.is_xrootd(target):
                 # Update the modification time since xrdcp does not
                 # preserve it.
                 os.utime(target, (os.stat(target).st_atime, itmstp))
@@ -204,12 +206,13 @@ def _display( msg ):
 
 def getmtime( path ):
     '''
-    Get the modification time for the file in "path".
+    Get the modification time for the file in "path". Only the integer part of
+    the modification time is used.
 
     :param path: path to the input file.
     :type path: str
     :returns: modification time.
-    :rtype: float or None
+    :rtype: int or None
     '''
     if protocols.is_ssh(path):
 
@@ -217,27 +220,20 @@ def getmtime( path ):
 
         tmpstp = _process('ssh', '-X', server, 'stat', '-c%Y', sepath).stdout.read()
 
-        try:
-            return float(tmpstp)
-        except:
-            return None
-
     elif protocols.is_xrootd(path):
 
         server, sepath = _split_remote(path)
 
         tmpstp = _process('xrd', server, 'stat', sepath).stdout.read()
-
-        try:
-            return float(tmpstp[tmpstp.find('Modtime:') + len('Modtime:'):])
-        except:
-            return None
+        tmpstp = tmpstp[tmpstp.find('Modtime:') + len('Modtime:'):]
 
     else:
-        if os.path.exists(path):
-            return os.path.getmtime(path)
-        else:
-            return None
+        tmpstp = _process('stat', '-c%Y', path).stdout.read()
+
+    try:
+        return int(tmpstp)
+    except:
+        return None
 
 
 def _process( *args ):

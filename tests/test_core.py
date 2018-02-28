@@ -1,12 +1,12 @@
 '''
-Test function for the "core" module.
+Test functions for the "core" module.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import atexit, os
+import atexit, os, pytest
 
 # Custom
 import hep_rfm
@@ -26,41 +26,17 @@ def _create_dummy_file():
 
     atexit.register(lambda: os.remove(fname))
 
-    return open(fname, 'wt')
+    open(fname, 'wt').close()
+
+    return fname
 
 
 def test_getmtime():
     '''
     Create a file and get the modification time.
     '''
-    with _create_dummy_file() as f:
-        hep_rfm.getmtime(f.name)
-
-
-def test_remote_name():
-    '''
-    Test the remote naming scheme.
-    '''
-
-    # XROOTD
-    assert hep_rfm.is_xrootd('root://my-site//')
-
-    assert not hep_rfm.is_xrootd('my-site')
-
-    s, p = hep_rfm.core._split_remote('root://my-site//path/to/file')
-    assert s == 'my-site' and p == 'path/to/file'
-
-    # SSH
-    assert hep_rfm.is_ssh('username@server')
-
-    assert not hep_rfm.is_ssh('username-server')
-
-    s, p = hep_rfm.core._split_remote('user@my-site:path/to/file')
-    assert s == 'user@my-site' and p == 'path/to/file'
-
-    # Both
-    assert hep_rfm.is_remote('username@server')
-    assert hep_rfm.is_remote('root://my-site//path/to/file')
+    f = _create_dummy_file()
+    hep_rfm.getmtime(f)
 
 
 def test_file_proxy():
@@ -70,7 +46,11 @@ def test_file_proxy():
     sf = _create_dummy_file()
     tf = _create_dummy_file()
 
-    fp = hep_rfm.FileProxy(sf.name, tf.name)
+    fp = hep_rfm.FileProxy(sf, tf)
     fp.sync()
 
-    assert hep_rfm.getmtime(sf.name) == hep_rfm.getmtime(tf.name)
+    assert str(hep_rfm.getmtime(sf)) == str(hep_rfm.getmtime(tf))
+
+    # Test warning when using xrootd protocol on target files
+    with pytest.warns(Warning):
+        fp = hep_rfm.FileProxy('/path/to/file', 'root://server//path/to/file')
