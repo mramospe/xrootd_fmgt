@@ -188,7 +188,7 @@ def _display( msg ):
     :type msg: str
     '''
     if __verbose_level__:
-        print msg
+        print(msg)
 
 
 def getmtime( path ):
