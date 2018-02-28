@@ -43,23 +43,33 @@ class FileProxy:
         self.source  = source
         self.targets = list(targets)
 
-    def path( self ):
+    def path( self, xrdav=False ):
         '''
         Get the most accessible path to one of the files in this class.
 
+        :param xrdav: whether the xrootd protocol is available in root.
+        :type xrdav: bool
         :returns: path to the file.
         :rtype: str
         '''
         host = socket.getfqdn()
 
-        if protocols.is_ssh(host):
-            for s in self.targets:
-                if s.startswith(host):
-                    _, path = _split_remote(s)
-        else:
-            for s in self.targets:
-                if not protocols.is_ssh(s):
-                    return s
+        all_paths = list(self.targets)
+        all_paths.append(self.source)
+
+        for s in all_paths:
+
+            if protocols.is_ssh(s):
+
+                server, sepath = _split_remote(s)
+
+                if server.endswith(host):
+                    return sepath
+
+            elif protocols.is_xrootd(s) and xrdav:
+                return s
+            else:
+                return s
 
         raise RuntimeError('Unable to find an available path')
 
