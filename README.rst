@@ -1,6 +1,6 @@
-=========
+=======
 hep_rfm
-=========
+=======
 
 .. image:: https://img.shields.io/travis/mramospe/hep_rfm.svg
    :target: https://travis-ci.org/mramospe/hep_rfm
