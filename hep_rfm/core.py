@@ -65,6 +65,7 @@ class FileProxy:
         all_paths = list(self.targets)
         all_paths.append(self.source)
 
+        path = None
         for s in all_paths:
 
             if protocols.is_ssh(s):
@@ -72,13 +73,20 @@ class FileProxy:
                 server, sepath = _split_remote(s)
 
                 if server.endswith(host):
-                    return sepath
+                    path = sepath
+                    break
 
             elif protocols.is_xrootd(s):
                 if xrdav:
-                    return s
+                    path = s
+                    break
             else:
-                return s
+                path = s
+                break
+
+        if path is not None:
+            _display('Using path "{}"'.format(path))
+            return path
 
         raise RuntimeError('Unable to find an available path')
 
