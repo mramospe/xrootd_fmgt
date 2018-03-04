@@ -1,0 +1,6 @@
+sync_proxies
+============
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: sync_proxies

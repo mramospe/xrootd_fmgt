@@ -10,10 +10,14 @@ FileProxy
 
    .. autosummary::
 
+      ~FileProxy.copy_target
       ~FileProxy.path
+      ~FileProxy.set_username
       ~FileProxy.sync
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: copy_target
    .. automethod:: path
+   .. automethod:: set_username
    .. automethod:: sync

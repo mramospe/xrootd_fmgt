@@ -54,15 +54,40 @@ used to update the others.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.FileProxy.path" title="hep_rfm.FileProxy.path"><code class="xref py py-obj docutils literal"><span class="pre">path</span></code></a>([xrdav])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.FileProxy.copy_target" title="hep_rfm.FileProxy.copy_target"><code class="xref py py-obj docutils literal"><span class="pre">copy_target</span></code></a>(target,&nbsp;**kwargs)</td>
+<td>Method to copy the source into a single target.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#hep_rfm.FileProxy.path" title="hep_rfm.FileProxy.path"><code class="xref py py-obj docutils literal"><span class="pre">path</span></code></a>([xrdav])</td>
 <td>Get the most accessible path to one of the files in this class.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="#hep_rfm.FileProxy.sync" title="hep_rfm.FileProxy.sync"><code class="xref py py-obj docutils literal"><span class="pre">sync</span></code></a>(**kwargs)</td>
+<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.FileProxy.set_username" title="hep_rfm.FileProxy.set_username"><code class="xref py py-obj docutils literal"><span class="pre">set_username</span></code></a>(uname[,&nbsp;host])</td>
+<td>Assign the user name “uname” to the source and targets with host equal to “host”, and which do not have a user name yet.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#hep_rfm.FileProxy.sync" title="hep_rfm.FileProxy.sync"><code class="xref py py-obj docutils literal"><span class="pre">sync</span></code></a>([para_targets])</td>
 <td>Synchronize the target files using the source file.</td>
 </tr>
 </tbody>
 </table>
 <p class="rubric">Methods Documentation</p>
+<dl class="method">
+<dt id="hep_rfm.FileProxy.copy_target">
+<code class="descname">copy_target</code><span class="sig-paren">(</span><em>target</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy.copy_target"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy.copy_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Method to copy the source into a single target. This allows to manage
+targets even if they are not present within this class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – path to a target file.</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – extra arguments to <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a>.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="method">
 <dt id="hep_rfm.FileProxy.path">
 <code class="descname">path</code><span class="sig-paren">(</span><em>xrdav=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy.path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy.path" title="Permalink to this definition">¶</a></dt>
@@ -82,14 +107,38 @@ used to update the others.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="hep_rfm.FileProxy.set_username">
+<code class="descname">set_username</code><span class="sig-paren">(</span><em>uname</em>, <em>host=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy.set_username"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy.set_username" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assign the user name “uname” to the source and targets with
+host equal to “host”, and which do not have a user name yet.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – path to a file.</li>
+<li><strong>uname</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – user name.</li>
+<li><strong>host</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.6)"><em>None</em></a>) – host name.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="hep_rfm.FileProxy.sync">
-<code class="descname">sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy.sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy.sync" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sync</code><span class="sig-paren">(</span><em>para_targets=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy.sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy.sync" title="Permalink to this definition">¶</a></dt>
 <dd><p>Synchronize the target files using the source file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – extra arguments to <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a>.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>para_targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – number of processes to be dedicated to         synchronize the source with the targets. By default (0) no         parallelization is done.</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – extra arguments to <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a>.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -118,7 +167,8 @@ used to update the others.</p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="hep_rfm.copy_file.html">copy_file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hep_rfm.getmtime.html">getmtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.set_verbose_level.html">set_verbose_level</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hep_rfm.make_directories.html">make_directories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="hep_rfm.sync_proxies.html">sync_proxies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_remote.html">is_remote</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_ssh.html">is_ssh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_xrootd.html">is_xrootd</a></li>

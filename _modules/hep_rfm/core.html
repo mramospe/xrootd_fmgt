@@ -49,20 +49,19 @@
 
 <span class="c1"># Custom</span>
 <span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.exceptions</span> <span class="k">import</span> <span class="n">CopyFileError</span><span class="p">,</span> <span class="n">MakeDirsError</span>
 
 <span class="c1"># Python</span>
-<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">multiprocessing</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">warnings</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;copy_file&#39;</span><span class="p">,</span>
     <span class="s1">&#39;FileProxy&#39;</span><span class="p">,</span>
     <span class="s1">&#39;getmtime&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;set_verbose_level&#39;</span>
+    <span class="s1">&#39;make_directories&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;sync_proxies&#39;</span>
     <span class="p">]</span>
-
-<span class="c1"># Verbose level</span>
-<span class="n">__verbose_level__</span> <span class="o">=</span> <span class="mi">1</span>
 
 
 <div class="viewcode-block" id="FileProxy"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy">[docs]</a><span class="k">class</span> <span class="nc">FileProxy</span><span class="p">:</span>
@@ -92,6 +91,33 @@
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Target &quot;</span><span class="si">{}</span><span class="s1">&quot; uses xrootd protocol, metadata &#39;</span>\
                                   <span class="s1">&#39;will not be updated. The file will always &#39;</span>\
                                   <span class="s1">&#39;be updated.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="ne">Warning</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_parallel_copy_worker</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">queue</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to copy the source into a target on a parallelized environment.</span>
+
+<span class="sd">        :param queue: queue this function is attached to.</span>
+<span class="sd">        :type queue: multiprocessing.JoinableQueue</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">copy_target</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
+
+<div class="viewcode-block" id="FileProxy.copy_target"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.copy_target">[docs]</a>    <span class="k">def</span> <span class="nf">copy_target</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Method to copy the source into a single target. This allows to manage</span>
+<span class="sd">        targets even if they are not present within this class.</span>
+
+<span class="sd">        :param target: path to a target file.</span>
+<span class="sd">        :type target: str</span>
+<span class="sd">        :param kwargs: extra arguments to :func:`copy_file`.</span>
+<span class="sd">        :type kwargs: dict</span>
+
+<span class="sd">        .. seealso: :func:`copy_file`, :func:`make_directories`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">make_directories</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="n">copy_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FileProxy.path"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.path">[docs]</a>    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">xrdav</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -127,12 +153,12 @@
                 <span class="k">break</span>
 
         <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">_display</span><span class="p">(</span><span class="s1">&#39;Using path &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Using path &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">path</span>
 
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to find an available path&#39;</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">set_username</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">uname</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+<div class="viewcode-block" id="FileProxy.set_username"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.set_username">[docs]</a>    <span class="k">def</span> <span class="nf">set_username</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">uname</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Assign the user name &quot;uname&quot; to the source and targets with</span>
 <span class="sd">        host equal to &quot;host&quot;, and which do not have a user name yet.</span>
@@ -146,17 +172,39 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">_set_username</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">uname</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_set_username</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">uname</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_set_username</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">uname</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FileProxy.sync"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.sync">[docs]</a>    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+<div class="viewcode-block" id="FileProxy.sync"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.sync">[docs]</a>    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">para_targets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Synchronize the target files using the source file.</span>
 
+<span class="sd">        :param para_targets: number of processes to be dedicated to \</span>
+<span class="sd">        synchronize the source with the targets. By default (0) no \</span>
+<span class="sd">        parallelization is done.</span>
+<span class="sd">        :type para_targets: int</span>
 <span class="sd">        :param kwargs: extra arguments to :func:`copy_file`.</span>
 <span class="sd">        :type kwargs: dict</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
-            <span class="n">copy_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+        <span class="k">if</span> <span class="n">para_targets</span><span class="p">:</span>
+
+            <span class="n">queue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">JoinableQueue</span><span class="p">()</span>
+
+            <span class="c1"># Prevent from creating extra processes which might end up</span>
+            <span class="c1"># as zombies</span>
+            <span class="n">para_targets</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">para_targets</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">para_targets</span><span class="p">):</span>
+                <span class="n">p</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parallel_copy_worker</span><span class="p">,</span>
+                                            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">queue</span><span class="p">,))</span>
+                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+                <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+            <span class="n">queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">copy_target</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="copy_file"><a class="viewcode-back" href="../../api/hep_rfm.copy_file.html#hep_rfm.copy_file">[docs]</a><span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
@@ -175,31 +223,12 @@
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to synchronize file &quot;</span><span class="si">{}</span><span class="s1">&quot;, the &#39;</span>\
                                <span class="s1">&#39;file does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
 
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">getmtime</span><span class="p">(</span><span class="n">target</span><span class="p">)</span> <span class="o">!=</span> <span class="n">itmstp</span> <span class="ow">or</span> <span class="n">force</span><span class="p">:</span>
 
-        <span class="c1"># Make the directories if they do not exist</span>
-        <span class="k">if</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_remote</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
-
-            <span class="n">server</span><span class="p">,</span> <span class="n">sepath</span> <span class="o">=</span> <span class="n">_split_remote</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-
-            <span class="n">dpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sepath</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_xrootd</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
-                <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;xrd&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="s1">&#39;mkdir&#39;</span><span class="p">,</span> <span class="n">dpath</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;ssh&#39;</span><span class="p">,</span> <span class="s1">&#39;-X&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="s1">&#39;mkdir&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">dpath</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="n">_</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Problem creating directories for &quot;</span><span class="si">{}</span><span class="s1">&quot;, &#39;</span>\
-                                       <span class="s1">&#39;Error: &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">stderr</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">pass</span>
-
         <span class="c1"># Copy the file</span>
+
         <span class="n">dec</span> <span class="o">=</span> <span class="n">protocols</span><span class="o">.</span><span class="n">_remote_protocol</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dec</span> <span class="o">==</span> <span class="n">protocols</span><span class="o">.</span><span class="n">__different_protocols__</span><span class="p">:</span>
             <span class="c1"># Copy to a temporal file</span>
@@ -214,7 +243,7 @@
             <span class="n">copy_file</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
 
-            <span class="n">_display</span><span class="p">(</span><span class="s1">&#39;Trying to get file from &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Trying to get file from &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">dec</span> <span class="o">==</span> <span class="n">protocols</span><span class="o">.</span><span class="n">__ssh_protocol__</span><span class="p">:</span>
                 <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;scp&#39;</span><span class="p">,</span> <span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
@@ -223,33 +252,21 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;cp&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
-            <span class="n">_display</span><span class="p">(</span><span class="s1">&#39;Output will be copied into &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Output will be copied into &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">_</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
-                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Problem copying file &quot;</span><span class="si">{}</span><span class="s1">&quot;, Error: &#39;</span>\
-                                       <span class="s1">&#39;&quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">stderr</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="n">CopyFileError</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">dec</span> <span class="o">==</span> <span class="n">protocols</span><span class="o">.</span><span class="n">__xrootd_protocol__</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_xrootd</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
                 <span class="c1"># Update the modification time since xrdcp does not</span>
                 <span class="c1"># preserve it.</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">utime</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">st_atime</span><span class="p">,</span> <span class="n">itmstp</span><span class="p">))</span>
 
-            <span class="n">_display</span><span class="p">(</span><span class="s1">&#39;Successfuly copied file&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Successfuly copied file&#39;</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">_display</span><span class="p">(</span><span class="s1">&#39;File &quot;</span><span class="si">{}</span><span class="s1">&quot; is up to date&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">))</span></div>
-
-
-<span class="k">def</span> <span class="nf">_display</span><span class="p">(</span> <span class="n">msg</span> <span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Display the given message taking into account the verbose level.</span>
-
-<span class="sd">    :param msg: message to display.</span>
-<span class="sd">    :type msg: str</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">__verbose_level__</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;File &quot;</span><span class="si">{}</span><span class="s1">&quot; is up to date&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="getmtime"><a class="viewcode-back" href="../../api/hep_rfm.getmtime.html#hep_rfm.getmtime">[docs]</a><span class="k">def</span> <span class="nf">getmtime</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
@@ -281,6 +298,35 @@
         <span class="n">tmpstp</span> <span class="o">=</span> <span class="n">tmpstp</span><span class="p">[</span><span class="n">tmpstp</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Modtime:&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="s1">&#39;Modtime:&#39;</span><span class="p">):]</span>
 
     <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">tmpstp</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="make_directories"><a class="viewcode-back" href="../../api/hep_rfm.make_directories.html#hep_rfm.make_directories">[docs]</a><span class="k">def</span> <span class="nf">make_directories</span><span class="p">(</span> <span class="n">target</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Make the directories for the given target in case they do not exist already.</span>
+
+<span class="sd">    :param target: path to a target file.</span>
+<span class="sd">    :type target: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_remote</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+
+        <span class="n">server</span><span class="p">,</span> <span class="n">sepath</span> <span class="o">=</span> <span class="n">_split_remote</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="n">dpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">sepath</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_xrootd</span><span class="p">(</span><span class="n">target</span><span class="p">):</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;xrd&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="s1">&#39;mkdir&#39;</span><span class="p">,</span> <span class="n">dpath</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;ssh&#39;</span><span class="p">,</span> <span class="s1">&#39;-X&#39;</span><span class="p">,</span> <span class="n">server</span><span class="p">,</span> <span class="s1">&#39;mkdir&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">dpath</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">dpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+
+        <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;mkdir&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">dpath</span> <span class="k">if</span> <span class="n">dpath</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="s1">&#39;./&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+        <span class="k">raise</span> <span class="n">MakeDirsError</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span> <span class="o">*</span><span class="n">args</span> <span class="p">):</span>
@@ -340,20 +386,58 @@
         <span class="k">return</span> <span class="n">path</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="n">rp</span><span class="p">],</span> <span class="n">path</span><span class="p">[</span><span class="n">rp</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:]</span>
 
 
-<div class="viewcode-block" id="set_verbose_level"><a class="viewcode-back" href="../../api/hep_rfm.set_verbose_level.html#hep_rfm.set_verbose_level">[docs]</a><span class="k">def</span> <span class="nf">set_verbose_level</span><span class="p">(</span> <span class="n">lvl</span> <span class="p">):</span>
+<span class="k">def</span> <span class="nf">_parallel_sync_worker</span><span class="p">(</span> <span class="n">queue</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Set the verbose level in this package.</span>
+<span class="sd">    Function to synchronize a FileProxy object on a parallelized environment.</span>
 
-<span class="sd">    :param lvl: verbose level.</span>
-<span class="sd">    :type lvl: int</span>
+<span class="sd">    :param queue: queue this function is attached to.</span>
+<span class="sd">    :type queue: multiprocessing.JoinableQueue</span>
+<span class="sd">    :param kwargs: extra arguments to :meth:`FileProxy.syn`.</span>
+<span class="sd">    :type kwargs: dict</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">global</span> <span class="n">__verbose_level__</span>
+    <span class="n">proxy</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">proxy</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
 
-    <span class="n">available</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">lvl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Verbose level must be in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">available</span><span class="p">))</span>
 
-    <span class="n">__verbose_level__</span> <span class="o">=</span> <span class="n">lvl</span></div>
+<div class="viewcode-block" id="sync_proxies"><a class="viewcode-back" href="../../api/hep_rfm.sync_proxies.html#hep_rfm.sync_proxies">[docs]</a><span class="k">def</span> <span class="nf">sync_proxies</span><span class="p">(</span> <span class="n">proxies</span><span class="p">,</span> <span class="n">para_proxies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Synchronize a given list of proxies. This function allows to fully</span>
+<span class="sd">    parallelize all the processes.</span>
+
+<span class="sd">    :param proxies: file proxies to synchronize.</span>
+<span class="sd">    :type proxies: collection(FileProxy)</span>
+<span class="sd">    :param para_proxies: number of processes allowed to parallelize the \</span>
+<span class="sd">    synchronization of all the proxies. By default it is set to 0, so no \</span>
+<span class="sd">    parallelization  is done (0).</span>
+<span class="sd">    :type para_proxies: int</span>
+<span class="sd">    :param kwargs: extra arguments to :meth:`FileProxy.sync`.</span>
+<span class="sd">    :type kwargs: dict</span>
+
+<span class="sd">    .. seealso: :meth:`FileProxy.sync`</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">para_proxies</span><span class="p">:</span>
+
+        <span class="n">queue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">JoinableQueue</span><span class="p">()</span>
+
+        <span class="c1"># Prevent from creating extra processes which might end up</span>
+        <span class="c1"># as zombies</span>
+        <span class="n">para_proxies</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">para_proxies</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">proxies</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">para_proxies</span><span class="p">):</span>
+            <span class="n">p</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">_parallel_sync_worker</span><span class="p">,</span>
+                                        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">queue</span><span class="p">,),</span>
+                                        <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">proxies</span><span class="p">:</span>
+            <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="n">queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">proxies</span><span class="p">:</span>
+            <span class="n">p</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 </pre></div>
 
           </div>
@@ -374,7 +458,8 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.copy_file.html">copy_file</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.getmtime.html">getmtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.set_verbose_level.html">set_verbose_level</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.make_directories.html">make_directories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.sync_proxies.html">sync_proxies</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.is_remote.html">is_remote</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.is_ssh.html">is_ssh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.is_xrootd.html">is_xrootd</a></li>

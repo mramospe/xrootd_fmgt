@@ -1,0 +1,6 @@
+make_directories
+================
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: make_directories
