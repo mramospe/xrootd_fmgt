@@ -31,18 +31,26 @@ def _create_dummy_file():
     return fname
 
 
-def test_getmtime():
+def test_copy_file():
     '''
-    Create a file and get the modification time.
+    Tests for the "copy_file" function.
     '''
+    with pytest.raises(RuntimeError):
+        hep_rfm.copy_file('non-existing-source', 'non-existing-target')
+
     f = _create_dummy_file()
-    hep_rfm.getmtime(f)
+
+    with pytest.raises(hep_rfm.exceptions.CopyFileError):
+        hep_rfm.copy_file(f, 'no-user@no-server.com:/path/to/file')
 
 
 def test_file_proxy():
     '''
     Test the behaviours of the FileProxy class.
     '''
+    with pytest.raises(ValueError):
+        hep_rfm.FileProxy('/path/to/file')
+
     sf = _create_dummy_file()
 
     # Add 2 seconds of delay between the creation of the two files
@@ -60,3 +68,19 @@ def test_file_proxy():
     # Test warning when using xrootd protocol on target files
     with pytest.warns(Warning):
         fp = hep_rfm.FileProxy('/path/to/file', 'root://server//path/to/file')
+
+
+def test_getmtime():
+    '''
+    Create a file and get the modification time.
+    '''
+    f = _create_dummy_file()
+    hep_rfm.getmtime(f)
+
+
+def test_make_directories():
+    '''
+    Test the "make_directories" function.
+    '''
+    with pytest.raises(hep_rfm.exceptions.MakeDirsError):
+        fp = hep_rfm.make_directories('no-user@no-server.com:/path/to/file')

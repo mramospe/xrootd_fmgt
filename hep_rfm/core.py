@@ -7,6 +7,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Custom
 from hep_rfm import protocols
+from hep_rfm.exceptions import CopyFileError, MakeDirsError
 
 # Python
 import os, subprocess, socket, warnings
@@ -16,6 +17,7 @@ __all__ = [
     'copy_file',
     'FileProxy',
     'getmtime',
+    'make_directories',
     'set_verbose_level'
     ]
 
@@ -114,6 +116,9 @@ class FileProxy:
         :type kwargs: dict
         '''
         for target in self.targets:
+
+            make_directories(target)
+
             copy_file(self.source, target, **kwargs)
 
 
@@ -135,29 +140,8 @@ def copy_file( source, target, force=False ):
 
     if getmtime(target) != itmstp or force:
 
-        # Make the directories if they do not exist
-        if protocols.is_remote(target):
-
-            server, sepath = _split_remote(target)
-
-            dpath = os.path.dirname(sepath)
-
-            if protocols.is_xrootd(target):
-                proc = _process('xrd', server, 'mkdir', dpath)
-            else:
-                proc = _process('ssh', '-X', server, 'mkdir', '-p', dpath)
-
-            if proc.wait() != 0:
-                _, stderr = proc.communicate()
-                raise RuntimeError('Problem creating directories for "{}", '\
-                                       'Error: "{}"'.format(target, stderr))
-        else:
-            try:
-                os.makedirs(os.path.dirname(target))
-            except:
-                pass
-
         # Copy the file
+
         dec = protocols._remote_protocol(source, target)
         if dec == protocols.__different_protocols__:
             # Copy to a temporal file
@@ -185,8 +169,7 @@ def copy_file( source, target, force=False ):
 
             if proc.wait() != 0:
                 _, stderr = proc.communicate()
-                raise RuntimeError('Problem copying file "{}", Error: '\
-                                       '"{}"'.format(source, stderr))
+                raise CopyFileError(source, target, stderr)
 
             if dec == protocols.__xrootd_protocol__ and not protocols.is_xrootd(target):
                 # Update the modification time since xrdcp does not
@@ -239,6 +222,35 @@ def getmtime( path ):
         tmpstp = tmpstp[tmpstp.find('Modtime:') + len('Modtime:'):]
 
     return int(tmpstp)
+
+
+def make_directories( target ):
+    '''
+    Make the directories for the given target in case they do not exist already.
+
+    :param target: path to a target file.
+    :type target: str
+    '''
+    if protocols.is_remote(target):
+
+        server, sepath = _split_remote(target)
+
+        dpath = os.path.dirname(sepath)
+
+        if protocols.is_xrootd(target):
+            proc = _process('xrd', server, 'mkdir', dpath)
+        else:
+            proc = _process('ssh', '-X', server, 'mkdir', '-p', dpath)
+
+    else:
+
+        dpath = os.path.dirname(target)
+
+        proc = _process('mkdir', '-p', dpath if dpath != '' else './')
+
+    if proc.wait() != 0:
+        _, stderr = proc.communicate()
+        raise MakeDirsError(target, stderr)
 
 
 def _process( *args ):
