@@ -10,7 +10,7 @@ from hep_rfm import protocols
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
 
 # Python
-import os, subprocess, socket, warnings
+import logging, multiprocessing, os, subprocess, socket, warnings
 
 
 __all__ = [
@@ -18,11 +18,8 @@ __all__ = [
     'FileProxy',
     'getmtime',
     'make_directories',
-    'set_verbose_level'
+    'sync_proxies'
     ]
-
-# Verbose level
-__verbose_level__ = 1
 
 
 class FileProxy:
@@ -52,6 +49,33 @@ class FileProxy:
                 warnings.warn('Target "{}" uses xrootd protocol, metadata '\
                                   'will not be updated. The file will always '\
                                   'be updated.'.format(t), Warning)
+
+    def _parallel_copy_worker( self, queue ):
+        '''
+        Method to copy the source into a target on a parallelized environment.
+
+        :param queue: queue this function is attached to.
+        :type queue: multiprocessing.JoinableQueue
+        '''
+        target = queue.get()
+        self.copy_target(target)
+        queue.task_done()
+
+    def copy_target( self, target, **kwargs ):
+        '''
+        Method to copy the source into a single target. This allows to manage
+        targets even if they are not present within this class.
+
+        :param target: path to a target file.
+        :type target: str
+        :param kwargs: extra arguments to :func:`copy_file`.
+        :type kwargs: dict
+
+        .. seealso: :func:`copy_file`, :func:`make_directories`
+        '''
+        make_directories(target)
+
+        copy_file(self.source, target, **kwargs)
 
     def path( self, xrdav=False ):
         '''
@@ -87,7 +111,7 @@ class FileProxy:
                 break
 
         if path is not None:
-            _display('Using path "{}"'.format(path))
+            logging.getLogger(__name__).info('Using path "{}"'.format(path))
             return path
 
         raise RuntimeError('Unable to find an available path')
@@ -108,18 +132,37 @@ class FileProxy:
         for i, t in enumerate(self.targets):
             self.targets[i] = _set_username(t, uname, host)
 
-    def sync( self, **kwargs ):
+    def sync( self, para_targets=False, **kwargs ):
         '''
         Synchronize the target files using the source file.
 
+        :param para_targets: number of processes to be dedicated to \
+        synchronize the source with the targets. By default (0) no \
+        parallelization is done.
+        :type para_targets: int
         :param kwargs: extra arguments to :func:`copy_file`.
         :type kwargs: dict
         '''
-        for target in self.targets:
+        if para_targets:
 
-            make_directories(target)
+            queue = multiprocessing.JoinableQueue()
 
-            copy_file(self.source, target, **kwargs)
+            # Prevent from creating extra processes which might end up
+            # as zombies
+            para_targets = min(para_targets, len(self.targets))
+
+            for i in range(para_targets):
+                p = multiprocessing.Process(target=self._parallel_copy_worker,
+                                            args=(queue,))
+                p.start()
+
+            for target in self.targets:
+                queue.put(target)
+
+            queue.join()
+        else:
+            for target in self.targets:
+                self.copy_target(target, **kwargs)
 
 
 def copy_file( source, target, force=False ):
@@ -137,6 +180,8 @@ def copy_file( source, target, force=False ):
     if itmstp == None:
         raise RuntimeError('Unable to synchronize file "{}", the '\
                                'file does not exist'.format(source))
+
+    logger = logging.getLogger(__name__)
 
     if getmtime(target) != itmstp or force:
 
@@ -156,7 +201,7 @@ def copy_file( source, target, force=False ):
             copy_file(tmp, target)
         else:
 
-            _display('Trying to get file from "{}"'.format(source))
+            logger.info('Trying to get file from "{}"'.format(source))
 
             if dec == protocols.__ssh_protocol__:
                 proc = _process('scp', '-q', '-p', source, target)
@@ -165,7 +210,7 @@ def copy_file( source, target, force=False ):
             else:
                 proc = _process('cp', '-p', source, target)
 
-            _display('Output will be copied into "{}"'.format(target))
+            logger.info('Output will be copied into "{}"'.format(target))
 
             if proc.wait() != 0:
                 _, stderr = proc.communicate()
@@ -176,21 +221,10 @@ def copy_file( source, target, force=False ):
                 # preserve it.
                 os.utime(target, (os.stat(target).st_atime, itmstp))
 
-            _display('Successfuly copied file')
+            logger.info('Successfuly copied file')
 
     else:
-        _display('File "{}" is up to date'.format(target))
-
-
-def _display( msg ):
-    '''
-    Display the given message taking into account the verbose level.
-
-    :param msg: message to display.
-    :type msg: str
-    '''
-    if __verbose_level__:
-        print(msg)
+        logger.info('File "{}" is up to date'.format(target))
 
 
 def getmtime( path ):
@@ -310,17 +344,55 @@ def _split_remote( path ):
         return path[7:rp], path[rp + 2:]
 
 
-def set_verbose_level( lvl ):
+def _parallel_sync_worker( queue, **kwargs ):
     '''
-    Set the verbose level in this package.
+    Function to synchronize a FileProxy object on a parallelized environment.
 
-    :param lvl: verbose level.
-    :type lvl: int
+    :param queue: queue this function is attached to.
+    :type queue: multiprocessing.JoinableQueue
+    :param kwargs: extra arguments to :meth:`FileProxy.syn`.
+    :type kwargs: dict
     '''
-    global __verbose_level__
+    proxy = queue.get()
+    proxy.sync(**kwargs)
+    queue.task_done()
 
-    available = (0, 1)
-    if lvl not in available:
-        raise ValueError('Verbose level must be in {}'.format(available))
 
-    __verbose_level__ = lvl
+def sync_proxies( proxies, para_proxies=False, **kwargs ):
+    '''
+    Synchronize a given list of proxies. This function allows to fully
+    parallelize all the processes.
+
+    :param proxies: file proxies to synchronize.
+    :type proxies: collection(FileProxy)
+    :param para_proxies: number of processes allowed to parallelize the \
+    synchronization of all the proxies. By default it is set to 0, so no \
+    parallelization  is done (0).
+    :type para_proxies: int
+    :param kwargs: extra arguments to :meth:`FileProxy.sync`.
+    :type kwargs: dict
+
+    .. seealso: :meth:`FileProxy.sync`
+    '''
+    if para_proxies:
+
+        queue = multiprocessing.JoinableQueue()
+
+        # Prevent from creating extra processes which might end up
+        # as zombies
+        para_proxies = min(para_proxies, len(proxies))
+
+        for i in range(para_proxies):
+            p = multiprocessing.Process(target=_parallel_sync_worker,
+                                        args=(queue,),
+                                        kwargs=kwargs)
+            p.start()
+
+        for p in proxies:
+            queue.put(p)
+
+        queue.join()
+
+    else:
+        for p in proxies:
+            p.sync(**kwargs)
