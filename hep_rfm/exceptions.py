@@ -22,7 +22,7 @@ class ProcessError(RuntimeError):
         :param stderr: error output from a subprocess call.
         :type stderr: str
         '''
-        RuntimeError.__init__(self, '{}\nError:\n{}'.format(msg, stderr))
+        RuntimeError.__init__(self, '{}\nstderr:\n{}'.format(msg, stderr))
 
 
 class CopyFileError(ProcessError):
@@ -40,9 +40,9 @@ class CopyFileError(ProcessError):
         :param stderr: error output from a subprocess call.
         :type stderr: str
         '''
-        msg = 'Problem copying file:\nInput: "{}"\nOutput: "{}"'.format(ipath, opath)
+        msg = 'Problem copying file:\ninput: "{}"\noutput: "{}"'.format(ipath, opath)
 
-        RuntimeError.__init__(self, msg, stderr)
+        ProcessError.__init__(self, msg, stderr)
 
 
 class MakeDirsError(ProcessError):
