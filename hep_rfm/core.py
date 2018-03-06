@@ -8,6 +8,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 # Custom
 from hep_rfm import protocols
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
+from hep_rfm.parallel import JobHandler, FuncWorker
 
 # Python
 import logging, multiprocessing, os, subprocess, socket, warnings
@@ -24,12 +25,14 @@ __all__ = [
 
 class FileProxy:
     '''
-    Object to store the path to a set of files, linked together, where one is
-    used to update the others.
+    Object to store the path to a source file, and some other paths pointing
+    to some target locations. The former is used as a reference to update the
+    latter, using the :func:`copy_file` function. Also provides a method to
+    obtain the most accessible file.
     '''
     def __init__( self, source, *targets ):
         '''
-        Build a proxy to a file.
+        Build a proxy to a file from a source and the set of targets.
 
         :param source: path to the file to use as a reference.
         :type source: str
@@ -49,33 +52,6 @@ class FileProxy:
                 warnings.warn('Target "{}" uses xrootd protocol, metadata '\
                                   'will not be updated. The file will always '\
                                   'be updated.'.format(t), Warning)
-
-    def _parallel_copy_worker( self, queue ):
-        '''
-        Method to copy the source into a target on a parallelized environment.
-
-        :param queue: queue this function is attached to.
-        :type queue: multiprocessing.JoinableQueue
-        '''
-        target = queue.get()
-        self.copy_target(target)
-        queue.task_done()
-
-    def copy_target( self, target, **kwargs ):
-        '''
-        Method to copy the source into a single target. This allows to manage
-        targets even if they are not present within this class.
-
-        :param target: path to a target file.
-        :type target: str
-        :param kwargs: extra arguments to :func:`copy_file`.
-        :type kwargs: dict
-
-        .. seealso: :func:`copy_file`, :func:`make_directories`
-        '''
-        make_directories(target)
-
-        copy_file(self.source, target, **kwargs)
 
     def path( self, xrdav=False ):
         '''
@@ -132,37 +108,34 @@ class FileProxy:
         for i, t in enumerate(self.targets):
             self.targets[i] = _set_username(t, uname, host)
 
-    def sync( self, para_targets=False, **kwargs ):
+    def sync( self, parallelize=False, **kwargs ):
         '''
         Synchronize the target files using the source file.
 
-        :param para_targets: number of processes to be dedicated to \
+        :param parallelize: number of processes to be dedicated to \
         synchronize the source with the targets. By default (0) no \
         parallelization is done.
-        :type para_targets: int
+        :type parallelize: int
         :param kwargs: extra arguments to :func:`copy_file`.
         :type kwargs: dict
         '''
-        if para_targets:
+        if parallelize:
 
-            queue = multiprocessing.JoinableQueue()
+            handler = JobHandler()
+            for target in self.targets:
+                handler.queue.put(target)
 
             # Prevent from creating extra processes which might end up
             # as zombies
-            para_targets = min(para_targets, len(self.targets))
+            parallelize = min(parallelize, len(self.targets))
 
-            for i in range(para_targets):
-                p = multiprocessing.Process(target=self._parallel_copy_worker,
-                                            args=(queue,))
-                p.start()
+            for i in range(parallelize):
+                FuncWorker(handler, copy_file, args=(self.source,), kwargs=kwargs)
 
-            for target in self.targets:
-                queue.put(target)
-
-            queue.join()
+            handler.wait()
         else:
             for target in self.targets:
-                self.copy_target(target, **kwargs)
+                copy_file(self.source, target, **kwargs)
 
 
 def copy_file( source, target, force=False ):
@@ -180,6 +153,8 @@ def copy_file( source, target, force=False ):
     if itmstp == None:
         raise RuntimeError('Unable to synchronize file "{}", the '\
                                'file does not exist'.format(source))
+
+    make_directories(target)
 
     logger = logging.getLogger(__name__)
 
@@ -201,7 +176,7 @@ def copy_file( source, target, force=False ):
             copy_file(tmp, target)
         else:
 
-            logger.info('Trying to get file from "{}"'.format(source))
+            logger.info('Copying file\n source: {}\n target: {}'.format(source, target))
 
             if dec == protocols.__ssh_protocol__:
                 proc = _process('scp', '-q', '-p', source, target)
@@ -209,8 +184,6 @@ def copy_file( source, target, force=False ):
                 proc = _process('xrdcp', '-f', '-s', source, target)
             else:
                 proc = _process('cp', '-p', source, target)
-
-            logger.info('Output will be copied into "{}"'.format(target))
 
             if proc.wait() != 0:
                 _, stderr = proc.communicate()
@@ -221,8 +194,6 @@ def copy_file( source, target, force=False ):
                 # preserve it.
                 os.utime(target, (os.stat(target).st_atime, itmstp))
 
-            logger.info('Successfuly copied file')
-
     else:
         logger.info('File "{}" is up to date'.format(target))
 
@@ -230,7 +201,8 @@ def copy_file( source, target, force=False ):
 def getmtime( path ):
     '''
     Get the modification time for the file in "path". Only the integer part of
-    the modification time is used.
+    the modification time is used. If no access is possible to the information
+    of the file, None is returned.
 
     :param path: path to the input file.
     :type path: str
@@ -248,10 +220,11 @@ def getmtime( path ):
     else:
         proc = _process('stat', '-c%Y', path)
 
-    if proc.wait() != 0:
+    tmpstp = proc.stdout.read()
+
+    if proc.wait() != 0 or 'Error' in tmpstp.decode('utf-8'):
         return None
 
-    tmpstp = proc.stdout.read()
     if protocols.is_xrootd(path):
         tmpstp = tmpstp[tmpstp.find('Modtime:') + len('Modtime:'):]
 
@@ -287,6 +260,20 @@ def make_directories( target ):
         raise MakeDirsError(target, stderr)
 
 
+def _parallel_copy_file( obj, **kwargs ):
+    '''
+    Wrapper of the function :func:`copy_file` to allow parallelization.
+
+    :param obj: source and target to process.
+    :type obj: tuple(str, str)
+    :param kwargs: extra arguments to :func:`copy_file`.
+    :type kwargs: dict
+    '''
+    s, t = obj
+
+    return copy_file(s, t, **kwargs)
+
+
 def _process( *args ):
     '''
     Create a subprocess object with a defined "stdout" and "stderr",
@@ -299,7 +286,7 @@ def _process( *args ):
     '''
     return subprocess.Popen( args,
                              stdout = subprocess.PIPE,
-                             stderr = subprocess.PIPE)
+                             stderr = subprocess.PIPE )
 
 
 def _set_username( source, uname, host=None ):
@@ -344,55 +331,36 @@ def _split_remote( path ):
         return path[7:rp], path[rp + 2:]
 
 
-def _parallel_sync_worker( queue, **kwargs ):
-    '''
-    Function to synchronize a FileProxy object on a parallelized environment.
-
-    :param queue: queue this function is attached to.
-    :type queue: multiprocessing.JoinableQueue
-    :param kwargs: extra arguments to :meth:`FileProxy.syn`.
-    :type kwargs: dict
-    '''
-    proxy = queue.get()
-    proxy.sync(**kwargs)
-    queue.task_done()
-
-
-def sync_proxies( proxies, para_proxies=False, **kwargs ):
+def sync_proxies( proxies, parallelize=False, **kwargs ):
     '''
     Synchronize a given list of proxies. This function allows to fully
     parallelize all the processes.
 
     :param proxies: file proxies to synchronize.
     :type proxies: collection(FileProxy)
-    :param para_proxies: number of processes allowed to parallelize the \
+    :param parallelize: number of processes allowed to parallelize the \
     synchronization of all the proxies. By default it is set to 0, so no \
     parallelization  is done (0).
-    :type para_proxies: int
-    :param kwargs: extra arguments to :meth:`FileProxy.sync`.
+    :type parallelize: int
+    :param kwargs: extra arguments to :func:`copy_file`.
     :type kwargs: dict
 
     .. seealso: :meth:`FileProxy.sync`
     '''
-    if para_proxies:
+    if parallelize:
 
-        queue = multiprocessing.JoinableQueue()
+        handler = JobHandler()
+        for p in proxies:
+            map(handler.queue.put, ((p.source, t) for t in p.targets))
 
         # Prevent from creating extra processes which might end up
         # as zombies
-        para_proxies = min(para_proxies, len(proxies))
+        parallelize = min(parallelize, len(proxies))
 
-        for i in range(para_proxies):
-            p = multiprocessing.Process(target=_parallel_sync_worker,
-                                        args=(queue,),
-                                        kwargs=kwargs)
-            p.start()
+        for i in range(parallelize):
+            FuncWorker(handler, _parallel_copy_file, kwargs=kwargs)
 
-        for p in proxies:
-            queue.put(p)
-
-        queue.join()
-
+        handler.wait()
     else:
         for p in proxies:
             p.sync(**kwargs)

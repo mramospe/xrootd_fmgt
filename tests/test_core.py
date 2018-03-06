@@ -40,7 +40,7 @@ def test_copy_file():
 
     f = _create_dummy_file()
 
-    with pytest.raises(hep_rfm.exceptions.CopyFileError):
+    with pytest.raises(hep_rfm.exceptions.MakeDirsError):
         hep_rfm.copy_file(f, 'no-user@no-server.com:/path/to/file')
 
 
@@ -64,7 +64,7 @@ def test_file_proxy():
 
     fp = hep_rfm.FileProxy(sf, tfa, tfb)
     fp.sync()
-    fp.sync(para_targets=6)
+    fp.sync(parallelize=6)
 
     assert str(hep_rfm.getmtime(sf)) == str(hep_rfm.getmtime(tfa))
     assert str(hep_rfm.getmtime(sf)) == str(hep_rfm.getmtime(tfb))
@@ -105,4 +105,4 @@ def test_sync_proxies():
     fpa = hep_rfm.FileProxy(sfa, tfa)
     fpb = hep_rfm.FileProxy(sfb, tfb)
 
-    hep_rfm.sync_proxies([fpa, fpb], para_proxies=2, para_targets=1)
+    hep_rfm.sync_proxies([fpa, fpb], parallelize=2)
