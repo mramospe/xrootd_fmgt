@@ -8,7 +8,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 # Custom
 from hep_rfm import protocols
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
-from hep_rfm.parallel import JobHandler, FuncWorker
+from hep_rfm.parallel import JobHandler, Worker
 
 # Python
 import logging, os, subprocess, shutil, socket, warnings
@@ -354,7 +354,7 @@ def sync_proxies( proxies, parallelize=False, **kwargs ):
         func = lambda obj, **kwargs: copy_file(*obj, **kwargs)
 
         for i in range(handler.nproc):
-            FuncWorker(handler, func, kwargs=kwargs)
+            Worker(handler, func, kwargs=kwargs)
 
         handler.wait()
 
