@@ -142,7 +142,7 @@ def copy_file( source, target, force=False, tmpdir=None ):
     '''
     Main function to copy a file from a source to a target. The copy is done
     if the modification time of both files do not coincide. If "force" is
-    specified, then the copy is done independently on this.
+    specified, then the copy is done independently of this.
 
     :param force: if set to True, the files are copied even if they are \
     up to date.
@@ -358,11 +358,11 @@ def sync_proxies( proxies, parallelize=False, **kwargs ):
     :param kwargs: extra arguments to :func:`copy_file`.
     :type kwargs: dict
 
-    .. seealso: :meth:`FileProxy.sync`
+    .. seealso:: :meth:`FileProxy.sync`
 
-    .. warning: beware that the base name of the source files in each proxy \
-    do not have the same names. This might result into overwriting temporal \
-    files in the :func:`copy_file`.
+    .. warning:: beware that the base name of the source files in each proxy \
+       do not have the same names. This might result into overwriting temporal \
+       files if there are parallel calls to :func:`copy_file`.
     '''
     if parallelize:
 
