@@ -62,7 +62,7 @@ obtain the most accessible file.</p>
 <tr class="row-even"><td><a class="reference internal" href="#hep_rfm.FileProxy.set_username" title="hep_rfm.FileProxy.set_username"><code class="xref py py-obj docutils literal"><span class="pre">set_username</span></code></a>(uname[,&nbsp;host])</td>
 <td>Assign the user name “uname” to the source and targets with host equal to “host”, and which do not have a user name yet.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.FileProxy.sync" title="hep_rfm.FileProxy.sync"><code class="xref py py-obj docutils literal"><span class="pre">sync</span></code></a>([parallelize])</td>
+<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.FileProxy.sync" title="hep_rfm.FileProxy.sync"><code class="xref py py-obj docutils literal"><span class="pre">sync</span></code></a>(**kwargs)</td>
 <td>Synchronize the target files using the source file.</td>
 </tr>
 </tbody>
@@ -108,20 +108,20 @@ host equal to “host”, and which do not have a user name yet.</p>
 
 <dl class="method">
 <dt id="hep_rfm.FileProxy.sync">
-<code class="descname">sync</code><span class="sig-paren">(</span><em>parallelize=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy.sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy.sync" title="Permalink to this definition">¶</a></dt>
+<code class="descname">sync</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy.sync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy.sync" title="Permalink to this definition">¶</a></dt>
 <dd><p>Synchronize the target files using the source file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>parallelize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – number of processes to be dedicated to         synchronize the source with the targets. By default (0) no         parallelization is done.</li>
-<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – extra arguments to <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a>.</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – extra arguments to <a class="reference internal" href="hep_rfm.sync_proxies.html#hep_rfm.sync_proxies" title="hep_rfm.sync_proxies"><code class="xref py py-func docutils literal"><span class="pre">sync_proxies()</span></code></a>.</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="hep_rfm.sync_proxies.html#hep_rfm.sync_proxies" title="hep_rfm.sync_proxies"><code class="xref py py-func docutils literal"><span class="pre">sync_proxies()</span></code></a></p>
+</div>
 </dd></dl>
 
 </dd></dl>
