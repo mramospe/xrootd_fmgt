@@ -46,7 +46,6 @@ class Worker:
     '''
     Class to build a process on a parallelized environment.
     '''
-
     def __init__( self, handler, args=(), kwargs={} ):
         '''
         Build a worker providing the job handler. The worker is automatically

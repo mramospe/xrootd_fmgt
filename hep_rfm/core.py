@@ -11,7 +11,7 @@ from hep_rfm.exceptions import CopyFileError, MakeDirsError
 from hep_rfm.parallel import JobHandler, FuncWorker
 
 # Python
-import logging, multiprocessing, os, subprocess, socket, warnings
+import logging, os, subprocess, shutil, socket, warnings
 
 
 __all__ = [
@@ -138,7 +138,7 @@ class FileProxy:
                 copy_file(self.source, target, **kwargs)
 
 
-def copy_file( source, target, force=False ):
+def copy_file( source, target, force=False, tmpdir=None ):
     '''
     Main function to copy a file from a source to a target. The copy is done
     if the modification time of both files do not coincide. If "force" is
@@ -147,6 +147,11 @@ def copy_file( source, target, force=False ):
     :param force: if set to True, the files are copied even if they are \
     up to date.
     :type force: bool
+    :param tmpdir: temporal directory to store files when needed. By default \
+    a folder is created in "/tmp/<pid>.<module name>", and it is deleted at \
+    the end of the execution. If provided, the user is considered to own the \
+    directory, altough this function will create it if it does not exist.
+    :type tmpdir: str
     '''
     itmstp = getmtime(source)
 
@@ -170,10 +175,18 @@ def copy_file( source, target, force=False ):
             else:
                 path = source
 
-            tmp = '/tmp/' + os.path.basename(path)
+            if tmpdir is None:
+                tdir = '/tmp/{}.{}'.format(os.getpid(), __name__)
+            else:
+                tdir = tmpdir
+
+            tmp = os.path.join(tdir, os.path.basename(path))
 
             copy_file(source, tmp)
             copy_file(tmp, target)
+
+            if tmpdir is None:
+                shutil.rmtree(tdir)
         else:
 
             logger.info('Copying file\n source: {}\n target: {}'.format(source, target))
@@ -346,6 +359,10 @@ def sync_proxies( proxies, parallelize=False, **kwargs ):
     :type kwargs: dict
 
     .. seealso: :meth:`FileProxy.sync`
+
+    .. warning: beware that the base name of the source files in each proxy \
+    do not have the same names. This might result into overwriting temporal \
+    files in the :func:`copy_file`.
     '''
     if parallelize:
 
@@ -357,10 +374,19 @@ def sync_proxies( proxies, parallelize=False, **kwargs ):
         # as zombies
         parallelize = min(parallelize, len(proxies))
 
+        rm_tmp = False
+        if 'tmpdir' not in kwargs.keys():
+            kwargs['tmpdir'] = '/tmp/{}.{}'.format(os.getpid(), __name__)
+            os.makedirs(kwargs['tmpdir'])
+            rm_tmp = True
+
         for i in range(parallelize):
             FuncWorker(handler, _parallel_copy_file, kwargs=kwargs)
 
         handler.wait()
+
+        if rm_tmp:
+            shutil.rmtree(kwargs['tmpdir'])
     else:
         for p in proxies:
             p.sync(**kwargs)
