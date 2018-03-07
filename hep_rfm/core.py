@@ -108,34 +108,16 @@ class FileProxy:
         for i, t in enumerate(self.targets):
             self.targets[i] = _set_username(t, uname, host)
 
-    def sync( self, parallelize=False, **kwargs ):
+    def sync( self, **kwargs ):
         '''
         Synchronize the target files using the source file.
 
-        :param parallelize: number of processes to be dedicated to \
-        synchronize the source with the targets. By default (0) no \
-        parallelization is done.
-        :type parallelize: int
-        :param kwargs: extra arguments to :func:`copy_file`.
+        :param kwargs: extra arguments to :func:`sync_proxies`.
         :type kwargs: dict
+
+        .. seealso:: :func:`sync_proxies`
         '''
-        if parallelize:
-
-            handler = JobHandler()
-            for target in self.targets:
-                handler.queue.put(target)
-
-            # Prevent from creating extra processes which might end up
-            # as zombies
-            parallelize = min(parallelize, len(self.targets))
-
-            for i in range(parallelize):
-                FuncWorker(handler, copy_file, args=(self.source,), kwargs=kwargs)
-
-            handler.wait()
-        else:
-            for target in self.targets:
-                copy_file(self.source, target, **kwargs)
+        sync_proxies((self,))
 
 
 def copy_file( source, target, force=False, tmpdir=None ):
@@ -167,7 +149,7 @@ def copy_file( source, target, force=False, tmpdir=None ):
 
         # Copy the file
 
-        dec = protocols._remote_protocol(source, target)
+        dec = protocols.remote_protocol(source, target)
         if dec == protocols.__different_protocols__:
             # Copy to a temporal file
             if protocols.is_remote(source):
@@ -182,8 +164,8 @@ def copy_file( source, target, force=False, tmpdir=None ):
 
             tmp = os.path.join(tdir, os.path.basename(path))
 
-            copy_file(source, tmp)
-            copy_file(tmp, target)
+            copy_file(source, tmp, force=force, tmpdir=tmpdir)
+            copy_file(tmp, target, force=force, tmpdir=tmpdir)
 
             if tmpdir is None:
                 shutil.rmtree(tdir)
@@ -273,20 +255,6 @@ def make_directories( target ):
         raise MakeDirsError(target, stderr)
 
 
-def _parallel_copy_file( obj, **kwargs ):
-    '''
-    Wrapper of the function :func:`copy_file` to allow parallelization.
-
-    :param obj: source and target to process.
-    :type obj: tuple(str, str)
-    :param kwargs: extra arguments to :func:`copy_file`.
-    :type kwargs: dict
-    '''
-    s, t = obj
-
-    return copy_file(s, t, **kwargs)
-
-
 def _process( *args ):
     '''
     Create a subprocess object with a defined "stdout" and "stderr",
@@ -364,29 +332,35 @@ def sync_proxies( proxies, parallelize=False, **kwargs ):
        do not have the same names. This might result into overwriting temporal \
        files if there are parallel calls to :func:`copy_file`.
     '''
+    rm_tmp = False
+    if 'tmpdir' not in kwargs.keys():
+        # Create a dedicated temporal directory
+        kwargs['tmpdir'] = '/tmp/{}.{}'.format(os.getpid(), __name__)
+
+        try:
+            os.makedirs(kwargs['tmpdir'])
+        except OSError:
+            # The directory exists
+            pass
+
+        rm_tmp = True
+
+    inputs = list((p.source, t) for p in proxies for t in p.targets)
+
     if parallelize:
 
-        handler = JobHandler()
-        for p in proxies:
-            map(handler.queue.put, ((p.source, t) for t in p.targets))
+        handler = JobHandler(inputs, parallelize)
 
-        # Prevent from creating extra processes which might end up
-        # as zombies
-        parallelize = min(parallelize, len(proxies))
+        func = lambda obj, **kwargs: copy_file(*obj, **kwargs)
 
-        rm_tmp = False
-        if 'tmpdir' not in kwargs.keys():
-            kwargs['tmpdir'] = '/tmp/{}.{}'.format(os.getpid(), __name__)
-            os.makedirs(kwargs['tmpdir'])
-            rm_tmp = True
-
-        for i in range(parallelize):
-            FuncWorker(handler, _parallel_copy_file, kwargs=kwargs)
+        for i in range(handler.nproc):
+            FuncWorker(handler, func, kwargs=kwargs)
 
         handler.wait()
 
-        if rm_tmp:
-            shutil.rmtree(kwargs['tmpdir'])
     else:
-        for p in proxies:
-            p.sync(**kwargs)
+        for i in inputs:
+            copy_file(*i, **kwargs)
+
+    if rm_tmp:
+        shutil.rmtree(kwargs['tmpdir'])

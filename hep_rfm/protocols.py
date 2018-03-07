@@ -54,7 +54,7 @@ def is_xrootd( path ):
     return path.startswith('root://')
 
 
-def _remote_protocol( a, b ):
+def remote_protocol( a, b ):
     '''
     Determine the protocol to use given two paths to files. The protocol IDs
     are defined as:

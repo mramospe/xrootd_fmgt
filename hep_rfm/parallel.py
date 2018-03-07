@@ -14,12 +14,26 @@ class JobHandler:
     '''
     Class to handle jobs on a parallelized environment.
     '''
-    def __init__( self ):
+    def __init__( self, inputs, nproc=1 ):
         '''
         Build the class to handling a queue and a set of workers.
+
+        :param inputs: inputs to the queue.
+        :type inputs: list
+        :param nproc: number of processes to generate. In case this number is \
+        greater than the number of inputs, it will be set to the smallest \
+        value of the two.
+        :type nproc: int
         '''
         self.queue   = mp.JoinableQueue()
         self.workers = []
+
+        for i in inputs:
+            self.queue.put(i)
+
+        # Prevent from creating extra processes which might end up
+        # as zombies
+        self.nproc = min(nproc, len(inputs))
 
     def add_worker( self, worker ):
         '''
