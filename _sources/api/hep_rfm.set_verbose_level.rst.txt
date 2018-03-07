@@ -1,6 +1,0 @@
-set_verbose_level
-=================
-
-.. currentmodule:: hep_rfm
-
-.. autofunction:: set_verbose_level

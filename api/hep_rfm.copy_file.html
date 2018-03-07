@@ -45,15 +45,19 @@
 <h1>copy_file<a class="headerlink" href="#copy-file" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="hep_rfm.copy_file">
-<code class="descclassname">hep_rfm.</code><code class="descname">copy_file</code><span class="sig-paren">(</span><em>source</em>, <em>target</em>, <em>force=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.copy_file" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">hep_rfm.</code><code class="descname">copy_file</code><span class="sig-paren">(</span><em>source</em>, <em>target</em>, <em>force=False</em>, <em>tmpdir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.copy_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function to copy a file from a source to a target. The copy is done
 if the modification time of both files do not coincide. If “force” is
-specified, then the copy is done independently on this.</p>
+specified, then the copy is done independently of this.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – if set to True, the files are copied even if they are     up to date.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – if set to True, the files are copied even if they are     up to date.</li>
+<li><strong>tmpdir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – temporal directory to store files when needed. By default     a folder is created in “/tmp/&lt;pid&gt;.&lt;module name&gt;”, and it is deleted at     the end of the execution. If provided, the user is considered to own the     directory, altough this function will create it if it does not exist.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>

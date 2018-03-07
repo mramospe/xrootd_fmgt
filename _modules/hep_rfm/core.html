@@ -50,9 +50,10 @@
 <span class="c1"># Custom</span>
 <span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
 <span class="kn">from</span> <span class="nn">hep_rfm.exceptions</span> <span class="k">import</span> <span class="n">CopyFileError</span><span class="p">,</span> <span class="n">MakeDirsError</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.parallel</span> <span class="k">import</span> <span class="n">JobHandler</span><span class="p">,</span> <span class="n">FuncWorker</span>
 
 <span class="c1"># Python</span>
-<span class="kn">import</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">multiprocessing</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">logging</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">subprocess</span><span class="o">,</span> <span class="nn">shutil</span><span class="o">,</span> <span class="nn">socket</span><span class="o">,</span> <span class="nn">warnings</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
@@ -66,12 +67,14 @@
 
 <div class="viewcode-block" id="FileProxy"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy">[docs]</a><span class="k">class</span> <span class="nc">FileProxy</span><span class="p">:</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Object to store the path to a set of files, linked together, where one is</span>
-<span class="sd">    used to update the others.</span>
+<span class="sd">    Object to store the path to a source file, and some other paths pointing</span>
+<span class="sd">    to some target locations. The former is used as a reference to update the</span>
+<span class="sd">    latter, using the :func:`copy_file` function. Also provides a method to</span>
+<span class="sd">    obtain the most accessible file.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Build a proxy to a file.</span>
+<span class="sd">        Build a proxy to a file from a source and the set of targets.</span>
 
 <span class="sd">        :param source: path to the file to use as a reference.</span>
 <span class="sd">        :type source: str</span>
@@ -91,33 +94,6 @@
                 <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Target &quot;</span><span class="si">{}</span><span class="s1">&quot; uses xrootd protocol, metadata &#39;</span>\
                                   <span class="s1">&#39;will not be updated. The file will always &#39;</span>\
                                   <span class="s1">&#39;be updated.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="ne">Warning</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_parallel_copy_worker</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">queue</span> <span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Method to copy the source into a target on a parallelized environment.</span>
-
-<span class="sd">        :param queue: queue this function is attached to.</span>
-<span class="sd">        :type queue: multiprocessing.JoinableQueue</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">copy_target</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-        <span class="n">queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
-
-<div class="viewcode-block" id="FileProxy.copy_target"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.copy_target">[docs]</a>    <span class="k">def</span> <span class="nf">copy_target</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Method to copy the source into a single target. This allows to manage</span>
-<span class="sd">        targets even if they are not present within this class.</span>
-
-<span class="sd">        :param target: path to a target file.</span>
-<span class="sd">        :type target: str</span>
-<span class="sd">        :param kwargs: extra arguments to :func:`copy_file`.</span>
-<span class="sd">        :type kwargs: dict</span>
-
-<span class="sd">        .. seealso: :func:`copy_file`, :func:`make_directories`</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">make_directories</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-
-        <span class="n">copy_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="FileProxy.path"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.path">[docs]</a>    <span class="k">def</span> <span class="nf">path</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">xrdav</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -174,54 +150,58 @@
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">_set_username</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">uname</span><span class="p">,</span> <span class="n">host</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FileProxy.sync"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.sync">[docs]</a>    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">para_targets</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+<div class="viewcode-block" id="FileProxy.sync"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy.sync">[docs]</a>    <span class="k">def</span> <span class="nf">sync</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Synchronize the target files using the source file.</span>
 
-<span class="sd">        :param para_targets: number of processes to be dedicated to \</span>
+<span class="sd">        :param parallelize: number of processes to be dedicated to \</span>
 <span class="sd">        synchronize the source with the targets. By default (0) no \</span>
 <span class="sd">        parallelization is done.</span>
-<span class="sd">        :type para_targets: int</span>
+<span class="sd">        :type parallelize: int</span>
 <span class="sd">        :param kwargs: extra arguments to :func:`copy_file`.</span>
 <span class="sd">        :type kwargs: dict</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">para_targets</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">parallelize</span><span class="p">:</span>
 
-            <span class="n">queue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">JoinableQueue</span><span class="p">()</span>
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">JobHandler</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
+                <span class="n">handler</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
             <span class="c1"># Prevent from creating extra processes which might end up</span>
             <span class="c1"># as zombies</span>
-            <span class="n">para_targets</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">para_targets</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">))</span>
+            <span class="n">parallelize</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">parallelize</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">))</span>
 
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">para_targets</span><span class="p">):</span>
-                <span class="n">p</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_parallel_copy_worker</span><span class="p">,</span>
-                                            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">queue</span><span class="p">,))</span>
-                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">parallelize</span><span class="p">):</span>
+                <span class="n">FuncWorker</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">copy_file</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,),</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
-                <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-
-            <span class="n">queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">copy_target</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+                <span class="n">copy_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="copy_file"><a class="viewcode-back" href="../../api/hep_rfm.copy_file.html#hep_rfm.copy_file">[docs]</a><span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
+<div class="viewcode-block" id="copy_file"><a class="viewcode-back" href="../../api/hep_rfm.copy_file.html#hep_rfm.copy_file">[docs]</a><span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">tmpdir</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Main function to copy a file from a source to a target. The copy is done</span>
 <span class="sd">    if the modification time of both files do not coincide. If &quot;force&quot; is</span>
-<span class="sd">    specified, then the copy is done independently on this.</span>
+<span class="sd">    specified, then the copy is done independently of this.</span>
 
 <span class="sd">    :param force: if set to True, the files are copied even if they are \</span>
 <span class="sd">    up to date.</span>
 <span class="sd">    :type force: bool</span>
+<span class="sd">    :param tmpdir: temporal directory to store files when needed. By default \</span>
+<span class="sd">    a folder is created in &quot;/tmp/&lt;pid&gt;.&lt;module name&gt;&quot;, and it is deleted at \</span>
+<span class="sd">    the end of the execution. If provided, the user is considered to own the \</span>
+<span class="sd">    directory, altough this function will create it if it does not exist.</span>
+<span class="sd">    :type tmpdir: str</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">itmstp</span> <span class="o">=</span> <span class="n">getmtime</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">itmstp</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to synchronize file &quot;</span><span class="si">{}</span><span class="s1">&quot;, the &#39;</span>\
                                <span class="s1">&#39;file does not exist&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+
+    <span class="n">make_directories</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
     <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
@@ -237,13 +217,21 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">path</span> <span class="o">=</span> <span class="n">source</span>
 
-            <span class="n">tmp</span> <span class="o">=</span> <span class="s1">&#39;/tmp/&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">tmpdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">tdir</span> <span class="o">=</span> <span class="s1">&#39;/tmp/</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="vm">__name__</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">tdir</span> <span class="o">=</span> <span class="n">tmpdir</span>
+
+            <span class="n">tmp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tdir</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
 
             <span class="n">copy_file</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">tmp</span><span class="p">)</span>
             <span class="n">copy_file</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">tmpdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">tdir</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Trying to get file from &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Copying file</span><span class="se">\n</span><span class="s1"> source: </span><span class="si">{}</span><span class="se">\n</span><span class="s1"> target: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">dec</span> <span class="o">==</span> <span class="n">protocols</span><span class="o">.</span><span class="n">__ssh_protocol__</span><span class="p">:</span>
                 <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;scp&#39;</span><span class="p">,</span> <span class="s1">&#39;-q&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
@@ -251,8 +239,6 @@
                 <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;xrdcp&#39;</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;-s&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;cp&#39;</span><span class="p">,</span> <span class="s1">&#39;-p&#39;</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
-
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Output will be copied into &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">_</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
@@ -263,8 +249,6 @@
                 <span class="c1"># preserve it.</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">utime</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">st_atime</span><span class="p">,</span> <span class="n">itmstp</span><span class="p">))</span>
 
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Successfuly copied file&#39;</span><span class="p">)</span>
-
     <span class="k">else</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;File &quot;</span><span class="si">{}</span><span class="s1">&quot; is up to date&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">target</span><span class="p">))</span></div>
 
@@ -272,7 +256,8 @@
 <div class="viewcode-block" id="getmtime"><a class="viewcode-back" href="../../api/hep_rfm.getmtime.html#hep_rfm.getmtime">[docs]</a><span class="k">def</span> <span class="nf">getmtime</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Get the modification time for the file in &quot;path&quot;. Only the integer part of</span>
-<span class="sd">    the modification time is used.</span>
+<span class="sd">    the modification time is used. If no access is possible to the information</span>
+<span class="sd">    of the file, None is returned.</span>
 
 <span class="sd">    :param path: path to the input file.</span>
 <span class="sd">    :type path: str</span>
@@ -290,10 +275,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">proc</span> <span class="o">=</span> <span class="n">_process</span><span class="p">(</span><span class="s1">&#39;stat&#39;</span><span class="p">,</span> <span class="s1">&#39;-c%Y&#39;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">tmpstp</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="s1">&#39;Error&#39;</span> <span class="ow">in</span> <span class="n">tmpstp</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
 
-    <span class="n">tmpstp</span> <span class="o">=</span> <span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_xrootd</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
         <span class="n">tmpstp</span> <span class="o">=</span> <span class="n">tmpstp</span><span class="p">[</span><span class="n">tmpstp</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;Modtime:&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="s1">&#39;Modtime:&#39;</span><span class="p">):]</span>
 
@@ -329,6 +315,20 @@
         <span class="k">raise</span> <span class="n">MakeDirsError</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span></div>
 
 
+<span class="k">def</span> <span class="nf">_parallel_copy_file</span><span class="p">(</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Wrapper of the function :func:`copy_file` to allow parallelization.</span>
+
+<span class="sd">    :param obj: source and target to process.</span>
+<span class="sd">    :type obj: tuple(str, str)</span>
+<span class="sd">    :param kwargs: extra arguments to :func:`copy_file`.</span>
+<span class="sd">    :type kwargs: dict</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">s</span><span class="p">,</span> <span class="n">t</span> <span class="o">=</span> <span class="n">obj</span>
+
+    <span class="k">return</span> <span class="n">copy_file</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
 <span class="k">def</span> <span class="nf">_process</span><span class="p">(</span> <span class="o">*</span><span class="n">args</span> <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Create a subprocess object with a defined &quot;stdout&quot; and &quot;stderr&quot;,</span>
@@ -341,7 +341,7 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span> <span class="n">args</span><span class="p">,</span>
                              <span class="n">stdout</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>
-                             <span class="n">stderr</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">)</span>
+                             <span class="n">stderr</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span> <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_set_username</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">uname</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
@@ -386,55 +386,49 @@
         <span class="k">return</span> <span class="n">path</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="n">rp</span><span class="p">],</span> <span class="n">path</span><span class="p">[</span><span class="n">rp</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:]</span>
 
 
-<span class="k">def</span> <span class="nf">_parallel_sync_worker</span><span class="p">(</span> <span class="n">queue</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Function to synchronize a FileProxy object on a parallelized environment.</span>
-
-<span class="sd">    :param queue: queue this function is attached to.</span>
-<span class="sd">    :type queue: multiprocessing.JoinableQueue</span>
-<span class="sd">    :param kwargs: extra arguments to :meth:`FileProxy.syn`.</span>
-<span class="sd">    :type kwargs: dict</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">proxy</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-    <span class="n">proxy</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    <span class="n">queue</span><span class="o">.</span><span class="n">task_done</span><span class="p">()</span>
-
-
-<div class="viewcode-block" id="sync_proxies"><a class="viewcode-back" href="../../api/hep_rfm.sync_proxies.html#hep_rfm.sync_proxies">[docs]</a><span class="k">def</span> <span class="nf">sync_proxies</span><span class="p">(</span> <span class="n">proxies</span><span class="p">,</span> <span class="n">para_proxies</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
+<div class="viewcode-block" id="sync_proxies"><a class="viewcode-back" href="../../api/hep_rfm.sync_proxies.html#hep_rfm.sync_proxies">[docs]</a><span class="k">def</span> <span class="nf">sync_proxies</span><span class="p">(</span> <span class="n">proxies</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span> <span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Synchronize a given list of proxies. This function allows to fully</span>
 <span class="sd">    parallelize all the processes.</span>
 
 <span class="sd">    :param proxies: file proxies to synchronize.</span>
 <span class="sd">    :type proxies: collection(FileProxy)</span>
-<span class="sd">    :param para_proxies: number of processes allowed to parallelize the \</span>
+<span class="sd">    :param parallelize: number of processes allowed to parallelize the \</span>
 <span class="sd">    synchronization of all the proxies. By default it is set to 0, so no \</span>
 <span class="sd">    parallelization  is done (0).</span>
-<span class="sd">    :type para_proxies: int</span>
-<span class="sd">    :param kwargs: extra arguments to :meth:`FileProxy.sync`.</span>
+<span class="sd">    :type parallelize: int</span>
+<span class="sd">    :param kwargs: extra arguments to :func:`copy_file`.</span>
 <span class="sd">    :type kwargs: dict</span>
 
-<span class="sd">    .. seealso: :meth:`FileProxy.sync`</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="n">para_proxies</span><span class="p">:</span>
+<span class="sd">    .. seealso:: :meth:`FileProxy.sync`</span>
 
-        <span class="n">queue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">JoinableQueue</span><span class="p">()</span>
+<span class="sd">    .. warning:: beware that the base name of the source files in each proxy \</span>
+<span class="sd">       do not have the same names. This might result into overwriting temporal \</span>
+<span class="sd">       files if there are parallel calls to :func:`copy_file`.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">parallelize</span><span class="p">:</span>
+
+        <span class="n">handler</span> <span class="o">=</span> <span class="n">JobHandler</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">proxies</span><span class="p">:</span>
+            <span class="nb">map</span><span class="p">(</span><span class="n">handler</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">,</span> <span class="p">((</span><span class="n">p</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">p</span><span class="o">.</span><span class="n">targets</span><span class="p">))</span>
 
         <span class="c1"># Prevent from creating extra processes which might end up</span>
         <span class="c1"># as zombies</span>
-        <span class="n">para_proxies</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">para_proxies</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">proxies</span><span class="p">))</span>
+        <span class="n">parallelize</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">parallelize</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">proxies</span><span class="p">))</span>
 
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">para_proxies</span><span class="p">):</span>
-            <span class="n">p</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">_parallel_sync_worker</span><span class="p">,</span>
-                                        <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">queue</span><span class="p">,),</span>
-                                        <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
-            <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">rm_tmp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s1">&#39;tmpdir&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tmpdir&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;/tmp/</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">(),</span> <span class="vm">__name__</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tmpdir&#39;</span><span class="p">])</span>
+            <span class="n">rm_tmp</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">proxies</span><span class="p">:</span>
-            <span class="n">queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">parallelize</span><span class="p">):</span>
+            <span class="n">FuncWorker</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="n">_parallel_copy_file</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="n">queue</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+        <span class="n">handler</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
 
+        <span class="k">if</span> <span class="n">rm_tmp</span><span class="p">:</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;tmpdir&#39;</span><span class="p">])</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">proxies</span><span class="p">:</span>
             <span class="n">p</span><span class="o">.</span><span class="n">sync</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>

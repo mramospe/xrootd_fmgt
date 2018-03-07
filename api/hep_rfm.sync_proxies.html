@@ -45,7 +45,7 @@
 <h1>sync_proxies<a class="headerlink" href="#sync-proxies" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="hep_rfm.sync_proxies">
-<code class="descclassname">hep_rfm.</code><code class="descname">sync_proxies</code><span class="sig-paren">(</span><em>proxies</em>, <em>para_proxies=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#sync_proxies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.sync_proxies" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">hep_rfm.</code><code class="descname">sync_proxies</code><span class="sig-paren">(</span><em>proxies</em>, <em>parallelize=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#sync_proxies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.sync_proxies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Synchronize a given list of proxies. This function allows to fully
 parallelize all the processes.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -54,13 +54,21 @@ parallelize all the processes.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>proxies</strong> (<em>collection</em><em>(</em><a class="reference internal" href="hep_rfm.FileProxy.html#hep_rfm.FileProxy" title="hep_rfm.FileProxy"><em>FileProxy</em></a><em>)</em>) – file proxies to synchronize.</li>
-<li><strong>para_proxies</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – number of processes allowed to parallelize the     synchronization of all the proxies. By default it is set to 0, so no     parallelization  is done (0).</li>
-<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – extra arguments to <a class="reference internal" href="hep_rfm.FileProxy.html#hep_rfm.FileProxy.sync" title="hep_rfm.FileProxy.sync"><code class="xref py py-meth docutils literal"><span class="pre">FileProxy.sync()</span></code></a>.</li>
+<li><strong>parallelize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – number of processes allowed to parallelize the     synchronization of all the proxies. By default it is set to 0, so no     parallelization  is done (0).</li>
+<li><strong>kwargs</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)"><em>dict</em></a>) – extra arguments to <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a>.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="hep_rfm.FileProxy.html#hep_rfm.FileProxy.sync" title="hep_rfm.FileProxy.sync"><code class="xref py py-meth docutils literal"><span class="pre">FileProxy.sync()</span></code></a></p>
+</div>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">beware that the base name of the source files in each proxy        do not have the same names. This might result into overwriting temporal        files if there are parallel calls to <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a>.</p>
+</div>
 </dd></dl>
 
 </div>
