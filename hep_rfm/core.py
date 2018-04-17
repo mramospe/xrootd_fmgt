@@ -47,17 +47,19 @@ class FileProxy:
 
     def path( self, xrdav=False ):
         '''
-        Get the most accessible path to one of the files in this class. If the
-        path to a file on a remote site matches that of a local file, it will be
-        returned. This allows to use local files while specifying remote paths.
-        However, if a path on a remote site matches a local file (which does not
-        correspond to a proxy of the path referenced by this object) it will be
-        returned as well.
+        Get the most accessible path to one of the files in this class.
 
         :param xrdav: whether the xrootd protocol is available in root.
         :type xrdav: bool
         :returns: path to the file.
         :rtype: str
+
+        .. warning::
+           If the path to a file on a remote site matches that of a local file,
+           it will be returned. This allows to use local files while specifying
+           remote paths. However, if a path on a remote site matches a local
+           file, which does not correspond to a proxy of the path referenced by
+           this object, it will result on a fake reference to the file.
         '''
         all_paths = list(self.targets)
         all_paths.append(self.source)
