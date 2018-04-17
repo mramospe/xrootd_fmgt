@@ -82,7 +82,7 @@ of the hep_rfm package. The class inheritance diagram is also shown.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;force])</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;force,&nbsp;tmpdir])</td>
 <td>Main function to copy a file from a source to a target.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.getmtime.html#hep_rfm.getmtime" title="hep_rfm.getmtime"><code class="xref py py-obj docutils literal"><span class="pre">getmtime</span></code></a>(path)</td>
@@ -91,7 +91,7 @@ of the hep_rfm package. The class inheritance diagram is also shown.</p>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.make_directories.html#hep_rfm.make_directories" title="hep_rfm.make_directories"><code class="xref py py-obj docutils literal"><span class="pre">make_directories</span></code></a>(target)</td>
 <td>Make the directories for the given target in case they do not exist already.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.sync_proxies.html#hep_rfm.sync_proxies" title="hep_rfm.sync_proxies"><code class="xref py py-obj docutils literal"><span class="pre">sync_proxies</span></code></a>(proxies[,&nbsp;para_proxies])</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.sync_proxies.html#hep_rfm.sync_proxies" title="hep_rfm.sync_proxies"><code class="xref py py-obj docutils literal"><span class="pre">sync_proxies</span></code></a>(proxies[,&nbsp;parallelize])</td>
 <td>Synchronize a given list of proxies.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal"><span class="pre">is_remote</span></code></a>(path)</td>
@@ -115,16 +115,16 @@ of the hep_rfm package. The class inheritance diagram is also shown.</p>
 </colgroup>
 <tbody valign="top">
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileProxy.html#hep_rfm.FileProxy" title="hep_rfm.FileProxy"><code class="xref py py-obj docutils literal"><span class="pre">FileProxy</span></code></a>(source,&nbsp;*targets)</td>
-<td>Object to store the path to a set of files, linked together, where one is used to update the others.</td>
+<td>Object to store the path to a source file, and some other paths pointing to some target locations.</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="class-inheritance-diagram">
 <h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<img src="_images/inheritance-974710bad460aa4d0823b8ccd9acddabb53b0da3.png" alt="Inheritance diagram of hep_rfm.core.FileProxy" usemap="#inheritance769daecc4e" class="inheritance"/>
+<img src="_images/inheritance-d3eef2bd7899992e9dde9a76f7ea31a0b1545671.png" alt="Inheritance diagram of hep_rfm.core.FileProxy" usemap="#inheritance769daecc4e" class="inheritance"/>
 <map id="inheritance769daecc4e" name="inheritance769daecc4e">
-<area shape="rect" id="node1" title="Object to store the path to a set of files, linked together, where one is" alt="" coords="5,5,83,31"/>
+<area shape="rect" id="node1" title="Object to store the path to a source file, and some other paths pointing" alt="" coords="5,5,83,31"/>
 </map>
 </div>
 </div>

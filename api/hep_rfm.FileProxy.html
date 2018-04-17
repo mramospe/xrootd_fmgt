@@ -45,7 +45,8 @@
 <dl class="class">
 <dt id="hep_rfm.FileProxy">
 <em class="property">class </em><code class="descclassname">hep_rfm.</code><code class="descname">FileProxy</code><span class="sig-paren">(</span><em>source</em>, <em>*targets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Object to store the path to a source file, and some other paths pointing
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Object to store the path to a source file, and some other paths pointing
 to some target locations. The former is used as a reference to update the
 latter, using the <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a> function. Also provides a method to
 obtain the most accessible file.</p>
@@ -84,6 +85,14 @@ obtain the most accessible file.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition warning">
+<p class="first admonition-title">Warning</p>
+<p class="last">If the path to a file on a remote site matches that of a local file,
+it will be returned. This allows to use local files while specifying
+remote paths. However, if a path on a remote site matches a local
+file, which does not correspond to a proxy of the path referenced by
+this object, it will result on a fake reference to the file.</p>
+</div>
 </dd></dl>
 
 <dl class="method">
