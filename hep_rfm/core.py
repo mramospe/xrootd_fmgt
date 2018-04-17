@@ -11,7 +11,7 @@ from hep_rfm.exceptions import CopyFileError, MakeDirsError
 from hep_rfm.parallel import JobHandler, Worker
 
 # Python
-import logging, os, subprocess, shutil, socket, warnings
+import logging, os, subprocess, shutil, warnings
 
 
 __all__ = [
@@ -19,7 +19,6 @@ __all__ = [
     'FileProxy',
     'getmtime',
     'make_directories',
-    'split_remote',
     'sync_proxies'
     ]
 
@@ -68,7 +67,7 @@ class FileProxy:
 
             if protocols.is_remote(s):
 
-                server, sepath = split_remote(s)
+                server, sepath = _split_remote(s)
 
                 if os.path.exists(sepath):
                     path = sepath
@@ -151,7 +150,7 @@ def copy_file( source, target, force=False, tmpdir=None ):
         if dec == protocols.__different_protocols__:
             # Copy to a temporal file
             if protocols.is_remote(source):
-                _, path = split_remote(source)
+                _, path = _split_remote(source)
             else:
                 path = source
 
@@ -204,7 +203,7 @@ def getmtime( path ):
     '''
     if protocols.is_remote(path):
 
-        server, sepath = split_remote(path)
+        server, sepath = _split_remote(path)
 
         if protocols.is_ssh(path):
             proc = _process('ssh', '-X', server, 'stat', '-c%Y', sepath)
@@ -237,7 +236,7 @@ def make_directories( target ):
     '''
     if protocols.is_remote(target):
 
-        server, sepath = split_remote(target)
+        server, sepath = _split_remote(target)
 
         dpath = os.path.dirname(sepath)
 
@@ -303,7 +302,7 @@ def _set_username( source, uname, host=None ):
     return source
 
 
-def split_remote( path ):
+def _split_remote( path ):
     '''
     Split a path related to a remote file in site and true path.
 
