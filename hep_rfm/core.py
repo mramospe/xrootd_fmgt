@@ -215,9 +215,9 @@ def getmtime( path ):
     else:
         proc = _process('stat', '-c%Y', path)
 
-    tmpstp = proc.stdout.read()
+    tmpstp = proc.stdout.read().decode('utf-8')
 
-    if proc.wait() != 0 or 'Error' in tmpstp.decode('utf-8'):
+    if proc.wait() != 0 or 'Error' in tmpstp:
         return None
 
     if protocols.is_xrootd(path):
