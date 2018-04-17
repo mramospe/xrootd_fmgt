@@ -20,7 +20,7 @@ def test_remote_name():
     assert not hep_rfm.is_xrootd('my-site')
 
     s, p = hep_rfm.core._split_remote('root://my-site//path/to/file')
-    assert s == 'my-site' and p == 'path/to/file'
+    assert s == 'my-site' and p == '/path/to/file'
 
     # SSH
     assert hep_rfm.is_ssh('username@server')

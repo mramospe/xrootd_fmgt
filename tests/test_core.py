@@ -69,10 +69,6 @@ def test_file_proxy():
     assert str(hep_rfm.getmtime(sf)) == str(hep_rfm.getmtime(tfa))
     assert str(hep_rfm.getmtime(sf)) == str(hep_rfm.getmtime(tfb))
 
-    # Test warning when using xrootd protocol on target files
-    with pytest.warns(Warning):
-        fp = hep_rfm.FileProxy('/path/to/file', 'root://server//path/to/file')
-
 
 def test_getmtime():
     '''
