@@ -19,6 +19,7 @@ __all__ = [
     'FileProxy',
     'getmtime',
     'make_directories',
+    'split_remote',
     'sync_proxies'
     ]
 
@@ -45,14 +46,6 @@ class FileProxy:
         self.source  = source
         self.targets = list(targets)
 
-        for t in self.targets:
-            if protocols.is_xrootd(t):
-                # The xrootd protocol does not allow to preserve the
-                # metadata when copying files.
-                warnings.warn('Target "{}" uses xrootd protocol, metadata '\
-                                  'will not be updated. The file will always '\
-                                  'be updated.'.format(t), Warning)
-
     def path( self, xrdav=False ):
         '''
         Get the most accessible path to one of the files in this class.
@@ -62,7 +55,7 @@ class FileProxy:
         :returns: path to the file.
         :rtype: str
         '''
-        host = socket.getfqdn()
+        host = socket.gethostname()
 
         all_paths = list(self.targets)
         all_paths.append(self.source)
@@ -72,9 +65,9 @@ class FileProxy:
 
             if protocols.is_ssh(s):
 
-                server, sepath = _split_remote(s)
+                server, sepath = split_remote(s)
 
-                if server.endswith(host):
+                if host.startswith(server):
                     path = sepath
                     break
 
@@ -153,7 +146,7 @@ def copy_file( source, target, force=False, tmpdir=None ):
         if dec == protocols.__different_protocols__:
             # Copy to a temporal file
             if protocols.is_remote(source):
-                _, path = _split_remote(source)
+                _, path = split_remote(source)
             else:
                 path = source
 
@@ -206,7 +199,7 @@ def getmtime( path ):
     '''
     if protocols.is_remote(path):
 
-        server, sepath = _split_remote(path)
+        server, sepath = split_remote(path)
 
         if protocols.is_ssh(path):
             proc = _process('ssh', '-X', server, 'stat', '-c%Y', sepath)
@@ -215,9 +208,13 @@ def getmtime( path ):
     else:
         proc = _process('stat', '-c%Y', path)
 
+    st = proc.wait()
+
     tmpstp = proc.stdout.read().decode('utf-8')
 
-    if proc.wait() != 0 or 'Error' in tmpstp:
+    if 'Connection timed out' in tmpstp:
+        raise RuntimeError('Connection timed out')
+    elif st != 0 or tmpstp.startswith('Error 3011: Unable to stat'):
         return None
 
     if protocols.is_xrootd(path):
@@ -235,7 +232,7 @@ def make_directories( target ):
     '''
     if protocols.is_remote(target):
 
-        server, sepath = _split_remote(target)
+        server, sepath = split_remote(target)
 
         dpath = os.path.dirname(sepath)
 
@@ -251,8 +248,13 @@ def make_directories( target ):
         proc = _process('mkdir', '-p', dpath if dpath != '' else './')
 
     if proc.wait() != 0:
+
         _, stderr = proc.communicate()
-        raise MakeDirsError(target, stderr)
+
+        if 'Connection timed out' in stderr.decode('utf-8'):
+            raise RuntimeError('Connection timed out')
+        else:
+            raise MakeDirsError(target, stderr)
 
 
 def _process( *args ):
@@ -296,7 +298,7 @@ def _set_username( source, uname, host=None ):
     return source
 
 
-def _split_remote( path ):
+def split_remote( path ):
     '''
     Split a path related to a remote file in site and true path.
 
@@ -309,7 +311,7 @@ def _split_remote( path ):
         return path.split(':')
     else:
         rp = path.find('//', 7)
-        return path[7:rp], path[rp + 2:]
+        return path[7:rp], path[rp + 1:]
 
 
 def sync_proxies( proxies, parallelize=False, **kwargs ):
