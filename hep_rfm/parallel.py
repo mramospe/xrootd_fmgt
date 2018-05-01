@@ -11,11 +11,10 @@ __all__ = []
 
 
 class JobHandler:
-    '''
-    Class to handle jobs on a parallelized environment.
-    '''
+
     def __init__( self, inputs, nproc=1 ):
         '''
+        Class to handle jobs on a parallelized environment.
         Build the class to handling a queue and a set of workers.
 
         :param inputs: inputs to the queue.
@@ -66,12 +65,11 @@ class JobHandler:
 
 
 class Worker:
-    '''
-    Worker which executes a function when the method :meth:`Worker._execute`
-    is called.
-    '''
+
     def __init__( self, handler, func, args=(), kwargs={} ):
         '''
+        Worker which executes a function when the method :meth:`Worker._execute`
+        is called.
         Build the class using the job handler and an input function to be
         called on execution.
 

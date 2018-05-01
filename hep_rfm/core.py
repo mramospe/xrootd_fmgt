@@ -24,15 +24,14 @@ __all__ = [
 
 
 class FileProxy:
-    '''
-    Object to store the path to a source file, and some other paths pointing
-    to some target locations. The former is used as a reference to update the
-    latter, using the :func:`copy_file` function. Also provides a method to
-    obtain the most accessible file.
-    '''
+
     def __init__( self, source, *targets ):
         '''
-        Build a proxy to a file from a source and the set of targets.
+        Object to store the path to a source file, and some other paths pointing
+        to some target locations. The former is used as a reference to update
+        the latter, using the :func:`copy_file` function.
+        Also provides a method to obtain the most accessible file.
+        The proxy is built from a source and the set of targets.
 
         :param source: path to the file to use as a reference.
         :type source: str

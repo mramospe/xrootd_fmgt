@@ -10,11 +10,10 @@ __all__ = []
 
 
 class ProcessError(RuntimeError):
-    '''
-    Define an error to be raised when a subprocess call fails.
-    '''
+
     def __init__( self, msg, stderr ):
         '''
+        Define an error to be raised when a subprocess call fails.
         The message and "stderr" from the subprocess call must be provided.
 
         :param msg: message to display.
@@ -26,11 +25,10 @@ class ProcessError(RuntimeError):
 
 
 class CopyFileError(ProcessError):
-    '''
-    Define an error to be raised when copying a file.
-    '''
+
     def __init__( self, ipath, opath, stderr ):
         '''
+        Define an error to be raised when copying a file.
         Build the class with the path to the input and output files.
 
         :param ipath: path to the input file.
@@ -46,11 +44,10 @@ class CopyFileError(ProcessError):
 
 
 class MakeDirsError(ProcessError):
-    '''
-    Error to be displayed when failing making directories.
-    '''
+
     def __init__( self, target, stderr ):
         '''
+        Error to be displayed when failing making directories.
         Provide the path to the target and the error output.
 
         :param target: path to the target.
