@@ -66,15 +66,14 @@
 
 
 <div class="viewcode-block" id="FileProxy"><a class="viewcode-back" href="../../api/hep_rfm.FileProxy.html#hep_rfm.FileProxy">[docs]</a><span class="k">class</span> <span class="nc">FileProxy</span><span class="p">:</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Object to store the path to a source file, and some other paths pointing</span>
-<span class="sd">    to some target locations. The former is used as a reference to update the</span>
-<span class="sd">    latter, using the :func:`copy_file` function. Also provides a method to</span>
-<span class="sd">    obtain the most accessible file.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="o">*</span><span class="n">targets</span> <span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Build a proxy to a file from a source and the set of targets.</span>
+<span class="sd">        Object to store the path to a source file, and some other paths pointing</span>
+<span class="sd">        to some target locations. The former is used as a reference to update</span>
+<span class="sd">        the latter, using the :func:`copy_file` function.</span>
+<span class="sd">        Also provides a method to obtain the most accessible file.</span>
+<span class="sd">        The proxy is built from a source and the set of targets.</span>
 
 <span class="sd">        :param source: path to the file to use as a reference.</span>
 <span class="sd">        :type source: str</span>

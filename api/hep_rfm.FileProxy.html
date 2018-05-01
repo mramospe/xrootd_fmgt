@@ -47,9 +47,22 @@
 <em class="property">class </em><code class="descclassname">hep_rfm.</code><code class="descname">FileProxy</code><span class="sig-paren">(</span><em>source</em>, <em>*targets</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#FileProxy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileProxy" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.6)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Object to store the path to a source file, and some other paths pointing
-to some target locations. The former is used as a reference to update the
-latter, using the <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a> function. Also provides a method to
-obtain the most accessible file.</p>
+to some target locations. The former is used as a reference to update
+the latter, using the <a class="reference internal" href="hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-func docutils literal"><span class="pre">copy_file()</span></code></a> function.
+Also provides a method to obtain the most accessible file.
+The proxy is built from a source and the set of targets.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>source</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – path to the file to use as a reference.</li>
+<li><strong>targets</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.6)"><em>list</em></a><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a><em>)</em>) – path to some other locations to put the target files.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods Summary</p>
 <table border="1" class="longtable docutils">
 <colgroup>
