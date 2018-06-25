@@ -3,11 +3,30 @@ Tools and function to do parallelization of jobs.
 '''
 
 # Python
-import logging, os, sys
 import multiprocessing as mp
 
 
 __all__ = []
+
+
+def log( logcall, string, lock=None ):
+    '''
+    Report an information/warning/error/debug... message with a logger instance
+    but taken into account a lock if given.
+
+    :param logcall: call of the logger to perform.
+    :type logcall: method
+    :param string: string to pass by argument to the call.
+    :type string: str
+    :param lock: possible lock instance.
+    :type lock: multiprocessing.Lock
+    '''
+    if lock:
+        lock.acquire()
+        logcall(string)
+        lock.release()
+    else:
+        logcall(string)
 
 
 class JobHandler:
@@ -26,6 +45,7 @@ class JobHandler:
         '''
         self._queue   = mp.JoinableQueue()
         self._workers = []
+        self._termsig = mp.Event()
 
         for i in inputs:
             self._queue.put(i)
@@ -52,6 +72,13 @@ class JobHandler:
         '''
         return self._queue
 
+    def task_done( self ):
+        '''
+        '''
+        self._queue.task_done()
+        if self._queue.empty():
+            self._termsig.set()
+
     def wait( self ):
         '''
         Wait until all jobs are completed and no elements are found in the \
@@ -59,9 +86,6 @@ class JobHandler:
         '''
         self._queue.close()
         self._queue.join()
-
-        for w in self._workers:
-            w.terminate()
 
 
 class Worker:
@@ -97,17 +121,10 @@ class Worker:
         Parallelizable method to call the stored function using items
         from the queue of the handler.
         '''
-        while True:
+        while not self._handler._termsig.is_set():
 
             obj = self._handler.queue().get(block=True, timeout=None)
 
             self.func(obj, *args, **kwargs)
 
-            self._handler.queue().task_done()
-
-    def terminate( self ):
-        '''
-        Terminate the owned process. No check is done to see whether the process
-        was running or not.
-        '''
-        self._process.terminate()
+            self._handler.task_done()
