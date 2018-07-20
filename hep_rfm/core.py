@@ -7,11 +7,13 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Custom
 from hep_rfm import protocols
+from hep_rfm import parallel
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
 from hep_rfm.parallel import JobHandler, Worker
 
 # Python
 import logging, os, subprocess, shutil, warnings
+import multiprocessing
 
 
 __all__ = [
@@ -118,7 +120,7 @@ class FileProxy:
         sync_proxies((self,))
 
 
-def copy_file( source, target, force=False, tmpdir=None ):
+def copy_file( source, target, force=False, loglock=None ):
     '''
     Main function to copy a file from a source to a target. The copy is done
     if the modification time of both files do not coincide. If "force" is
@@ -127,11 +129,8 @@ def copy_file( source, target, force=False, tmpdir=None ):
     :param force: if set to True, the files are copied even if they are \
     up to date.
     :type force: bool
-    :param tmpdir: temporal directory to store files when needed. By default \
-    a folder is created in "/tmp/<pid>.<module name>", and it is deleted at \
-    the end of the execution. If provided, the user is considered to own the \
-    directory, altough this function will create it if it does not exist.
-    :type tmpdir: str
+    :param loglock: possible locker to prevent from displaying at the same time
+    in the screen for two different processes.
     '''
     itmstp = getmtime(source)
 
@@ -155,21 +154,17 @@ def copy_file( source, target, force=False, tmpdir=None ):
             else:
                 path = source
 
-            if tmpdir is None:
-                tdir = '/tmp/{}.{}'.format(os.getpid(), __name__)
-            else:
-                tdir = tmpdir
+            with tempfile.TemporaryDirectory() as tmpdir:
 
-            tmp = os.path.join(tdir, os.path.basename(path))
+                tmp = os.path.join(tmpdir, os.path.basename(path))
 
-            copy_file(source, tmp, force=force, tmpdir=tmpdir)
-            copy_file(tmp, target, force=force, tmpdir=tmpdir)
+                copy_file(source, tmp, force=force)
+                copy_file(tmp, target, force=force)
 
-            if tmpdir is None:
-                shutil.rmtree(tdir)
         else:
-
-            logger.info('Copying file\n source: {}\n target: {}'.format(source, target))
+            parallel.log(logger.info,
+                         'Copying file\n source: {}\n target: {}'.format(source, target),
+                         loglock)
 
             if dec == protocols.__ssh_protocol__:
                 proc = _process('scp', '-q', '-p', source, target)
@@ -188,7 +183,9 @@ def copy_file( source, target, force=False, tmpdir=None ):
                 os.utime(target, (os.stat(target).st_atime, itmstp))
 
     else:
-        logger.info('File "{}" is up to date'.format(target))
+        parallel.log(logger.info,
+                     'File "{}" is up to date'.format(target),
+                     loglock)
 
 
 def getmtime( path ):
@@ -319,7 +316,7 @@ def _split_remote( path ):
         return path[7:rp], path[rp + 1:]
 
 
-def sync_proxies( proxies, parallelize=False, **kwargs ):
+def sync_proxies( proxies, parallelize = False, force = False ):
     '''
     Synchronize a given list of proxies. This function allows to fully
     parallelize all the processes.
@@ -330,8 +327,9 @@ def sync_proxies( proxies, parallelize=False, **kwargs ):
     synchronization of all the proxies. By default it is set to 0, so no \
     parallelization  is done (0).
     :type parallelize: int
-    :param kwargs: extra arguments to :func:`copy_file`.
-    :type kwargs: dict
+    :param force: if set to True, the files are copied even if they are \
+    up to date.
+    :type force: bool
 
     .. seealso:: :meth:`FileProxy.sync`
 
@@ -339,35 +337,24 @@ def sync_proxies( proxies, parallelize=False, **kwargs ):
        do not have the same names. This might result into overwriting temporal \
        files if there are parallel calls to :func:`copy_file`.
     '''
-    rm_tmp = False
-    if 'tmpdir' not in kwargs.keys():
-        # Create a dedicated temporal directory
-        kwargs['tmpdir'] = '/tmp/{}.{}'.format(os.getpid(), __name__)
-
-        try:
-            os.makedirs(kwargs['tmpdir'])
-        except OSError:
-            # The directory exists
-            pass
-
-        rm_tmp = True
-
     inputs = list((p.source, t) for p in proxies for t in p.targets)
 
+    kwargs = {'force': force}
+
     if parallelize:
+
+        lock = multiprocessing.Lock()
 
         handler = JobHandler(inputs, parallelize)
 
         func = lambda obj, **kwargs: copy_file(*obj, **kwargs)
 
+        kwargs['loglock'] = lock
+
         for i in range(handler.nproc):
             Worker(handler, func, kwargs=kwargs)
 
         handler.wait()
-
     else:
         for i in inputs:
             copy_file(*i, **kwargs)
-
-    if rm_tmp:
-        shutil.rmtree(kwargs['tmpdir'])
