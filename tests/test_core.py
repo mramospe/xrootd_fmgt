@@ -32,3 +32,11 @@ def test_make_directories():
     '''
     with pytest.raises(hep_rfm.exceptions.MakeDirsError):
         fp = hep_rfm.make_directories('no-user@no-server.com:/path/to/file')
+
+
+def test_rfm_hash():
+    '''
+    Test for the "rfm_hash" function.
+    '''
+    with tempfile.NamedTemporaryFile() as f:
+        h = hep_rfm.rfm_hash(f.name)

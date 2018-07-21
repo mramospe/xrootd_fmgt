@@ -14,14 +14,6 @@ import tempfile
 import hep_rfm
 
 
-def test_rfm_hash():
-    '''
-    Test for the "rfm_hash" function.
-    '''
-    with tempfile.NamedTemporaryFile() as f:
-        h = hep_rfm.rfm_hash(f.name)
-
-
 def test_fileinfo():
     '''
     Test for the "FileInfo" class.

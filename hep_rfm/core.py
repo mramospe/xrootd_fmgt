@@ -11,6 +11,7 @@ from hep_rfm import parallel
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
 
 # Python
+import hashlib
 import logging
 import os
 import subprocess
@@ -19,7 +20,11 @@ import subprocess
 __all__ = [
     'copy_file',
     'make_directories',
+    'rfm_hash',
     ]
+
+# Buffer size to be able to hash large files
+__buffer_size__ = 10485760 # 10MB
 
 
 def copy_file( source, target, loglock=None, server_spec=None ):
@@ -127,6 +132,29 @@ def _process( *args ):
     return subprocess.Popen( args,
                              stdout = subprocess.PIPE,
                              stderr = subprocess.PIPE )
+
+
+def rfm_hash( path ):
+    '''
+    Definition of the hash function for a file.
+
+    :param path: path to the file.
+    :type path: str
+    '''
+    h = hashlib.sha1()
+
+    with open(path, 'rb') as f:
+
+        # Read in chunks so we do not run out of memory
+        while True:
+
+            d = f.read(__buffer_size__)
+            if not d:
+                break
+
+            h.update(d)
+
+    return h.hexdigest()
 
 
 def _set_username( path, server_spec=None ):

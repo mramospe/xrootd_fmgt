@@ -11,7 +11,6 @@ from hep_rfm.parallel import JobHandler, Worker
 from hep_rfm import protocols
 
 # Python
-import hashlib
 import logging
 import multiprocessing
 import os
@@ -19,44 +18,18 @@ import tempfile
 from collections import namedtuple
 
 
-__all__ = ['rfm_hash', 'FileInfo', 'FileMarks', 'Table', 'Manager']
+__all__ = ['FileInfo', 'FileMarks', 'Table', 'Manager']
 
 
 # Default names for the file marks
 __default_tmstp__ = 0
 __default_fid__   = 'none'
 
-# Buffer size to be able to hash large files
-__buffer_size__ = 10485760 # 10MB
-
 # Store the time-stamp and a file ID
 FileMarks = namedtuple('FileMarks', ['tmstp', 'fid'])
 
 # Class to store the information of a file
 FileInfoBase = namedtuple('FileInfoBase', ['name', 'path', 'marks'])
-
-
-def rfm_hash( path ):
-    '''
-    Definition of the hash function for a file.
-
-    :param path: path to the file.
-    :type path: str
-    '''
-    h = hashlib.sha1()
-
-    with open(path) as f:
-
-        # Read in chunks so we do not run out of memory
-        while True:
-
-            d = f.read(__buffer_size__)
-            if not d:
-                break
-
-            h.update(data)
-
-    return h.hexdigest()
 
 
 class FileInfo(FileInfoBase):
@@ -100,7 +73,7 @@ class FileInfo(FileInfoBase):
         :returns: built :class:`FileInfo` instance.
         :rtype: FileInfo
         '''
-        fid = rfm_hash(path)
+        fid = core.rfm_hash(path)
 
         tmstp = os.path.getmtime(path)
 
@@ -321,7 +294,7 @@ class Table(dict):
 
             if os.path.exists(f.path):
 
-                fid = rfm_hash(f.path)
+                fid = core.rfm_hash(f.path)
 
                 tmstp = os.path.getmtime(f.path)
 

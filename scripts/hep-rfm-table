@@ -8,7 +8,9 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
 import argparse
+import functools
 import logging
+import multiprocessing
 import os
 import tempfile
 import subprocess
@@ -21,6 +23,7 @@ def decorate_access_mode( mode ):
     '''
     Decorator for some modes.
     '''
+    @functools.wraps(mode)
     def _wrapper( **kwargs ):
         '''
         If the path specified in "table" is remote, then copy the table
@@ -55,6 +58,7 @@ def decorate_create_mode( mode ):
     '''
     Decorator for modes where the table is created for the first time.
     '''
+    @functools.wraps(mode)
     def _wrapper( **kwargs ):
         '''
         If the keyword "table" refers to a remote path.
@@ -100,6 +104,47 @@ def add( table, name, path, bare ):
         f = hep_rfm.FileInfo.from_name_and_path(name, path)
 
     t[f.name] = f
+
+    t.write(table)
+
+
+@decorate_access_mode
+def add_massive( table, files, nproc ):
+    '''
+    Add a list of files to the given table.
+    The name of the files will be used as name for the table index.
+    '''
+    t = hep_rfm.Table.read(table)
+
+    lst = []
+    for p in files:
+
+        name = os.path.basename(os.path.splitext(p)[0])
+
+        if not os.path.isfile(p):
+            raise RuntimeError('File in "{}" does not exist')
+
+        lst.append((name, p))
+
+    handler = hep_rfm.parallel.JobHandler(lst, nproc)
+
+    queue = multiprocessing.Queue()
+
+    def _file_info( obj, queue ):
+        '''
+        Create a FileInfo from the inputs, and put it in the queue
+        '''
+        f = hep_rfm.FileInfo.from_name_and_path(*obj)
+        queue.put(f)
+
+    for i in range(nproc):
+        hep_rfm.parallel.Worker(handler, _file_info, args=(queue,))
+
+    handler.wait()
+
+    for i in range(len(files)):
+        f = queue.get()
+        t[f.name] = f
 
     t.write(table)
 
@@ -169,15 +214,22 @@ if __name__ == '__main__':
     parser_add = subparsers.add_parser('add', help=add.__doc__)
     parser_add.set_defaults(func=add)
     parser_add.add_argument('name', type=str,
-                                 help='Name of the file to add')
+                            help='Name of the file to add')
     parser_add.add_argument('path', type=str,
-                                 help='Path to the file')
+                            help='Path to the file')
     parser_add.add_argument('--bare', '-b', action='store_true',
                             help='Whether the to create a bare entry in '\
                             'the file. A bare entry will not contain '\
                             'file ID nor time-stamp. This must be called '\
                             'when having multiple tables, for those '\
                             'which need to be updated.')
+
+    parser_add_massive = subparsers.add_parser('add_massive', help=add_massive.__doc__)
+    parser_add_massive.set_defaults(func=add_massive)
+    parser_add_massive.add_argument('--files', nargs='+',
+                                    help='Path to the files to add')
+    parser_add_massive.add_argument('--nproc', type=int, default=4,
+                                    help='Number of parallel process to invoke')
 
     parser_display = subparsers.add_parser('display', help=display.__doc__)
     parser_display.set_defaults(func=display)
