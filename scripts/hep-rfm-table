@@ -8,13 +8,82 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
 import argparse
+import logging
 import os
+import tempfile
 import subprocess
 
 # Local
 import hep_rfm
 
 
+def decorate_access_mode( mode ):
+    '''
+    Decorator for some modes.
+    '''
+    def _wrapper( **kwargs ):
+        '''
+        If the path specified in "table" is remote, then copy the table
+        to a temporary directory, modify it there, and copy it back.
+        '''
+        table = kwargs['table']
+
+        if hep_rfm.is_remote(table):
+
+            logging.getLogger(__name__).info('Copying remote table to a temporary directory')
+
+            with tempfile.TemporaryDirectory() as d:
+
+                tmp_table = os.path.join(d, 'tmp_table.txt')
+
+                hep_rfm.copy_file(table, tmp_table)
+
+                kwargs['table'] = tmp_table
+
+                mode(**kwargs)
+
+                logging.getLogger(__name__).info('Copying the table to the remote path')
+
+                hep_rfm.copy_file(tmp_table, table)
+        else:
+            mode(**kwargs)
+
+    return _wrapper
+
+
+def decorate_create_mode( mode ):
+    '''
+    Decorator for modes where the table is created for the first time.
+    '''
+    def _wrapper( **kwargs ):
+        '''
+        If the keyword "table" refers to a remote path.
+        Create the file on a temporary directory and then copy it.
+        '''
+        table = kwargs['table']
+
+        if hep_rfm.is_remote(table):
+
+            logging.getLogger(__name__).info('Creating table on a temporary directory')
+
+            with tempfile.TemporaryDirectory() as d:
+
+                tmp_table = os.path.join(d, 'tmp_table.txt')
+
+                kwargs['table'] = tmp_table
+
+                mode(**kwargs)
+
+                logging.getLogger(__name__).info('Copying the table to the remote path')
+
+                hep_rfm.copy_file(tmp_table, table)
+        else:
+            mode(**kwargs)
+
+    return _wrapper
+
+
+@decorate_access_mode
 def add( table, name, path, bare ):
     '''
     Add a new file to the table in the given path
@@ -35,6 +104,7 @@ def add( table, name, path, bare ):
     t.write(table)
 
 
+@decorate_create_mode
 def create( table ):
     '''
     Create a new empty table
@@ -46,27 +116,33 @@ def create( table ):
         pass
 
 
+@decorate_access_mode
 def display( table ):
     '''
     Display the contents of the table at the given path
     '''
     t = hep_rfm.Table.read(table)
 
+    if len(t) == 0:
+        logging.getLogger(__name__).info('No entries found in "{}"'.format(table))
+        return
+
     mn = max(len('name'), max(len(f.name) for f in t.values()))
     mp = max(len('path'), max(len(f.path) for f in t.values()))
-    mt = max(len('tmstp'), max(len(f.marks.tmstp) for f in t.values()))
+    mt = max(len('tmstp'), max(len(str(f.marks.tmstp)) for f in t.values()))
     mf = max(len('fid'), max(len(f.marks.fid) for f in t.values()))
 
     frmt = '{:<{}} \t {:<{}} \t {:<{}} \t {:<{}}'
 
     to_string = lambda name, path, tmstp, fid: frmt.format(name, mn, path, mp, tmstp, mt, fid, mf)
 
-    print('Contents of table "{}"'.format(table))
-    print(to_string('name', 'path', 'tmstp', 'fid'))
+    logging.getLogger(__name__).info('Contents of table "{}"'.format(table))
+    logging.getLogger(__name__).info(to_string('name', 'path', 'tmstp', 'fid'))
     for _, f in sorted(t.items()):
-        print(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
+        logging.getLogger(__name__).info(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
 
 
+@decorate_access_mode
 def update( table ):
     '''
     Update the table located in the given path
@@ -77,6 +153,10 @@ def update( table ):
 
 
 if __name__ == '__main__':
+
+    # Logging configuration
+    logging.basicConfig(format='%(message)s')
+    logging.getLogger(__name__).setLevel(logging.INFO)
 
     # Define the parser
     parser = argparse.ArgumentParser(description=__doc__)

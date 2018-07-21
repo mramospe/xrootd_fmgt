@@ -327,7 +327,7 @@ class Table(dict):
 
                 if fid != f.marks.fid or tmstp != f.marks.tmstp:
 
-                    f = FileInfo(f.name, f.path, tmstp, fid)
+                    f = FileInfo(f.name, f.path, FileMarks(tmstp, fid))
 
             output.append(f)
 

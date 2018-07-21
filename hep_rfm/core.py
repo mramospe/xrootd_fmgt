@@ -77,7 +77,7 @@ def copy_file( source, target, loglock=None, server_spec=None ):
 
         if proc.wait() != 0:
             _, stderr = proc.communicate()
-            raise CopyFileError(source, target, stderr)
+            raise CopyFileError(source, target, stderr.decode())
 
 
 def make_directories( target ):
@@ -111,7 +111,7 @@ def make_directories( target ):
         if 'Connection timed out' in stderr.decode('utf-8'):
             raise RuntimeError('Connection timed out')
         else:
-            raise MakeDirsError(target, stderr)
+            raise MakeDirsError(target, stderr.decode())
 
 
 def _process( *args ):
@@ -146,6 +146,8 @@ def _set_username( path, server_spec=None ):
     :raises RuntimeError: if there is no way to determine the user name for \
     the given path.
     '''
+    server_spec = server_spec if server_spec is not None else {}
+
     l = path.find('@')
 
     if l == 0 and server_spec is None:

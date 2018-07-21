@@ -65,6 +65,10 @@ def test_table():
 
         table = hep_rfm.Table([p1, p2])
 
+        ut = table.updated()
+        for k in ut:
+            assert ut[k] == table[k]
+
     with tempfile.TemporaryDirectory() as d:
 
         path = os.path.join(d, 'table.txt')
