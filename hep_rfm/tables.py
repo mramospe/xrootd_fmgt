@@ -347,7 +347,7 @@ class Table(dict):
 
                 frmt = '{}'
                 for i in range(len(info) - 1):
-                    frmt += ' \t {}'
+                    frmt += '\t{}'
                 frmt += '\n'
 
                 fo.write(frmt.format(*info))
