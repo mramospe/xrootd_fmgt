@@ -74,6 +74,7 @@ class JobHandler:
 
     def task_done( self ):
         '''
+        Set the task as done.
         '''
         self._queue.task_done()
         if self._queue.empty():

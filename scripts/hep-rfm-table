@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+'''
+Create/update tables
+'''
+
+__author__ = ['Miguel Ramos Pernas']
+__email__  = ['miguel.ramos.pernas@cern.ch']
+
+# Python
+import argparse
+import os
+import subprocess
+
+# Local
+import hep_rfm
+
+
+def add( table, name, path, bare ):
+    '''
+    Add a new file to the table in the given path
+    '''
+    t = hep_rfm.Table.read(table)
+
+    if bare:
+        f = hep_rfm.FileInfo(name, path)
+    else:
+
+        if not os.path.isfile(path):
+            raise RuntimeError('File in "{}" does not exist. To create a bare entry, specify it with "--bare".'.format(path))
+
+        f = hep_rfm.FileInfo.from_name_and_path(name, path)
+
+    t[f.name] = f
+
+    t.write(table)
+
+
+def create( table ):
+    '''
+    Create a new empty table
+    '''
+    if os.path.isfile(table):
+        raise RuntimeError('File "{}" already exists'.format(table))
+
+    with open(table, 'wt'):
+        pass
+
+
+def display( table ):
+    '''
+    Display the contents of the table at the given path
+    '''
+    t = hep_rfm.Table.read(table)
+
+    mn = max(len('name'), max(len(f.name) for f in t.values()))
+    mp = max(len('path'), max(len(f.path) for f in t.values()))
+    mt = max(len('tmstp'), max(len(f.marks.tmstp) for f in t.values()))
+    mf = max(len('fid'), max(len(f.marks.fid) for f in t.values()))
+
+    frmt = '{:<{}} \t {:<{}} \t {:<{}} \t {:<{}}'
+
+    to_string = lambda name, path, tmstp, fid: frmt.format(name, mn, path, mp, tmstp, mt, fid, mf)
+
+    print('Contents of table "{}"'.format(table))
+    print(to_string('name', 'path', 'tmstp', 'fid'))
+    for _, f in sorted(t.items()):
+        print(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
+
+
+def update( table ):
+    '''
+    Update the table located in the given path
+    '''
+    t = hep_rfm.Table.read(table)
+
+    t.updated().write(table)
+
+
+if __name__ == '__main__':
+
+    # Define the parser
+    parser = argparse.ArgumentParser(description=__doc__)
+
+    subparsers = parser.add_subparsers(help='Mode to run')
+
+    parser_create = subparsers.add_parser('create', help=create.__doc__)
+    parser_create.set_defaults(func=create)
+
+    parser_add = subparsers.add_parser('add', help=add.__doc__)
+    parser_add.set_defaults(func=add)
+    parser_add.add_argument('name', type=str,
+                                 help='Name of the file to add')
+    parser_add.add_argument('path', type=str,
+                                 help='Path to the file')
+    parser_add.add_argument('--bare', '-b', action='store_true',
+                            help='Whether the to create a bare entry in '\
+                            'the file. A bare entry will not contain '\
+                            'file ID nor time-stamp. This must be called '\
+                            'when having multiple tables, for those '\
+                            'which need to be updated.')
+
+    parser_display = subparsers.add_parser('display', help=display.__doc__)
+    parser_display.set_defaults(func=display)
+
+    parser_update = subparsers.add_parser('update', help=update.__doc__)
+    parser_update.set_defaults(func=update)
+
+    for p in subparsers.choices.values():
+        p.add_argument('table', type=str,
+                       help='Path to the file to store the table')
+
+    # Parse the arguments and call the function
+    args = parser.parse_args()
+    dct  = dict(vars(args))
+    dct.pop('func')
+
+    args.func(**dct)
