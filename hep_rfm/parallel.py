@@ -4,6 +4,7 @@ Tools and function to do parallelization of jobs.
 
 # Python
 import multiprocessing as mp
+from queue import Empty
 
 
 __all__ = []
@@ -29,30 +30,17 @@ def log( logcall, string, lock=None ):
         logcall(string)
 
 
-class JobHandler:
+class JobHandler(object):
 
-    def __init__( self, inputs, nproc=1 ):
+    def __init__( self ):
         '''
         Class to handle jobs on a parallelized environment.
         Build the class to handling a queue and a set of workers.
-
-        :param inputs: inputs to the queue.
-        :type inputs: list
-        :param nproc: number of processes to generate. In case this number is \
-        greater than the number of inputs, it will be set to the smallest \
-        value of the two.
-        :type nproc: int
         '''
+        super(JobHandler, self).__init__()
+
         self._queue   = mp.JoinableQueue()
         self._workers = []
-        self._termsig = mp.Event()
-
-        for i in inputs:
-            self._queue.put(i)
-
-        # Prevent from creating extra processes which might end up
-        # as zombies
-        self.nproc = min(nproc, len(inputs))
 
     def add_worker( self, worker ):
         '''
@@ -63,33 +51,39 @@ class JobHandler:
         '''
         self._workers.append(worker)
 
-    def queue( self ):
+    def get( self ):
         '''
-        Get the queue used by this class.
+        Get an object from the queue. This function does not block.
+        '''
+        return self._queue.get_nowait()
 
-        :returns: queue used by this class.
-        :rtype: multiprocessing.queues.JoinableQueue
+    def put( self, el ):
         '''
-        return self._queue
+        Put an element in a process queue.
+
+        :param el: object to add to the queue.
+        :type el: serializable object
+        '''
+        self._queue.put(el)
 
     def task_done( self ):
         '''
         Set the task as done.
         '''
         self._queue.task_done()
-        if self._queue.empty():
-            self._termsig.set()
 
-    def wait( self ):
+    def process( self ):
         '''
         Wait until all jobs are completed and no elements are found in the \
         queue.
         '''
+        for w in self._workers:
+            w.start()
         self._queue.close()
         self._queue.join()
 
 
-class Worker:
+class Worker(object):
 
     def __init__( self, handler, func, args=(), kwargs={} ):
         '''
@@ -108,6 +102,8 @@ class Worker:
         (excepting "target", which is automatically asigned).
         :type kwargs: dict
         '''
+        super(Worker, self).__init__()
+
         self.func = func
 
         self._process = mp.Process(target=self._execute, args=args, kwargs=kwargs)
@@ -115,17 +111,24 @@ class Worker:
 
         self._handler.add_worker(self)
 
-        self._process.start()
-
     def _execute( self, *args, **kwargs ):
         '''
         Parallelizable method to call the stored function using items
         from the queue of the handler.
         '''
-        while not self._handler._termsig.is_set():
+        while True:
 
-            obj = self._handler.queue().get(block=True, timeout=None)
+            try:
+                obj = self._handler.get()
+            except Empty:
+                break
 
             self.func(obj, *args, **kwargs)
 
             self._handler.task_done()
+
+    def start( self ):
+        '''
+        Start processing.
+        '''
+        self._process.start()

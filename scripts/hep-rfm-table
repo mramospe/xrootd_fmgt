@@ -116,17 +116,7 @@ def add_massive( table, files, nproc ):
     '''
     t = hep_rfm.Table.read(table)
 
-    lst = []
-    for p in files:
-
-        name = os.path.basename(os.path.splitext(p)[0])
-
-        if not os.path.isfile(p):
-            raise RuntimeError('File in "{}" does not exist'.format(p))
-
-        lst.append((name, p))
-
-    handler = hep_rfm.parallel.JobHandler(lst, nproc)
+    handler = hep_rfm.parallel.JobHandler()
 
     def _file_info( obj, queue ):
         '''
@@ -136,13 +126,21 @@ def add_massive( table, files, nproc ):
         queue.put(f)
 
     queue = multiprocessing.Queue()
-
-    for i in range(nproc):
+    for _ in range(nproc):
         hep_rfm.parallel.Worker(handler, _file_info, args=(queue,))
 
-    handler.wait()
+    for p in files:
 
-    for i in range(len(files)):
+        name = os.path.basename(os.path.splitext(p)[0])
+
+        if not os.path.isfile(p):
+            raise RuntimeError('File in "{}" does not exist'.format(p))
+
+        handler.put((name, p))
+
+    handler.process()
+
+    for _ in range(len(files)):
         f = queue.get()
         t[f.name] = f
 

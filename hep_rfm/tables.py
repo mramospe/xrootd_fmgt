@@ -141,7 +141,7 @@ class Manager(object):
 
         :param parallelize: number of processes allowed to parallelize the \
         synchronization of all the proxies. By default it is set to 0, so no \
-        parallelization  is done (0).
+        parallelization  is done.
         :type parallelize: int
         :param force: if set to True, the files are copied even if they are \
         up to date.
@@ -237,16 +237,19 @@ class Manager(object):
 
             lock = multiprocessing.Lock()
 
-            handler = JobHandler(inputs, parallelize)
+            handler = JobHandler()
+
+            for i in inputs:
+                handler.put(i)
 
             func = lambda obj, **kwargs: core.copy_file(*obj, **kwargs)
 
             kwargs['loglock'] = lock
 
-            for i in range(handler.nproc):
+            for i in range(parallelize):
                 Worker(handler, func, kwargs=kwargs)
 
-            handler.wait()
+            handler.process()
         else:
             for i in inputs:
                 core.copy_file(*i, **kwargs)
