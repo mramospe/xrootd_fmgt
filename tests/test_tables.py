@@ -14,6 +14,18 @@ import tempfile
 import hep_rfm
 
 
+def test_fileinfobase():
+    '''
+    Test for the "FileInfoBase" class.
+    '''
+    m = hep_rfm.FileMarks(0., 'fid')
+    f = hep_rfm.FileInfoBase('dummy', 'my/path', m)
+
+    # It is an inmutable object
+    with pytest.raises(AttributeError):
+        f.name = 'other'
+
+
 def test_fileinfo():
     '''
     Test for the "FileInfo" class.
