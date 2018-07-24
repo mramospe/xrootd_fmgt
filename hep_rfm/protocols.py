@@ -67,6 +67,7 @@ def available_path( paths, use_xrd=False ):
     :type use_xrd: bool
     :returns: first available path found.
     :rtype: str
+    :raises RuntimeError: if it fails to find an available path.
 
     .. warning::
        If the path to a file on a remote site matches that of a local file,
@@ -75,17 +76,12 @@ def available_path( paths, use_xrd=False ):
        file, which does not correspond to a proxy of the path referenced by
        this object, it will result on a fake reference to the file.
     '''
-    path = None
-    for s in paths:
+    for path in paths:
 
-        path = available_local_path(s, use_xrd)
+        p = available_local_path(path, use_xrd)
 
-        if path is not None:
-            break
-
-    if path is not None:
-        logging.getLogger(__name__).info('Using path "{}"'.format(path))
-        return path
+        if p is not None:
+            return p
 
     raise RuntimeError('Unable to find an available path')
 

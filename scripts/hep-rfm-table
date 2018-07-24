@@ -26,6 +26,8 @@ def _process_path( path, remote, bare = False ):
     '''
     Process the given path adding the remote if necessary.
     '''
+    path = os.path.abspath(path)
+
     if remote:
 
         if hep_rfm.is_ssh(remote):
@@ -38,8 +40,6 @@ def _process_path( path, remote, bare = False ):
                 path = path[1:]
 
             path = remote + '//' + path
-
-        return path
 
     if not bare:
 
@@ -139,7 +139,7 @@ def add( table, name, path, bare, remote ):
 
 
 @decorate_access_mode
-def add_massive( table, files, nproc, remote ):
+def add_massive( table, files, nproc, remote, bare ):
     '''
     Add a list of files to the given table.
     The name of the files will be used as name for the table index.
@@ -148,20 +148,24 @@ def add_massive( table, files, nproc, remote ):
 
     handler = hep_rfm.parallel.JobHandler()
 
-    def _file_info( obj, queue ):
+    def _file_info( obj, queue, bare ):
         '''
         Create a FileInfo from the inputs, and put it in the queue
         '''
-        f = hep_rfm.FileInfo.from_name_and_path(*obj)
+        if bare:
+            f = hep_rfm.FileInfo(*obj)
+        else:
+            f = hep_rfm.FileInfo.from_name_and_path(*obj)
+
         queue.put(f)
 
     queue = multiprocessing.Queue()
     for _ in range(nproc):
-        hep_rfm.parallel.Worker(handler, _file_info, args=(queue,))
+        hep_rfm.parallel.Worker(handler, _file_info, args=(queue, bare))
 
     for p in files:
 
-        p = _process_path(p, remote)
+        p = _process_path(p, remote, bare)
 
         name = os.path.basename(os.path.splitext(p)[0])
 
@@ -198,10 +202,10 @@ def add_from_dir( directory, regex, **kwargs ):
                 add = False
 
             if add:
-                files.append(os.path.abspath(os.path.join(root, f)))
+                files.append(os.path.join(root, f))
 
     # Call the "add_massive" function
-    add_massive(files=files, **kwargs)
+    add_massive(files=files, bare=False, **kwargs)
 
 
 @decorate_create_mode
@@ -232,7 +236,7 @@ def display( table ):
     mt = max(len('tmstp'), max(len(str(f.marks.tmstp)) for f in t.values()))
     mf = max(len('fid'), max(len(f.marks.fid) for f in t.values()))
 
-    frmt = '{:<{}} \t {:<{}} \t {:<{}} \t {:<{}}'
+    frmt = '{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}'
 
     to_string = lambda name, path, tmstp, fid: frmt.format(name, mn, path, mp, tmstp, mt, fid, mf)
 
@@ -240,6 +244,26 @@ def display( table ):
     logging.getLogger(__name__).info(to_string('name', 'path', 'tmstp', 'fid'))
     for _, f in sorted(t.items()):
         logging.getLogger(__name__).info(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
+
+
+@decorate_access_mode
+def remove( table, files, regex ):
+    '''
+    Remove the given entries from the table.
+    One can provide both a set of file names and a regular expression.
+    '''
+    t = hep_rfm.Table.read(table)
+
+    for e in files:
+        t.pop(e)
+
+    if regex:
+        c = re.compile(regex)
+        for e in tables:
+            if c.match(e):
+                t.pop(e)
+
+    t.write(table)
 
 
 @decorate_access_mode
@@ -274,12 +298,6 @@ if __name__ == '__main__':
                             help='Name of the file to add')
     parser_add.add_argument('path', type=str,
                             help='Path to the file')
-    parser_add.add_argument('--bare', '-b', action='store_true',
-                            help='Whether the to create a bare entry in '\
-                            'the file. A bare entry will not contain '\
-                            'file ID nor time-stamp. This must be called '\
-                            'when having multiple tables, for those '\
-                            'which need to be updated.')
 
     parser_add_massive = subparsers.add_parser('add_massive', help=add_massive.__doc__)
     parser_add_massive.set_defaults(func=add_massive)
@@ -291,10 +309,17 @@ if __name__ == '__main__':
     parser_add_from_dir.add_argument('directory', type=str,
                                      help='Directory to process')
     parser_add_from_dir.add_argument('--regex', type=str, default=None,
-                                     help='Regular expression for the type of files to add')
+                                     help='Regular expression to filter the files to add')
 
     parser_display = subparsers.add_parser('display', help=display.__doc__)
     parser_display.set_defaults(func=display)
+
+    parser_remove = subparsers.add_parser('remove', help=remove.__doc__)
+    parser_remove.set_defaults(func=remove)
+    parser_remove.add_argument('files', nargs='*',
+                               help='Path to the files to add')
+    parser_remove.add_argument('--regex', type=str, default=None,
+                               help='Regular expression for the files to remove')
 
     parser_update = subparsers.add_parser('update', help=update.__doc__)
     parser_update.set_defaults(func=update)
@@ -308,6 +333,14 @@ if __name__ == '__main__':
                        help='Remote direction to prepend to the files. If you '\
                        'are specifying it in the file path, adding it as well '\
                        'here will cause an error.')
+
+    for p in (parser_add, parser_add_massive):
+        p.add_argument('--bare', '-b', action='store_true',
+                       help='Whether the to create a bare entry in '\
+                       'the file. A bare entry will not contain '\
+                       'file ID nor time-stamp. This must be called '\
+                       'when having multiple tables, for those '\
+                       'which need to be updated.')
 
     # Parse the arguments and call the function
     args = parser.parse_args()

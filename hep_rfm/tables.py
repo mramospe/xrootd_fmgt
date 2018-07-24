@@ -18,7 +18,7 @@ import tempfile
 from collections import namedtuple
 
 
-__all__ = ['FileInfo', 'FileMarks', 'Table', 'Manager']
+__all__ = ['FileInfo', 'FileInfoBase', 'FileMarks', 'Table', 'Manager']
 
 
 # Default names for the file marks
@@ -27,16 +27,27 @@ __default_fid__   = 'none'
 
 # Store the time-stamp and a file ID
 FileMarks = namedtuple('FileMarks', ['tmstp', 'fid'])
+FileMarks.__new__.__doc__ = '''
+Represent an object storing the time-stamp and file ID of a file.
+'''
 
 # Class to store the information of a file
 FileInfoBase = namedtuple('FileInfoBase', ['name', 'path', 'marks'])
+FileInfoBase.__new__.__doc__ = '''
+Base class for an object storing the information about a file.
+'''
+
+# Add documentation to classes comming from collections.namedtuple()
+namedtuple_extradoc = 'This object has been defined through :func:`collections.namedtuple`.'
+for c in (FileMarks, FileInfoBase):
+    c.__new__.__doc__ += namedtuple_extradoc
 
 
 class FileInfo(FileInfoBase):
 
     def __new__( cls, name, path, marks = None ):
         '''
-        Initialize the object.
+        Object to store the information about a file.
 
         :param name: name of the file.
         :type name: str
@@ -74,6 +85,7 @@ class FileInfo(FileInfoBase):
         :type path: str
         :returns: built :class:`FileInfo` instance.
         :rtype: FileInfo
+        :raises: ValueError: if failed to extract a valid path from that given.
         '''
         p = protocols.available_local_path(path)
 
@@ -96,6 +108,22 @@ class FileInfo(FileInfoBase):
         :rtype: tuple(str, str, str, str)
         '''
         return (self.name, self.path, self.marks.tmstp, self.marks.fid)
+
+    def local_path( self ):
+        '''
+        Return the actual path in the local system, removing the information
+        of the remote.
+
+        :returns: path in the local system.
+        :rtype: str
+        :raises RuntimeError: if no file is found in the associated path.
+        '''
+        p = protocols.available_local_path(self.path)
+
+        if p is None:
+            raise RuntimeError('Unable to retrieve a valid path to a file from "{}"'.format(self.path))
+
+        return p
 
     def newer_than( self, other ):
         '''

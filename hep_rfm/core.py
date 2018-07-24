@@ -32,13 +32,14 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     Main function to copy a file from a source to a target. The copy is done
     if the modification time of both files do not coincide.
 
-    :param loglock: possible locker to prevent from displaying at the same time
-    in the screen for two different processes.
+    :param loglock: possible locker to prevent from displaying at the same \
+    time in the screen for two different processes.
     :type loglock: multiprocessing.Lock or None
     :param server_spec: specification of user for each SSH server. Must \
     be specified as a dictionary, where the keys are the hosts and the \
     values are the user names.
     :type server_spec: dict
+    :raises CopyFileError: if the file can not be copied.
     '''
     # Make the directories to the target
     make_directories(target)
@@ -91,6 +92,7 @@ def make_directories( target ):
 
     :param target: path to a target file.
     :type target: str
+    :raises MakeDirsError: if the directory could not be created.
     '''
     if protocols.is_remote(target):
 
@@ -113,10 +115,7 @@ def make_directories( target ):
 
         _, stderr = proc.communicate()
 
-        if 'Connection timed out' in stderr.decode('utf-8'):
-            raise RuntimeError('Connection timed out')
-        else:
-            raise MakeDirsError(target, stderr.decode())
+        raise MakeDirsError(target, stderr.decode())
 
 
 def _process( *args ):
@@ -136,7 +135,8 @@ def _process( *args ):
 
 def rfm_hash( path ):
     '''
-    Definition of the hash function for a file.
+    Use the SHA1 hash function to get the file ID of the file
+    in the given path.
 
     :param path: path to the file.
     :type path: str

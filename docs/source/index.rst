@@ -9,6 +9,15 @@ Introduction
 .. include:: ../../README.rst
    :start-after: inclusion-marker-do-not-remove
 
+In order to start working with this package, follow these steps:
+
+.. toctree::
+   :maxdepth: 2
+
+   setup
+   file_management
+
+
 Functions and classes
 =====================
 
