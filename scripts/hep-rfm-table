@@ -14,8 +14,9 @@ import functools
 import logging
 import multiprocessing
 import os
-import tempfile
+import re
 import subprocess
+import tempfile
 
 # Local
 import hep_rfm
@@ -177,6 +178,32 @@ def add_massive( table, files, nproc, remote ):
     t.write(table)
 
 
+def add_from_dir( directory, regex, **kwargs ):
+    '''
+    Add files from a given directory.
+    A regular expression can be used to match those files.
+    Paths will be converted to absolute.
+    '''
+    if regex:
+        m = re.compile(regex)
+    else:
+        m = None
+
+    files = []
+    for root, _, filenames in os.walk(directory):
+        for f in filenames:
+
+            add = True
+            if m and not m.match(f):
+                add = False
+
+            if add:
+                files.append(os.path.abspath(os.path.join(root, f)))
+
+    # Call the "add_massive" function
+    add_massive(files=files, **kwargs)
+
+
 @decorate_create_mode
 def create( table ):
     '''
@@ -258,8 +285,13 @@ if __name__ == '__main__':
     parser_add_massive.set_defaults(func=add_massive)
     parser_add_massive.add_argument('files', nargs='+',
                                     help='Path to the files to add')
-    parser_add_massive.add_argument('--nproc', type=int, default=4, required=False,
-                                    help='Number of parallel process to invoke')
+
+    parser_add_from_dir = subparsers.add_parser('add_from_dir', help=add_from_dir.__doc__)
+    parser_add_from_dir.set_defaults(func=add_from_dir)
+    parser_add_from_dir.add_argument('directory', type=str,
+                                     help='Directory to process')
+    parser_add_from_dir.add_argument('--regex', type=str, default=None,
+                                     help='Regular expression for the type of files to add')
 
     parser_display = subparsers.add_parser('display', help=display.__doc__)
     parser_display.set_defaults(func=display)
@@ -267,7 +299,11 @@ if __name__ == '__main__':
     parser_update = subparsers.add_parser('update', help=update.__doc__)
     parser_update.set_defaults(func=update)
 
-    for p in (parser_add, parser_add_massive):
+    for p in (parser_add_massive, parser_add_from_dir):
+        p.add_argument('--nproc', type=int, default=4, required=False,
+                       help='Number of parallel process to invoke')
+
+    for p in (parser_add, parser_add_massive, parser_add_from_dir):
         p.add_argument('--remote', '-r', type=str, default=None, required=False,
                        help='Remote direction to prepend to the files. If you '\
                        'are specifying it in the file path, adding it as well '\
