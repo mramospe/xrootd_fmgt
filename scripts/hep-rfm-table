@@ -33,7 +33,10 @@ def _process_path( path, remote, bare = False ):
             while remote.endswith('/'):
                 remote = remote[:-1]
 
-            path = remote + '/' + path
+            while path.startswith('/'):
+                path = path[1:]
+
+            path = remote + '//' + path
 
         return path
 
