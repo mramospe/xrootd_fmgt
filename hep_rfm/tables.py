@@ -65,6 +65,8 @@ class FileInfo(FileInfoBase):
     def from_name_and_path( cls, name, path ):
         '''
         Build a from the file at the given path.
+        The path must point to a local file or, in case of being a
+        remote path, its path must correspond to a local file.
 
         :param name: name of the file.
         :type name: str
@@ -73,9 +75,14 @@ class FileInfo(FileInfoBase):
         :returns: built :class:`FileInfo` instance.
         :rtype: FileInfo
         '''
-        fid = core.rfm_hash(path)
+        p = protocols.available_local_path(path)
 
-        tmstp = os.path.getmtime(path)
+        if p is None:
+            raise ValueError('Unable to extract a local path from "{}"'.format(path))
+
+        fid = core.rfm_hash(p)
+
+        tmstp = os.path.getmtime(p)
 
         marks = FileMarks(tmstp, fid)
 

@@ -22,6 +22,39 @@ __xrootd_protocol__     = 3
 __different_protocols__ = 4
 
 
+def available_local_path( path, use_xrd = False ):
+    '''
+    If a local path can be resolved from "path", it returns it.
+    Return None otherwise.
+    If "use_xrd" is True, and the given path is a xrd-protocol path, then
+    it will be directly returned.
+
+    :param path: path to process.
+    :type path: str
+    :param use_xrd: whether to use the xrootd protocol.
+    :type use_xrd: bool
+    :returns: local path.
+    :rtype: str or None
+    '''
+    if is_remote(path):
+
+        if use_xrd and is_xrootd(path):
+            # Using XRootD protocol is allowed
+            return path
+
+        server, sepath = split_remote(path)
+
+        if os.path.exists(sepath):
+            # Local and remote hosts are the same
+            return sepath
+
+    else:
+        if os.path.exists(path):
+            return path
+
+    return None
+
+
 def available_path( paths, use_xrd=False ):
     '''
     Return the first available path from a list of paths. If "use_xrd" is
@@ -45,22 +78,7 @@ def available_path( paths, use_xrd=False ):
     path = None
     for s in paths:
 
-        if is_remote(s):
-
-            server, sepath = split_remote(s)
-
-            if is_xrootd(s):
-                if use_xrd:
-                    # Using XRootD protocol is allowed
-                    path = s
-
-            if os.path.exists(sepath):
-                # Local and remote hosts are the same
-                path = sepath
-
-        else:
-            if os.path.exists(s):
-                path = s
+        path = available_local_path(s, use_xrd)
 
         if path is not None:
             break

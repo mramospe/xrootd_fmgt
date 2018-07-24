@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 '''
-Create/update tables
+Create add elements or update tables.
+When using remote paths, no check is done to determine whether it corresponds
+to the current host.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
@@ -17,6 +19,32 @@ import subprocess
 
 # Local
 import hep_rfm
+
+
+def _process_path( path, remote, bare = False ):
+    '''
+    Process the given path adding the remote if necessary.
+    '''
+    if remote:
+
+        if hep_rfm.is_ssh(remote):
+            path = remote + ':' + path
+        else:
+            while remote.endswith('/'):
+                remote = remote[:-1]
+
+            path = remote + '/' + path
+
+        return path
+
+    if not bare:
+
+        p = hep_rfm.protocol.available_local_path(path)
+
+        if p is None:
+            raise RuntimeError('Attempt to create a table entry with a path that is not present locally')
+
+    return path
 
 
 def decorate_access_mode( mode ):
@@ -88,19 +116,17 @@ def decorate_create_mode( mode ):
 
 
 @decorate_access_mode
-def add( table, name, path, bare ):
+def add( table, name, path, bare, remote ):
     '''
     Add a new file to the table in the given path
     '''
     t = hep_rfm.Table.read(table)
 
+    path = _process_path(path, remote, bare)
+
     if bare:
         f = hep_rfm.FileInfo(name, path)
     else:
-
-        if not os.path.isfile(path):
-            raise RuntimeError('File in "{}" does not exist. To create a bare entry, specify it with "--bare".'.format(path))
-
         f = hep_rfm.FileInfo.from_name_and_path(name, path)
 
     t[f.name] = f
@@ -109,7 +135,7 @@ def add( table, name, path, bare ):
 
 
 @decorate_access_mode
-def add_massive( table, files, nproc ):
+def add_massive( table, files, nproc, remote ):
     '''
     Add a list of files to the given table.
     The name of the files will be used as name for the table index.
@@ -131,10 +157,9 @@ def add_massive( table, files, nproc ):
 
     for p in files:
 
-        name = os.path.basename(os.path.splitext(p)[0])
+        p = _process_path(p, remote)
 
-        if not os.path.isfile(p):
-            raise RuntimeError('File in "{}" does not exist'.format(p))
+        name = os.path.basename(os.path.splitext(p)[0])
 
         handler.put((name, p))
 
@@ -240,6 +265,12 @@ if __name__ == '__main__':
     for p in subparsers.choices.values():
         p.add_argument('table', type=str,
                        help='Path to the file to store the table')
+
+    for p in (parser_add, parser_add_massive):
+        p.add_argument('--remote', '-r', type=str,
+                       help='Remote direction to prepend to the files. If you '\
+                       'are specifying it in the file path, adding it as well '\
+                       'here will cause an error.')
 
     # Parse the arguments and call the function
     args = parser.parse_args()
