@@ -39,7 +39,7 @@ def _process_path( path, remote, bare = False ):
 
     if not bare:
 
-        p = hep_rfm.protocol.available_local_path(path)
+        p = hep_rfm.protocols.available_local_path(path)
 
         if p is None:
             raise RuntimeError('Attempt to create a table entry with a path that is not present locally')
@@ -230,6 +230,8 @@ if __name__ == '__main__':
 
     # Define the parser
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('table', type=str,
+                        help='Path to the file to store the table')
 
     subparsers = parser.add_subparsers(help='Mode to run')
 
@@ -251,9 +253,9 @@ if __name__ == '__main__':
 
     parser_add_massive = subparsers.add_parser('add_massive', help=add_massive.__doc__)
     parser_add_massive.set_defaults(func=add_massive)
-    parser_add_massive.add_argument('--files', nargs='+',
+    parser_add_massive.add_argument('files', nargs='+',
                                     help='Path to the files to add')
-    parser_add_massive.add_argument('--nproc', type=int, default=4,
+    parser_add_massive.add_argument('--nproc', type=int, default=4, required=False,
                                     help='Number of parallel process to invoke')
 
     parser_display = subparsers.add_parser('display', help=display.__doc__)
@@ -262,12 +264,8 @@ if __name__ == '__main__':
     parser_update = subparsers.add_parser('update', help=update.__doc__)
     parser_update.set_defaults(func=update)
 
-    for p in subparsers.choices.values():
-        p.add_argument('table', type=str,
-                       help='Path to the file to store the table')
-
     for p in (parser_add, parser_add_massive):
-        p.add_argument('--remote', '-r', type=str,
+        p.add_argument('--remote', '-r', type=str, default=None, required=False,
                        help='Remote direction to prepend to the files. If you '\
                        'are specifying it in the file path, adding it as well '\
                        'here will cause an error.')
