@@ -135,13 +135,13 @@ def _process( *args ):
 
 def rfm_hash( path ):
     '''
-    Use the SHA1 hash function to get the file ID of the file
+    Use the SHA512 hash function to get the file ID of the file
     in the given path.
 
     :param path: path to the file.
     :type path: str
     '''
-    h = hashlib.sha1()
+    h = hashlib.sha512()
 
     with open(path, 'rb') as f:
 
