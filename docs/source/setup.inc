@@ -1,7 +1,7 @@
 .. _setup:
 
 Setting-up the system
-=====================
+---------------------
 
 The first thing needed to profit from the different tools offered in this
 package is to start **defining the set of files** to work with, this means,
@@ -36,34 +36,6 @@ To start-up, create a empty directory and then type:
 
    $ hep-rfm-table -h
 
-   usage: hep-rfm-table [-h]
-                        table
-                        {create,add,add_massive,add_from_dir,display,remove,update}
-                        ...
-
-   Create add elements or update tables. When using remote paths, no check is
-   done to determine whether it corresponds to the current host.
-
-   positional arguments:
-     table                 Path to the file to store the table
-     {create,add,add_massive,add_from_dir,display,remove,update}
-                           Mode to run
-       create              Create a new empty table
-       add                 Add a new file to the table in the given path
-       add_massive         Add a list of files to the given table. The name of
-                           the files will be used as name for the table index.
-       add_from_dir        Add files from a given directory. A regular expression
-                           can be used to match those files. Paths will be
-                           converted to absolute.
-       display             Display the contents of the table at the given path
-       remove              Remove the given entries from the table. One can
-                           provide both a set of file names and a regular
-                           expression.
-       update              Update the table located in the given path
-
-   optional arguments:
-     -h, --help            show this help message and exit
-
 You can now see the different options we have to work with tables.
 We will start by creating a new table.
 
@@ -82,7 +54,7 @@ We can see the contents on the table at any point by typing
 
 which is telling us that there are no entries in the table.
 Let's add some then.
-We will start by creating a new file, with a random content, and then we will add it to the table.
+We will start by creating a new file, with some content, and then we will add it to the table.
 
 .. code-block:: console
 
@@ -200,7 +172,7 @@ In the **remote host**, we will need to have **another table** with the paths
 in it.
 However, we should **specify the path but not the time-stamp or file ID**, since
 we will not have a file there.
-This is solved adding the *--bare* option to *add* and *add_massive*.
+This is solved adding the *-\\-bare* option to *add* and *add_massive*.
 The mode *add_from_dir* will not make sense to be used here, since we do not
 have files there.
 This means that we could type
@@ -218,13 +190,13 @@ This means that we could type
 
 So you can see that the time-stamp and file ID are filled with default values,
 which are chosen so they do not cause conflicts.
-Note that we have **specified the remote path "@host.com"**.
+Note that we have **specified the remote path** "@host.com".
 This will be needed afterwards to correctly update the files.
 The other files will be added in a row, by typing
 
 .. code-block:: console
 
-   $ hep-rfm-table table.db add_massive `a=""; for i in {2..7};do echo file$i.txt; done; echo $a` --bare --remote @host.com
+   $ hep-rfm-table table.db add_massive `a=""; for i in {2..7};do echo files/file$i.txt; done; echo $a` --bare --remote @host.com
    $ hep-rfm-table table.db display
    Contents of table "table.db"
    name 	path                                                 	tmstp	fid 

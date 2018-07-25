@@ -9,23 +9,14 @@ Introduction
 .. include:: ../../README.rst
    :start-after: inclusion-marker-do-not-remove
 
-In order to start working with this package, follow these steps:
+In order to get started into this package, or to see the function and classes
+here provided, please use the following links:
 
 .. toctree::
    :maxdepth: 2
 
-   setup
-   file_management
-
-
-Functions and classes
-=====================
-
-Here you can find the documentation on the functions and classes
-of the hep_rfm package. The class inheritance diagram is also shown.
-
-.. automodapi:: hep_rfm
-   :no-heading:
+   getting-started
+   functions-and-classes
 
 Indices and tables
 ==================

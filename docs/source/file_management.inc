@@ -1,7 +1,7 @@
 .. _file-management:
 
 File management
-===============
+---------------
 
 In section :ref:`setup` we saw how to set-up two tables in two different hosts,
 one local and one remote, with different files.
@@ -76,13 +76,13 @@ Lastly, and probably one of the most useful methods of the class
 concerns the method :class:`hep_rfm.Manager.update`.
 This method allows to update all the different tables stored in the manager.
 
-1. First, the tables are copied to the current host.
-2. On a second step, the file ID of each file is compared among the different
+1. First, the **tables are copied** to the current host.
+2. On a second step, the **file IDs** of the files **are compared** among the different
    tables.
-3. If there is a mismatch, then the time-stamps are checked, so the newest
+3. If there is a mismatch, then the **time-stamps are checked**, so the newest
    version is determined.
-4. After, the file is copied to each outdated location.
-5. Finally, the tables in the outdated locations are updated.
+4. After, the **files are copied** to each outdated location.
+5. Finally, the **tables** in the outdated locations **are updated**.
 
 The general idea is to have a python file in your module with the tables
 begin defined, so it serves as an access point to the data and also to
