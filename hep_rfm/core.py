@@ -137,6 +137,9 @@ def rfm_hash( path ):
     '''
     Use the SHA512 hash function to get the file ID of the file
     in the given path.
+    This is achieved by reading the file in binary mode, evaluating
+    the hash in chunks of 10 MB, adding them and converting the
+    result to hexadecimal.
 
     :param path: path to the file.
     :type path: str
