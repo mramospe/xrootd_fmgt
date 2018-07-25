@@ -143,6 +143,8 @@ def rfm_hash( path ):
 
     :param path: path to the file.
     :type path: str
+    :returns: hexadecimal result of evaluating the hash function.
+    :rtype: str
     '''
     h = hashlib.sha512()
 
