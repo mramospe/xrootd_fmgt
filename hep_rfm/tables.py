@@ -43,6 +43,12 @@ for c in (FileMarks, FileInfoBase):
     c.__new__.__doc__ += namedtuple_extradoc
 
 
+# Add references for classes comming from collections.namedtuple() (do not indent)
+for c in (FileMarks, FileInfoBase):
+    c.__new__.__doc__ += '''\n
+.. seealso:: :class:`hep_rfm.FileInfo`
+'''
+
 class FileInfo(FileInfoBase):
 
     def __new__( cls, name, path, marks = None ):
@@ -55,6 +61,8 @@ class FileInfo(FileInfoBase):
         :type path: str
         :param marks: time-stamp and file ID.
         :type marks: FileMarks
+
+        .. seealso:: :class:`hep_rfm.FileMarks`
         '''
         if marks is None:
             marks = FileMarks(__default_tmstp__, __default_fid__)
@@ -145,6 +153,8 @@ class Manager(object):
         '''
         Represent a class to store tables in different local/remote hosts, being
         able to do updates among them.
+
+        :ivar tables: paths to the stored tables.
         '''
         self.tables = []
 
@@ -170,7 +180,7 @@ class Manager(object):
         '''
         return protocols.available_path(self.tables, use_xrd)
 
-    def update( self, parallelize = False, force = False, server_spec = None ):
+    def update( self, parallelize = False, server_spec = None ):
         '''
         Update the different tables registered within this manager.
 
@@ -178,14 +188,13 @@ class Manager(object):
         synchronization of all the proxies. By default it is set to 0, so no \
         parallelization  is done.
         :type parallelize: int
-        :param force: if set to True, the files are copied even if they are \
-        up to date.
         :param server_spec: specification of user for each SSH server. Must \
         be specified as a dictionary, where the keys are the hosts and the \
         values are the user names.
         :type server_spec: dict
-        :type force: bool
         :raises RuntimeError: if a file is missing for any of the tables.
+
+        .. seealso:: :class:`hep_rfm.Table`, :func:`hep_rfm.copy_file`
         '''
         #
         # Determine the files to update
@@ -206,7 +215,7 @@ class Manager(object):
 
             core.copy_file(n, fpath, server_spec=server_spec)
 
-            tu = TableUpdater(n, fpath, Table.read(fpath))
+            tu = TableUpdater(n, fpath)
 
             update_tables.append(tu)
 
@@ -295,6 +304,11 @@ class Table(dict):
     def __init__( self, files ):
         '''
         Create a table storing the information about files.
+
+        :param files: files to store in the table.
+        :type files: collection(FileInfo)
+
+        .. seealso:: :class:`hep_rfm.Manager`, :func:`hep_rfm.copy_file`
         '''
         super(Table, self).__init__()
 
@@ -366,20 +380,24 @@ class Table(dict):
 
 class TableUpdater(object):
 
-    def __init__( self, path, tmp_path, table ):
+    def __init__( self, path, tmp_path ):
         '''
         Class to ease the procedure of updating tables.
 
         :param path: path where the information of the given table is holded.
         :type path: str
-        :param table: table to work with.
-        :type table: Table
+        :param tmp_path: path to the temporal input table.
+        :type tmp_path: str
+
+        :ivar path: path where the real input table is located.
+        :ivar tmp_path: path to the temporal input table.
+        :ivar table: table holding the information about the files.
         '''
         super(TableUpdater, self).__init__()
 
         self.path     = path
         self.tmp_path = tmp_path
-        self.table    = table
+        self.table    = Table.read(tmp_path)
         self._changes = []
 
     def changes( self ):

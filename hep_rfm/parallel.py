@@ -104,7 +104,7 @@ class Worker(object):
         '''
         super(Worker, self).__init__()
 
-        self.func = func
+        self._func = func
 
         self._process = mp.Process(target=self._execute, args=args, kwargs=kwargs)
         self._handler = handler
@@ -123,7 +123,7 @@ class Worker(object):
             except Empty:
                 break
 
-            self.func(obj, *args, **kwargs)
+            self._func(obj, *args, **kwargs)
 
             self._handler.task_done()
 
