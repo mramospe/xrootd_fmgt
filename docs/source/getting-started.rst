@@ -11,3 +11,5 @@ the other covers the accesibility of the files, and their update through
 .. include:: setup.inc
 
 .. include:: file_management.inc
+
+.. include:: limitations.inc

@@ -15,7 +15,8 @@ This information corresponds to:
 - **Name**: this is the user identifier of the file. \
   In a table there can only be one file with the same name.
 - **Path**: the path to the file. This can be either a local or remote path. \
-  In the last case, the possibility to work with both SSH an XROOTD protocols is provided.
+  In the last case, the possibility to work with both \
+  **ssh and xrootd protocols** is provided.
 - **Time-stamp**: the system time-stamp of the file, stored as a float value. \
   This will be needed to determine which files are newer.
 - **File ID**: this is the result of hashing the file. For this purpose, the \
@@ -166,7 +167,7 @@ placing our new versions of the files, and from there we would be updating the
 other locations.
 In order to do any modification on a remote we need to authenticate, and
 we would need to do it for every single file we want to update.
-Using **SSH keys** is thus the preferred way to handle this inconvenient,
+Using **ssh keys** is thus the preferred way to handle this inconvenient,
 or make sure that the target host is directly accessible from your current one.
 In the **remote host**, we will need to have **another table** with the paths
 in it.
