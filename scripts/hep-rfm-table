@@ -221,7 +221,7 @@ def create( table ):
 
 
 @decorate_access_mode
-def display( table ):
+def display( table, regex ):
     '''
     Display the contents of the table at the given path
     '''
@@ -242,8 +242,18 @@ def display( table ):
 
     logging.getLogger(__name__).info('Contents of table "{}"'.format(table))
     logging.getLogger(__name__).info(to_string('name', 'path', 'tmstp', 'fid'))
-    for _, f in sorted(t.items()):
-        logging.getLogger(__name__).info(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
+
+    if regex:
+        m = re.compile(regex)
+
+    for k, f in sorted(t.items()):
+
+        disp = True
+        if regex and not m.match(k):
+            disp = False
+
+        if disp:
+            logging.getLogger(__name__).info(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
 
 
 @decorate_access_mode
@@ -313,6 +323,8 @@ if __name__ == '__main__':
 
     parser_display = subparsers.add_parser('display', help=display.__doc__)
     parser_display.set_defaults(func=display)
+    parser_display.add_argument('--regex', type=str, default=None,
+                                help='Regular expression to filter the files to show')
 
     parser_remove = subparsers.add_parser('remove', help=remove.__doc__)
     parser_remove.set_defaults(func=remove)
