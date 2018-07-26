@@ -11,6 +11,7 @@ hep-rfm-table table.db add file1 file1.txt
 hep-rfm-table table.db display
 echo "This is the second file" >> file2.txt
 echo "This is the third file" >> file3.txt
+hep-rfm-table table.db add_massive file2.txt file3.txt
 hep-rfm-table table.db display
 mkdir -p subdir/subsubdir
 echo "This is the fourth file" >> subdir/file4.txt

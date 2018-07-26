@@ -63,8 +63,8 @@ We will start by creating a new file, with some content, and then we will add it
    $ hep-rfm-table table.db add file1 file1.txt
    $ hep-rfm-table table.db display
    Contents of table "table.db"
-   name 	path                    	tmstp            	fid                                     
-   file1	/home/user/rfm/file1.txt	1532441131.918498	b5f48e2bb67a3f11469f83899195464bda5f149c
+   name 	path                    	tmstp             	fid                                                                                                                             
+   file1	/home/user/rfm/file1.txt	1532621260.6913095	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
 
 So we have added our first file.
 In order to do this we had to give the name of the file and the path to it.
@@ -77,10 +77,10 @@ Now let's create two more files and add them to the table as well.
    $ echo "This is the third file" >> file3.txt
    $ hep-rfm-table table.db add_massive file2.txt file3.txt
    Contents of table "table.db"
-   name 	path                    	tmstp             	fid                                     
-   file1	/home/user/rfm/file1.txt	1532468042.6981168	b5f48e2bb67a3f11469f83899195464bda5f149c
-   file2	/home/user/rfm/file2.txt	1532468062.7577875	41d87e380cb316535e4a97b523cf7dbfd94eaa80
-   file3	/home/user/rfm/file3.txt	1532468067.8457038	02a8fd5d7a7181ba405223b749a0ad9c574ab29b
+   name 	path                    	tmstp             	fid                                                                                                                             
+   file1	/home/user/rfm/file1.txt	1532621260.6913095	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
+   file2	/home/user/rfm/file2.txt	1532621261.0113027	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
+   file3	/home/user/rfm/file3.txt	1532621261.0113027	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
 
 With this command one can add easily new files, given only their paths, where
 the names will be extracted from the name of the files themselves, without
@@ -101,12 +101,12 @@ We can also specify a regular expression, so only the files whose names
    $ hep-rfm-table table.db add_from_dir . --regex .*.txt
    $ hep-rfm-table table.db display
    Contents of table "table.db"
-   name 	path                                     	tmstp             	fid                                     
-   file1	/home/user/rfm/file1.txt                 	1532468042.6981168	b5f48e2bb67a3f11469f83899195464bda5f149c
-   file2	/home/user/rfm/file2.txt                 	1532468062.7577875	41d87e380cb316535e4a97b523cf7dbfd94eaa80
-   file3	/home/user/rfm/file3.txt                 	1532468067.8457038	02a8fd5d7a7181ba405223b749a0ad9c574ab29b
-   file4	/home/user/rfm/subdir/file4.txt          	1532468131.9366517	801dabbdf8c7244883a896c418835599103b6ff0
-   file5	/home/user/rfm/subdir/subsubdir/file5.txt	1532468142.2924817	220d820bbb8939b69fb7ee028b5144c868cdf499
+   name 	path                                     	tmstp             	fid                                                                                                                             
+   file1	/home/user/rfm/file1.txt                 	1532621260.6913095	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
+   file2	/home/user/rfm/file2.txt                 	1532621261.0113027	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
+   file3	/home/user/rfm/file3.txt                 	1532621261.0113027	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
+   file4	/home/user/rfm/subdir/file4.txt          	1532621261.3512957	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
+   file5	/home/user/rfm/subdir/subsubdir/file5.txt	1532621261.3512957	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
 
 You can see that we have included all files in the current directory, but from
 *file6.dt*, which did not match the given regular expression.
@@ -117,14 +117,14 @@ If we remove the regular expression requirement, then it is included
    $ hep-rfm-table table.db add_from_dir .
    $ hep-rfm-table table.db display
    Contents of table "table.db"
-   name 	path                                     	tmstp             	fid                                     
-   file1	/home/user/rfm/file1.txt                 	1532468042.6981168	b5f48e2bb67a3f11469f83899195464bda5f149c
-   file2	/home/user/rfm/file2.txt                 	1532468062.7577875	41d87e380cb316535e4a97b523cf7dbfd94eaa80
-   file3	/home/user/rfm/file3.txt                 	1532468067.8457038	02a8fd5d7a7181ba405223b749a0ad9c574ab29b
-   file4	/home/user/rfm/subdir/file4.txt          	1532468131.9366517	801dabbdf8c7244883a896c418835599103b6ff0
-   file5	/home/user/rfm/subdir/subsubdir/file5.txt	1532468142.2924817	220d820bbb8939b69fb7ee028b5144c868cdf499
-   file6	/home/user/rfm/subdir/subsubdir/file6.dt 	1532468149.8963568	0372b573268f3c58d3d4e466607489f57ba17dd3
-   table	/home/user/rfm/table.db                  	1532468283.6741607	18c6b58520eff3010c6fd140af092ceeaee2faa3
+   name 	path                                     	tmstp             	fid                                                                                                                             
+   file1	/home/user/rfm/file1.txt                 	1532621260.6913095	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
+   file2	/home/user/rfm/file2.txt                 	1532621261.0113027	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
+   file3	/home/user/rfm/file3.txt                 	1532621261.0113027	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
+   file4	/home/user/rfm/subdir/file4.txt          	1532621261.3512957	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
+   file5	/home/user/rfm/subdir/subsubdir/file5.txt	1532621261.3512957	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
+   file6	/home/user/rfm/subdir/subsubdir/file6.dt 	1532621261.3512957	5bd329091112ab1c712523d2064d0ca9e4dc2b52095852ae1d314924c0bf6e1d508e269d5a1f5a92d793ad5d285b7d2c44ba1840a9981e9a3c0a86ef24e7ad28
+   table	/home/user/rfm/table.db                  	1532621261.5152922	0cc234324fd87b813ec9fba94aea29aa80176b8a2a7a14247d9f5cd50556b90c73c99f2e2cba928d03e508dbea8fbfa758f70e3e98242a5ffbbed2231687090d
 
 You can see that we have also included the table itself.
 This is very dangerous, and must be avoided, since it will lead to a replacement
@@ -139,25 +139,25 @@ new directory and add the files again.
    $ hep-rfm-table table.db remove table
    $ hep-rfm-table table.db display
    Contents of table "table.db"
-   name 	path                                     	tmstp             	fid                                     
-   file1	/home/user/rfm/file1.txt                 	1532468042.6981168	b5f48e2bb67a3f11469f83899195464bda5f149c
-   file2	/home/user/rfm/file2.txt                 	1532468062.7577875	41d87e380cb316535e4a97b523cf7dbfd94eaa80
-   file3	/home/user/rfm/file3.txt                 	1532468067.8457038	02a8fd5d7a7181ba405223b749a0ad9c574ab29b
-   file4	/home/user/rfm/subdir/file4.txt          	1532468131.9366517	801dabbdf8c7244883a896c418835599103b6ff0
-   file5	/home/user/rfm/subdir/subsubdir/file5.txt	1532468142.2924817	220d820bbb8939b69fb7ee028b5144c868cdf499
-   file6	/home/user/rfm/subdir/subsubdir/file6.dt 	1532468149.8963568	0372b573268f3c58d3d4e466607489f57ba17dd3
+   name 	path                                     	tmstp             	fid                                                                                                                             
+   file1	/home/user/rfm/file1.txt                 	1532621260.6913095	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
+   file2	/home/user/rfm/file2.txt                 	1532621261.0113027	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
+   file3	/home/user/rfm/file3.txt                 	1532621261.0113027	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
+   file4	/home/user/rfm/subdir/file4.txt          	1532621261.3512957	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
+   file5	/home/user/rfm/subdir/subsubdir/file5.txt	1532621261.3512957	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
+   file6	/home/user/rfm/subdir/subsubdir/file6.dt 	1532621261.3512957	5bd329091112ab1c712523d2064d0ca9e4dc2b52095852ae1d314924c0bf6e1d508e269d5a1f5a92d793ad5d285b7d2c44ba1840a9981e9a3c0a86ef24e7ad28
    $ mkdir files
    $ mv subdir *.txt files/.
    $ hep-rfm-table table.db add_from_dir files
    $ hep-rfm-table table.db display
    Contents of table "table.db"
-   name 	path                                           	tmstp             	fid                                     
-   file1	/home/user/rfm/files/file1.txt                 	1532468042.6981168	b5f48e2bb67a3f11469f83899195464bda5f149c
-   file2	/home/user/rfm/files/file2.txt                 	1532468062.7577875	41d87e380cb316535e4a97b523cf7dbfd94eaa80
-   file3	/home/user/rfm/files/file3.txt                 	1532468067.8457038	02a8fd5d7a7181ba405223b749a0ad9c574ab29b
-   file4	/home/user/rfm/files/subdir/file4.txt          	1532468131.9366517	801dabbdf8c7244883a896c418835599103b6ff0
-   file5	/home/user/rfm/files/subdir/subsubdir/file5.txt	1532468142.2924817	220d820bbb8939b69fb7ee028b5144c868cdf499
-   file6	/home/user/rfm/files/subdir/subsubdir/file6.dt 	1532468149.8963568	0372b573268f3c58d3d4e466607489f57ba17dd3
+   name 	path                                           	tmstp             	fid                                                                                                                             
+   file1	/home/user/rfm/files/file1.txt                 	1532621260.6913095	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
+   file2	/home/user/rfm/files/file2.txt                 	1532621261.0113027	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
+   file3	/home/user/rfm/files/file3.txt                 	1532621261.0113027	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
+   file4	/home/user/rfm/files/subdir/file4.txt          	1532621261.3512957	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
+   file5	/home/user/rfm/files/subdir/subsubdir/file5.txt	1532621261.3512957	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
+   file6	/home/user/rfm/files/subdir/subsubdir/file6.dt 	1532621261.3512957	5bd329091112ab1c712523d2064d0ca9e4dc2b52095852ae1d314924c0bf6e1d508e269d5a1f5a92d793ad5d285b7d2c44ba1840a9981e9a3c0a86ef24e7ad28
 
 So now the entry *table* has been removed.
 The idea behind this is not only to have a way to keep our data files organized,
