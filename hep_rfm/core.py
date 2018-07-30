@@ -41,9 +41,6 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     :type server_spec: dict
     :raises CopyFileError: if the file can not be copied.
     '''
-    # Make the directories to the target
-    make_directories(target)
-
     # Set the user names if dealing with SSH paths
     if protocols.is_ssh(source):
         source = _set_username(source, server_spec)
@@ -51,7 +48,8 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     if protocols.is_ssh(target):
         target = _set_username(target, server_spec)
 
-    logger = logging.getLogger(__name__)
+    # Make the directories to the target
+    make_directories(target)
 
     # Copy the file
     dec = protocols.remote_protocol(source, target)
@@ -70,7 +68,7 @@ def copy_file( source, target, loglock=None, server_spec=None ):
             copy_file(tmp, target)
 
     else:
-        parallel.log(logger.info,
+        parallel.log(logging.getLogger(__name__).info,
                      'Copying file\n source: {}\n target: {}'.format(source, target),
                      loglock)
 
@@ -186,11 +184,11 @@ def _set_username( path, server_spec=None ):
     if l == 0 and server_spec is None:
         raise RuntimeError('User name not specified for path "{}"'.format(path))
 
+    uh, _ = protocols.split_remote(path)
+
+    u, h = uh.split('@')
+
     for host, uname in server_spec.items():
-
-        uh, _ = protocols.split_remote(path)
-
-        u, h = uh.split('@')
 
         if host == h:
             path = uname + path[l:]
