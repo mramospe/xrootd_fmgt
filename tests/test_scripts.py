@@ -72,8 +72,8 @@ def test_hep_rfm_table( tmpdir ):
     table = hep_rfm.Table.read(table_path.strpath)
 
     for f in table.values():
-        f.marks.tmstp != hep_rfm.tables.__default_tmstp__
-        f.marks.fid   != hep_rfm.tables.__default_fid__
+        f.marks.tmstp != hep_rfm.files.__default_tmstp__
+        f.marks.fid   != hep_rfm.files.__default_fid__
 
     assert len(table) == 7
 

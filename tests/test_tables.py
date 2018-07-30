@@ -7,56 +7,10 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
 import os
-import pytest
 import tempfile
 
 # Local
 import hep_rfm
-
-
-def test_fileinfobase():
-    '''
-    Test for the "FileInfoBase" class.
-    '''
-    m = hep_rfm.FileMarks(0., 'fid')
-    f = hep_rfm.FileInfoBase('dummy', 'my/path', m)
-
-    # It is an inmutable object
-    with pytest.raises(AttributeError):
-        f.name = 'other'
-
-
-def test_fileinfo():
-    '''
-    Test for the "FileInfo" class.
-    '''
-    f = hep_rfm.FileInfo('dummy', 'my/path')
-
-    # It is an inmutable object
-    with pytest.raises(AttributeError):
-        f.name = 'new'
-
-    assert f.marks.tmstp == hep_rfm.tables.__default_tmstp__
-    assert f.marks.fid == hep_rfm.tables.__default_fid__
-    assert f.is_bare()
-
-    with tempfile.NamedTemporaryFile() as f:
-
-        proxy = hep_rfm.FileInfo.from_name_and_path('dummy', f.name)
-
-        assert proxy.name == 'dummy'
-        assert proxy.path == f.name
-
-
-def test_filemarks():
-    '''
-    Test for the "FileMarks" class.
-    '''
-    m = hep_rfm.FileMarks(0., 'fid')
-
-    # It is an inmutable object
-    with pytest.raises(AttributeError):
-        m.fid = 'other'
 
 
 def test_table():
