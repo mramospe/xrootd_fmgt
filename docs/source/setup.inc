@@ -191,7 +191,7 @@ This means that we could type
 
 So you can see that the time-stamp and file ID are filled with default values,
 which are chosen so they do not cause conflicts.
-Note that we have **specified the remote path** "@host.com".
+Note that we have **specified the remote path** *@host.com*.
 This will be needed afterwards to correctly update the files.
 The other files will be added in a row, by typing
 

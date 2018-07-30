@@ -5,7 +5,7 @@ File management
 
 In section :ref:`setup` we saw how to set-up two tables in two different hosts,
 one local and one remote, with different files.
-Our final goal is to access these files from python.
+Our final goal is to **access these files from python**.
 In the local host we can do it by writing
 
 .. code-block:: python
