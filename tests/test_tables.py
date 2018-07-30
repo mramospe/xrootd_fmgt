@@ -38,6 +38,7 @@ def test_fileinfo():
 
     assert f.marks.tmstp == hep_rfm.tables.__default_tmstp__
     assert f.marks.fid == hep_rfm.tables.__default_fid__
+    assert f.is_bare()
 
     with tempfile.NamedTemporaryFile() as f:
 

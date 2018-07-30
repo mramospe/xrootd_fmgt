@@ -117,15 +117,31 @@ class FileInfo(FileInfoBase):
         '''
         return (self.name, self.path, self.marks.tmstp, self.marks.fid)
 
+    def is_bare( self ):
+        '''
+        Return whether this is a bare file.
+
+        :returns: whether this is a bare file.
+        :rtype: bool
+        '''
+        return self.marks.tmstp == __default_tmstp__ and self.marks.fid == __default_fid__
+
     def local_path( self ):
         '''
         Return the actual path in the local system, removing the information
         of the remote.
+        If this is a bare file, None is returned.
+        In the opposite case, an exception is raised if the file is not found
+        in the associated path.
 
         :returns: path in the local system.
-        :rtype: str
-        :raises RuntimeError: if no file is found in the associated path.
+        :rtype: str or None
+        :raises RuntimeError: if this is a non-bare file, and no file is found \
+        in the associated path.
         '''
+        if self.is_bare():
+            return None
+
         p = protocols.available_local_path(self.path)
 
         if p is None:
@@ -145,6 +161,24 @@ class FileInfo(FileInfoBase):
             return True
 
         return False
+
+    def updated( self ):
+        '''
+        Return the updated version of this file.
+
+        :returns: updated version of this file.
+        :rtype: FileInfo
+        '''
+        p = self.local_path()
+
+        if p is not None:
+            fid   = core.rfm_hash(p)
+            tmstp = os.path.getmtime(p)
+        else:
+            fid   = self.marks.fid
+            tmstp = self.marks.tmstp
+
+        return FileInfo(self.name, self.path, FileMarks(tmstp, fid))
 
 
 class Manager(object):
@@ -343,18 +377,7 @@ class Table(dict):
         '''
         output = []
         for f in self.values():
-
-            if os.path.exists(f.path):
-
-                fid = core.rfm_hash(f.path)
-
-                tmstp = os.path.getmtime(f.path)
-
-                if fid != f.marks.fid or tmstp != f.marks.tmstp:
-
-                    f = FileInfo(f.name, f.path, FileMarks(tmstp, fid))
-
-            output.append(f)
+            output.append(f.updated())
 
         return self.__class__(output)
 
