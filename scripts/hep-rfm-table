@@ -277,13 +277,31 @@ def remove( table, files, regex ):
 
 
 @decorate_access_mode
-def update( table ):
+def update( table, regex ):
     '''
     Update the table located in the given path
     '''
     t = hep_rfm.Table.read(table)
 
-    t.updated().write(table)
+    if regex:
+
+        m = re.compile(regex)
+
+        to_update, maintain = [], []
+        for n, f in t.items():
+            if m.match(n):
+                to_update.append(f)
+            else:
+                maintain.append(f)
+
+        t = hep_rfm.Table(to_update).updated()
+        for f in maintain:
+            t[f.name] = f
+
+        t.write(table)
+
+    else:
+        t.updated().write(table)
 
 
 if __name__ == '__main__':
@@ -335,6 +353,8 @@ if __name__ == '__main__':
 
     parser_update = subparsers.add_parser('update', help=update.__doc__)
     parser_update.set_defaults(func=update)
+    parser_update.add_argument('--regex', type=str, default=None,
+                               help='Regular expression for the files to update')
 
     for p in (parser_add_massive, parser_add_from_dir):
         p.add_argument('--nproc', type=int, default=4, required=False,
