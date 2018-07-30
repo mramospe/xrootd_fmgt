@@ -9,11 +9,13 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 import logging
 import os
 
+
 __all__ = [
     'is_remote',
     'is_ssh',
     'is_xrootd'
     ]
+
 
 # Definition of the protocols to use
 __local_protocol__      = 1
