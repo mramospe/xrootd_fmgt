@@ -13,7 +13,9 @@ from hep_rfm import protocols
 import os
 from collections import namedtuple
 
-__all__ = ['FileInfo', 'FileInfoBase', 'FileMarksBase', 'FileMarks']
+
+__all__ = ['FileInfoBase', 'FileInfo', 'FileMarksBase', 'FileMarks']
+
 
 # Default names for the file marks
 __default_tmstp__ = 0
