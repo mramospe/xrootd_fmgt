@@ -1,0 +1,6 @@
+CopyFileError
+=============
+
+.. currentmodule:: hep_rfm
+
+.. autoexception:: CopyFileError

@@ -1,0 +1,7 @@
+FileMarksBase
+=============
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: FileMarksBase
+   :show-inheritance:

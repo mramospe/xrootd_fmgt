@@ -47,17 +47,87 @@
 <span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miguel Ramos Pernas&#39;</span><span class="p">]</span>
 <span class="n">__email__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
 
+<span class="c1"># Python</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;is_remote&#39;</span><span class="p">,</span>
     <span class="s1">&#39;is_ssh&#39;</span><span class="p">,</span>
     <span class="s1">&#39;is_xrootd&#39;</span>
     <span class="p">]</span>
 
+
 <span class="c1"># Definition of the protocols to use</span>
 <span class="n">__local_protocol__</span>      <span class="o">=</span> <span class="mi">1</span>
 <span class="n">__ssh_protocol__</span>        <span class="o">=</span> <span class="mi">2</span>
 <span class="n">__xrootd_protocol__</span>     <span class="o">=</span> <span class="mi">3</span>
 <span class="n">__different_protocols__</span> <span class="o">=</span> <span class="mi">4</span>
+
+
+<span class="k">def</span> <span class="nf">available_local_path</span><span class="p">(</span> <span class="n">path</span><span class="p">,</span> <span class="n">use_xrd</span> <span class="o">=</span> <span class="kc">False</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    If a local path can be resolved from &quot;path&quot;, it returns it.</span>
+<span class="sd">    Return None otherwise.</span>
+<span class="sd">    If &quot;use_xrd&quot; is True, and the given path is a xrd-protocol path, then</span>
+<span class="sd">    it will be directly returned.</span>
+
+<span class="sd">    :param path: path to process.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :param use_xrd: whether to use the xrootd protocol.</span>
+<span class="sd">    :type use_xrd: bool</span>
+<span class="sd">    :returns: local path.</span>
+<span class="sd">    :rtype: str or None</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">is_remote</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">use_xrd</span> <span class="ow">and</span> <span class="n">is_xrootd</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="c1"># Using XRootD protocol is allowed</span>
+            <span class="k">return</span> <span class="n">path</span>
+
+        <span class="n">server</span><span class="p">,</span> <span class="n">sepath</span> <span class="o">=</span> <span class="n">split_remote</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sepath</span><span class="p">):</span>
+            <span class="c1"># Local and remote hosts are the same</span>
+            <span class="k">return</span> <span class="n">sepath</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">path</span>
+
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">available_path</span><span class="p">(</span> <span class="n">paths</span><span class="p">,</span> <span class="n">use_xrd</span><span class="o">=</span><span class="kc">False</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Return the first available path from a list of paths. If &quot;use_xrd&quot; is</span>
+<span class="sd">    set to True, then this also stands for any path using the XRootD</span>
+<span class="sd">    protocol (by default they are avoided).</span>
+
+<span class="sd">    :param paths: list of paths to process.</span>
+<span class="sd">    :type paths: collection(str)</span>
+<span class="sd">    :param use_xrd: whether using XRootD protocol is allowed.</span>
+<span class="sd">    :type use_xrd: bool</span>
+<span class="sd">    :returns: first available path found.</span>
+<span class="sd">    :rtype: str</span>
+<span class="sd">    :raises RuntimeError: if it fails to find an available path.</span>
+
+<span class="sd">    .. warning::</span>
+<span class="sd">       If the path to a file on a remote site matches that of a local file,</span>
+<span class="sd">       it will be returned. This allows to use local files while specifying</span>
+<span class="sd">       remote paths. However, if a path on a remote site matches a local</span>
+<span class="sd">       file, which does not correspond to a proxy of the path referenced by</span>
+<span class="sd">       this object, it will result on a fake reference to the file.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">available_local_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">use_xrd</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">p</span>
+
+    <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to find an available path&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="is_remote"><a class="viewcode-back" href="../../api/hep_rfm.is_remote.html#hep_rfm.is_remote">[docs]</a><span class="k">def</span> <span class="nf">is_remote</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
@@ -123,6 +193,22 @@
         <span class="k">return</span> <span class="n">__xrootd_protocol__</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">__local_protocol__</span>
+
+
+<span class="k">def</span> <span class="nf">split_remote</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Split a path related to a remote file in site and true path.</span>
+
+<span class="sd">    :param path: path to the input file.</span>
+<span class="sd">    :type path: str</span>
+<span class="sd">    :returns: site and path to the file in the site.</span>
+<span class="sd">    :rtype: str, str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">is_ssh</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">rp</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s1">&#39;//&#39;</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">path</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="n">rp</span><span class="p">],</span> <span class="n">path</span><span class="p">[</span><span class="n">rp</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span>
 </pre></div>
 
           </div>
@@ -141,16 +227,8 @@
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.copy_file.html">copy_file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.getmtime.html">getmtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.make_directories.html">make_directories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.sync_proxies.html">sync_proxies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.is_remote.html">is_remote</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.is_ssh.html">is_ssh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.is_xrootd.html">is_xrootd</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../api/hep_rfm.FileProxy.html">FileProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions-and-classes.html">Functions and classes</a></li>
 </ul>
 
 <div class="relations">

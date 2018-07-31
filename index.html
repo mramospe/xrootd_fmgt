@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="copy_file" href="api/hep_rfm.copy_file.html" />
+    <link rel="next" title="Getting started" href="getting-started.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -42,23 +42,15 @@
             
   <div class="section" id="introduction">
 <h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
-<p>Provides tools to manage remote and local files using the xrootd and ssh
-protocols. This allows, for example, to synchronize remote files with those
-in a local cluster.</p>
-</div>
-<div class="section" id="considerations">
-<h1>Considerations:<a class="headerlink" href="#considerations" title="Permalink to this headline">¶</a></h1>
-<blockquote>
-<div><ul class="simple">
-<li>One file can have different paths, but only one of them is used as <strong>source</strong>.</li>
-<li>If the <strong>source</strong> is modified, this module provides function to update the others accordingly.</li>
-<li>If any of the other files is modified, an update will remove this modifications, since the <strong>source</strong> will be copied again into its path.</li>
-<li>Make sure to have the correct rights to access to the sites before using the functions within this module. This prevents having to introduce their associated passwords may times.</li>
-</ul>
-</div></blockquote>
+<p>Provides tools to manage remote and local files using the XROOTD and/or SSH
+protocols.
+This allows, for example, to synchronize remote files with those
+in a local cluster.
+One has to be sure to have the correct rights to access to the sites before using the functions within this module.
+This prevents having to introduce their associated passwords many times.</p>
 </div>
 <div class="section" id="installation">
-<h1>Installation:<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <p>This package is available on PyPi, so just type:</p>
 <div class="highlight-bash"><div class="highlight"><pre><span></span>pip install hep-rfm
 </pre></div>
@@ -69,60 +61,23 @@ in a local cluster.</p>
 pip install .
 </pre></div>
 </div>
-</div>
-<div class="section" id="functions-and-classes">
-<h1>Functions and classes<a class="headerlink" href="#functions-and-classes" title="Permalink to this headline">¶</a></h1>
-<p>Here you can find the documentation on the functions and classes
-of the hep_rfm package. The class inheritance diagram is also shown.</p>
-<span class="target" id="module-hep_rfm"></span><div class="section" id="functions">
-<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;force,&nbsp;tmpdir])</td>
-<td>Main function to copy a file from a source to a target.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.getmtime.html#hep_rfm.getmtime" title="hep_rfm.getmtime"><code class="xref py py-obj docutils literal"><span class="pre">getmtime</span></code></a>(path)</td>
-<td>Get the modification time for the file in “path”.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.make_directories.html#hep_rfm.make_directories" title="hep_rfm.make_directories"><code class="xref py py-obj docutils literal"><span class="pre">make_directories</span></code></a>(target)</td>
-<td>Make the directories for the given target in case they do not exist already.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.sync_proxies.html#hep_rfm.sync_proxies" title="hep_rfm.sync_proxies"><code class="xref py py-obj docutils literal"><span class="pre">sync_proxies</span></code></a>(proxies[,&nbsp;parallelize])</td>
-<td>Synchronize a given list of proxies.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal"><span class="pre">is_remote</span></code></a>(path)</td>
-<td>Check whether the given path points to a remote file.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_ssh.html#hep_rfm.is_ssh" title="hep_rfm.is_ssh"><code class="xref py py-obj docutils literal"><span class="pre">is_ssh</span></code></a>(path)</td>
-<td>Return whether the standard ssh protocol must be used.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_xrootd.html#hep_rfm.is_xrootd" title="hep_rfm.is_xrootd"><code class="xref py py-obj docutils literal"><span class="pre">is_xrootd</span></code></a>(path)</td>
-<td>Return whether the path is related to the xrootd protocol.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="classes">
-<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
-<table border="1" class="longtable docutils">
-<colgroup>
-<col width="10%" />
-<col width="90%" />
-</colgroup>
-<tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileProxy.html#hep_rfm.FileProxy" title="hep_rfm.FileProxy"><code class="xref py py-obj docutils literal"><span class="pre">FileProxy</span></code></a>(source,&nbsp;*targets)</td>
-<td>Object to store the path to a source file, and some other paths pointing to some target locations.</td>
-</tr>
-</tbody>
-</table>
-</div>
-<div class="section" id="class-inheritance-diagram">
-<h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<img src="_images/inheritance-8952ed07ef122a93891232bebdb915e1f0badba1.png" alt="Inheritance diagram of hep_rfm.core.FileProxy" class="inheritance"/>
+<p>In order to get started into this package, or to see the function and classes
+here provided, please use the following links:</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#setting-up-the-system">Setting-up the system</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#file-management">File management</a></li>
+<li class="toctree-l2"><a class="reference internal" href="getting-started.html#limitations">Limitations</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="functions-and-classes.html">Functions and classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="functions-and-classes.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions-and-classes.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="functions-and-classes.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+</ul>
 </div>
 </div>
 <div class="section" id="indices-and-tables">
@@ -151,23 +106,15 @@ of the hep_rfm package. The class inheritance diagram is also shown.</p>
 
 <h3>Navigation</h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.copy_file.html">copy_file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.getmtime.html">getmtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.make_directories.html">make_directories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.sync_proxies.html">sync_proxies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.is_remote.html">is_remote</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.is_ssh.html">is_ssh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.is_xrootd.html">is_xrootd</a></li>
-</ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="api/hep_rfm.FileProxy.html">FileProxy</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions-and-classes.html">Functions and classes</a></li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="#">Documentation overview</a><ul>
-      <li>Next: <a href="api/hep_rfm.copy_file.html" title="next chapter">copy_file</a></li>
+      <li>Next: <a href="getting-started.html" title="next chapter">Getting started</a></li>
   </ul></li>
 </ul>
 </div>

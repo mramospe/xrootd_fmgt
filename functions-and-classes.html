@@ -1,0 +1,190 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Functions and classes &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0.dev1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="copy_file" href="api/hep_rfm.copy_file.html" />
+    <link rel="prev" title="Getting started" href="getting-started.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="functions-and-classes">
+<h1>Functions and classes<a class="headerlink" href="#functions-and-classes" title="Permalink to this headline">¶</a></h1>
+<p>Here you can find the documentation on the functions and classes
+of the <strong>hep_rfm</strong> package.</p>
+<span class="target" id="module-hep_rfm"></span><div class="section" id="functions">
+<h2>Functions<a class="headerlink" href="#functions" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;loglock,&nbsp;server_spec])</td>
+<td>Main function to copy a file from a source to a target.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.make_directories.html#hep_rfm.make_directories" title="hep_rfm.make_directories"><code class="xref py py-obj docutils literal"><span class="pre">make_directories</span></code></a>(target)</td>
+<td>Make the directories for the given target in case they do not exist already.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash" title="hep_rfm.rfm_hash"><code class="xref py py-obj docutils literal"><span class="pre">rfm_hash</span></code></a>(path)</td>
+<td>Use the SHA512 hash function to get the file ID of the file in the given path.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal"><span class="pre">is_remote</span></code></a>(path)</td>
+<td>Check whether the given path points to a remote file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_ssh.html#hep_rfm.is_ssh" title="hep_rfm.is_ssh"><code class="xref py py-obj docutils literal"><span class="pre">is_ssh</span></code></a>(path)</td>
+<td>Return whether the standard ssh protocol must be used.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_xrootd.html#hep_rfm.is_xrootd" title="hep_rfm.is_xrootd"><code class="xref py py-obj docutils literal"><span class="pre">is_xrootd</span></code></a>(path)</td>
+<td>Return whether the path is related to the xrootd protocol.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.ProcessError.html#hep_rfm.ProcessError" title="hep_rfm.ProcessError"><code class="xref py py-obj docutils literal"><span class="pre">ProcessError</span></code></a>(msg,&nbsp;stderr)</td>
+<td>Define an error to be raised when a subprocess call fails.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.CopyFileError.html#hep_rfm.CopyFileError" title="hep_rfm.CopyFileError"><code class="xref py py-obj docutils literal"><span class="pre">CopyFileError</span></code></a>(ipath,&nbsp;opath,&nbsp;stderr)</td>
+<td>Define an error to be raised when copying a file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.MakeDirsError.html#hep_rfm.MakeDirsError" title="hep_rfm.MakeDirsError"><code class="xref py py-obj docutils literal"><span class="pre">MakeDirsError</span></code></a>(target,&nbsp;stderr)</td>
+<td>Error to be displayed when failing making directories.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileInfoBase.html#hep_rfm.FileInfoBase" title="hep_rfm.FileInfoBase"><code class="xref py py-obj docutils literal"><span class="pre">FileInfoBase</span></code></a></td>
+<td>Base class for an object storing the information about a file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileInfo.html#hep_rfm.FileInfo" title="hep_rfm.FileInfo"><code class="xref py py-obj docutils literal"><span class="pre">FileInfo</span></code></a></td>
+<td>Object to store the information about a file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileMarksBase.html#hep_rfm.FileMarksBase" title="hep_rfm.FileMarksBase"><code class="xref py py-obj docutils literal"><span class="pre">FileMarksBase</span></code></a></td>
+<td>Base class representing an object storing the time-stamp and file ID of a file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileMarks.html#hep_rfm.FileMarks" title="hep_rfm.FileMarks"><code class="xref py py-obj docutils literal"><span class="pre">FileMarks</span></code></a></td>
+<td>Represent an object storing the time-stamp and file ID of a file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-obj docutils literal"><span class="pre">Table</span></code></a>(files)</td>
+<td>Create a table storing the information about files.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-obj docutils literal"><span class="pre">Manager</span></code></a>()</td>
+<td>Represent a class to store tables in different local/remote hosts, being able to do updates among them.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="class-inheritance-diagram">
+<h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
+<img src="_images/inheritance-63e31e2073f1305d84effcf2dd12eed69322a2b4.png" alt="Inheritance diagram of hep_rfm.exceptions.ProcessError, hep_rfm.exceptions.CopyFileError, hep_rfm.exceptions.MakeDirsError, hep_rfm.files.FileInfoBase, hep_rfm.files.FileInfo, hep_rfm.files.FileMarksBase, hep_rfm.files.FileMarks, hep_rfm.tables.Table, hep_rfm.tables.Manager" usemap="#inheritanceab0f15a176" class="inheritance"/>
+<map id="inheritanceab0f15a176" name="inheritanceab0f15a176">
+<area shape="rect" id="node4" title="FileInfoBase(name, path, marks)" alt="" coords="13,153,110,179"/>
+<area shape="rect" id="node6" title="FileMarksBase(tmstp, fid)" alt="" coords="5,104,117,129"/>
+</map>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">hep_rfm</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Functions and classes</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="getting-started.html" title="previous chapter">Getting started</a></li>
+      <li>Next: <a href="api/hep_rfm.copy_file.html" title="next chapter">copy_file</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/functions-and-classes.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

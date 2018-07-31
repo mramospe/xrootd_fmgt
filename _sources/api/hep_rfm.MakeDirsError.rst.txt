@@ -1,0 +1,6 @@
+MakeDirsError
+=============
+
+.. currentmodule:: hep_rfm
+
+.. autoexception:: MakeDirsError

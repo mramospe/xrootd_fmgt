@@ -24,8 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="getmtime" href="hep_rfm.getmtime.html" />
-    <link rel="prev" title="Introduction" href="../index.html" />
+    <link rel="next" title="make_directories" href="hep_rfm.make_directories.html" />
+    <link rel="prev" title="Functions and classes" href="../functions-and-classes.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -45,18 +45,20 @@
 <h1>copy_file<a class="headerlink" href="#copy-file" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="hep_rfm.copy_file">
-<code class="descclassname">hep_rfm.</code><code class="descname">copy_file</code><span class="sig-paren">(</span><em>source</em>, <em>target</em>, <em>force=False</em>, <em>tmpdir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.copy_file" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">hep_rfm.</code><code class="descname">copy_file</code><span class="sig-paren">(</span><em>source</em>, <em>target</em>, <em>loglock=None</em>, <em>server_spec=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#copy_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.copy_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Main function to copy a file from a source to a target. The copy is done
-if the modification time of both files do not coincide. If “force” is
-specified, then the copy is done independently of this.</p>
+if the modification time of both files do not coincide.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>force</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – if set to True, the files are copied even if they are     up to date.</li>
-<li><strong>tmpdir</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – temporal directory to store files when needed. By default     a folder is created in “/tmp/&lt;pid&gt;.&lt;module name&gt;”, and it is deleted at     the end of the execution. If provided, the user is considered to own the     directory, altough this function will create it if it does not exist.</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>loglock</strong> (<a class="reference external" href="https://docs.python.org/3/library/multiprocessing.html#multiprocessing.Lock" title="(in Python v3.7)"><em>multiprocessing.Lock</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.7)"><em>None</em></a>) – possible locker to prevent from displaying at the same     time in the screen for two different processes.</li>
+<li><strong>server_spec</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – specification of user for each SSH server. Must     be specified as a dictionary, where the keys are the hosts and the     values are the user names.</li>
 </ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference internal" href="hep_rfm.CopyFileError.html#hep_rfm.CopyFileError" title="hep_rfm.CopyFileError"><strong>CopyFileError</strong></a> – if the file can not be copied.</p>
 </td>
 </tr>
 </tbody>
@@ -82,24 +84,23 @@ specified, then the copy is done independently of this.</p>
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">copy_file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.getmtime.html">getmtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.make_directories.html">make_directories</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.sync_proxies.html">sync_proxies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_remote.html">is_remote</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_ssh.html">is_ssh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_xrootd.html">is_xrootd</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../functions-and-classes.html">Functions and classes</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../functions-and-classes.html#functions">Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.FileProxy.html">FileProxy</a></li>
+</li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="../index.html" title="previous chapter">Introduction</a></li>
-      <li>Next: <a href="hep_rfm.getmtime.html" title="next chapter">getmtime</a></li>
+  <li><a href="../functions-and-classes.html">Functions and classes</a><ul>
+      <li>Previous: <a href="../functions-and-classes.html" title="previous chapter">Functions and classes</a></li>
+      <li>Next: <a href="hep_rfm.make_directories.html" title="next chapter">make_directories</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>

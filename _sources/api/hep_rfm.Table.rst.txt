@@ -1,0 +1,21 @@
+Table
+=====
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: Table
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Table.read
+      ~Table.updated
+      ~Table.write
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: read
+   .. automethod:: updated
+   .. automethod:: write

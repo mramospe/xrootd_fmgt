@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>sync_proxies &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <title>ProcessError &#8212; hep_rfm 0.0.0.dev1 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="is_remote" href="hep_rfm.is_remote.html" />
-    <link rel="prev" title="make_directories" href="hep_rfm.make_directories.html" />
+    <link rel="next" title="CopyFileError" href="hep_rfm.CopyFileError.html" />
+    <link rel="prev" title="is_xrootd" href="hep_rfm.is_xrootd.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -41,8 +41,27 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="sync-proxies">
-<h1>sync_proxies<a class="headerlink" href="#sync-proxies" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="processerror">
+<h1>ProcessError<a class="headerlink" href="#processerror" title="Permalink to this headline">¶</a></h1>
+<dl class="exception">
+<dt id="hep_rfm.ProcessError">
+<em class="property">exception </em><code class="descclassname">hep_rfm.</code><code class="descname">ProcessError</code><span class="sig-paren">(</span><em>msg</em>, <em>stderr</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/exceptions.html#ProcessError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.ProcessError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define an error to be raised when a subprocess call fails.
+The message and “stderr” from the subprocess call must be provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>msg</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – message to display.</li>
+<li><strong>stderr</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – error output from a subprocess call.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 
 
@@ -62,24 +81,23 @@
 
 <h3>Navigation</h3>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.copy_file.html">copy_file</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.getmtime.html">getmtime</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.make_directories.html">make_directories</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">sync_proxies</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_remote.html">is_remote</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_ssh.html">is_ssh</a></li>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.is_xrootd.html">is_xrootd</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../functions-and-classes.html">Functions and classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions-and-classes.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="hep_rfm.FileProxy.html">FileProxy</a></li>
+</li>
 </ul>
 
 <div class="relations">
 <h3>Related Topics</h3>
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
-      <li>Previous: <a href="hep_rfm.make_directories.html" title="previous chapter">make_directories</a></li>
-      <li>Next: <a href="hep_rfm.is_remote.html" title="next chapter">is_remote</a></li>
+  <li><a href="../functions-and-classes.html">Functions and classes</a><ul>
+      <li>Previous: <a href="hep_rfm.is_xrootd.html" title="previous chapter">is_xrootd</a></li>
+      <li>Next: <a href="hep_rfm.CopyFileError.html" title="next chapter">CopyFileError</a></li>
+  </ul></li>
   </ul></li>
 </ul>
 </div>
@@ -105,7 +123,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="../_sources/api/hep_rfm.sync_proxies.rst.txt"
+      <a href="../_sources/api/hep_rfm.ProcessError.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

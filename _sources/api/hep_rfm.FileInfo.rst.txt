@@ -1,0 +1,7 @@
+FileInfo
+========
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: FileInfo
+   :show-inheritance:

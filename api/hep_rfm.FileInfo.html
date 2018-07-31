@@ -5,7 +5,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>make_directories &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <title>FileInfo &#8212; hep_rfm 0.0.0.dev1 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <script type="text/javascript">
@@ -24,8 +24,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="rfm_hash" href="hep_rfm.rfm_hash.html" />
-    <link rel="prev" title="copy_file" href="hep_rfm.copy_file.html" />
+    <link rel="next" title="FileMarksBase" href="hep_rfm.FileMarksBase.html" />
+    <link rel="prev" title="FileInfoBase" href="hep_rfm.FileInfoBase.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
   
@@ -41,22 +41,30 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="make-directories">
-<h1>make_directories<a class="headerlink" href="#make-directories" title="Permalink to this headline">¶</a></h1>
-<dl class="function">
-<dt id="hep_rfm.make_directories">
-<code class="descclassname">hep_rfm.</code><code class="descname">make_directories</code><span class="sig-paren">(</span><em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/core.html#make_directories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.make_directories" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make the directories for the given target in case they do not exist already.</p>
+  <div class="section" id="fileinfo">
+<h1>FileInfo<a class="headerlink" href="#fileinfo" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="hep_rfm.FileInfo">
+<em class="property">class </em><code class="descclassname">hep_rfm.</code><code class="descname">FileInfo</code><a class="reference internal" href="../_modules/hep_rfm/files.html#FileInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.FileInfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">hep_rfm.files.FileInfoBase</span></code></p>
+<p>Object to store the information about a file.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>target</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – path to a target file.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><a class="reference internal" href="hep_rfm.MakeDirsError.html#hep_rfm.MakeDirsError" title="hep_rfm.MakeDirsError"><strong>MakeDirsError</strong></a> – if the directory could not be created.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – name of the file.</li>
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – path to the file.</li>
+<li><strong>marks</strong> (<a class="reference internal" href="hep_rfm.FileMarks.html#hep_rfm.FileMarks" title="hep_rfm.FileMarks"><em>FileMarks</em></a>) – time-stamp and file ID.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="hep_rfm.FileMarks.html#hep_rfm.FileMarks" title="hep_rfm.FileMarks"><code class="xref py py-class docutils literal"><span class="pre">hep_rfm.FileMarks</span></code></a></p>
+</div>
 </dd></dl>
 
 </div>
@@ -80,8 +88,8 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../functions-and-classes.html">Functions and classes</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../functions-and-classes.html#functions">Functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions-and-classes.html#classes">Classes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
 </ul>
 </li>
@@ -92,8 +100,8 @@
 <ul>
   <li><a href="../index.html">Documentation overview</a><ul>
   <li><a href="../functions-and-classes.html">Functions and classes</a><ul>
-      <li>Previous: <a href="hep_rfm.copy_file.html" title="previous chapter">copy_file</a></li>
-      <li>Next: <a href="hep_rfm.rfm_hash.html" title="next chapter">rfm_hash</a></li>
+      <li>Previous: <a href="hep_rfm.FileInfoBase.html" title="previous chapter">FileInfoBase</a></li>
+      <li>Next: <a href="hep_rfm.FileMarksBase.html" title="next chapter">FileMarksBase</a></li>
   </ul></li>
   </ul></li>
 </ul>
@@ -120,7 +128,7 @@
       &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
       
       |
-      <a href="../_sources/api/hep_rfm.make_directories.rst.txt"
+      <a href="../_sources/api/hep_rfm.FileInfo.rst.txt"
           rel="nofollow">Page source</a>
     </div>
 

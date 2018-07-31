@@ -1,0 +1,195 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>File management &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0.dev1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="file-management">
+<span id="id1"></span><h1>File management<a class="headerlink" href="#file-management" title="Permalink to this headline">¶</a></h1>
+<p>In section <a class="reference internal" href="setup.html#setup"><span class="std std-ref">Setting-up the system</span></a> we saw how to set-up two tables in two different hosts,
+one local and one remote, with different files.
+Our final goal is to access these files from python.
+In the local host we can do it by writing</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">hep_rfm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">hep_rfm</span><span class="o">.</span><span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;/home/user/rfm/table.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">table</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="go">[&#39;file1&#39;, &#39;file2&#39;, &#39;file3&#39;, &#39;file4&#39;, &#39;file5&#39;, &#39;file6&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;file1&#39;</span><span class="p">]</span>
+<span class="go">FileInfo(name=&#39;file1&#39;, path=&#39;/home/user/rfm/files/file1.txt&#39;, marks=FileMarks(tmstp=1532441131.0, fid=&#39;b5f48e2bb67a3f11469f83899195464bda5f149c&#39;))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;file1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span>
+<span class="go">/home/user/rfm/files/file1.txt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;file1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">local_path</span><span class="p">()</span>
+<span class="go">/home/user/rfm/files/file1.txt</span>
+</pre></div>
+</div>
+<p>so we can access all the information.
+We could also modify the information of the table, make copies, and then
+write them using the method <a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table.write" title="hep_rfm.Table.write"><code class="xref py py-meth docutils literal"><span class="pre">hep_rfm.Table.write()</span></code></a>.
+To automatically update the table using the local files, we could
+simply call <a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table.updated" title="hep_rfm.Table.updated"><code class="xref py py-meth docutils literal"><span class="pre">hep_rfm.Table.updated()</span></code></a>, and we would obtain
+the updated version of the table.
+Note that in the local host both <code class="xref py py-attr docutils literal"><span class="pre">hep_rfm.FileInfo.path</span></code> and
+<code class="xref py py-meth docutils literal"><span class="pre">hep_rfm.FileInfo.local_path()</span></code> return the same values.
+This will not happen if the path refers to a remote place, where you would get</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;file1&#39;</span><span class="p">]</span>
+<span class="go">FileInfo(name=&#39;file1&#39;, path=&#39;@host.com:/home/user/files/file1.txt&#39;, marks=FileMarks(tmstp=1532441131.0, fid=&#39;b5f48e2bb67a3f11469f83899195464bda5f149c&#39;))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;file1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">path</span>
+<span class="go">@host.com:/home/user/files/file1.txt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;file1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">local_path</span><span class="p">()</span>
+<span class="go">/home/user/files/file1.txt</span>
+</pre></div>
+</div>
+<p>From now on, we will consider that we are working in the local host.
+To manage both tables, we will create a <a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-class docutils literal"><span class="pre">hep_rfm.Manager</span></code></a> class, and
+register the two tables</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span> <span class="o">=</span> <span class="n">hep_rfm</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="s1">&#39;/home/user/rfm/table.db&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mgr</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="s1">&#39;@host.com:/home/user/table.db&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now we have the two tables registered.
+Calling the method <a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager.available_table" title="hep_rfm.Manager.available_table"><code class="xref py py-meth docutils literal"><span class="pre">hep_rfm.Manager.available_table()</span></code></a>, we will
+obtain the table corresponding to the local path.
+This means that in the local host we will get “/home/user/rfm/table.db”,
+and in the remote “/home/user/table.db”.
+With this information we can create the table, and work with the files
+from there.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">table</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">available_table</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">[&#39;file1&#39;, &#39;file2&#39;, &#39;file3&#39;, &#39;file4&#39;, &#39;file5&#39;, &#39;file6&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">table</span><span class="p">[</span><span class="s1">&#39;file1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">local_path</span><span class="p">()</span>
+<span class="go">/home/user/rfm/files/file1.txt</span>
+</pre></div>
+</div>
+<p>The advantage of using the <a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-class docutils literal"><span class="pre">hep_rfm.Manager</span></code></a> instance, is that
+we do not need to care whether we are in the local or remote host.
+This turns powerful when having code on a <a class="reference external" href="https://git-scm.com/">git</a>
+repository, which is present in both local and remote hosts, since one
+could work in each host without really caring about the location of the
+files.
+Lastly, and probably one of the most useful methods of the class
+concerns the method <a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager.update" title="hep_rfm.Manager.update"><code class="xref py py-class docutils literal"><span class="pre">hep_rfm.Manager.update</span></code></a>.
+This method allows to update all the different tables stored in the manager.</p>
+<ol class="arabic simple">
+<li>First, the <strong>tables are copied</strong> to the current host.</li>
+<li>On a second step, the <strong>file IDs</strong> of the files <strong>are compared</strong> among the different
+tables.</li>
+<li>If there is a mismatch, then the <strong>time-stamps are checked</strong>, so the newest
+version is determined.</li>
+<li>After, the <strong>files are copied</strong> to each outdated location.</li>
+<li>Finally, the <strong>tables</strong> in the outdated locations <strong>are updated</strong>.</li>
+</ol>
+<p>The general idea is to have a python file in your module with the tables
+begin defined, so it serves as an access point to the data and also to
+update it.
+An example of such module would be</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">mgr</span> <span class="o">=</span> <span class="n">hep_rfm</span><span class="o">.</span><span class="n">Manager</span><span class="p">()</span>
+<span class="n">mgr</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="s1">&#39;/home/user/rfm/table.db&#39;</span><span class="p">)</span>
+<span class="n">mgr</span><span class="o">.</span><span class="n">add_table</span><span class="p">(</span><span class="s1">&#39;@host.com:/home/user/table.db&#39;</span><span class="p">)</span>
+
+<span class="n">table</span> <span class="o">=</span> <span class="n">mgr</span><span class="o">.</span><span class="n">available_table</span><span class="p">()</span>
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">mgr</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>so if we put this in a file called “data.py”, we can access it via
+<code class="code docutils literal"><span class="pre">import</span> <span class="pre">data</span></code> and then <code class="code docutils literal"><span class="pre">data.table</span></code> would allow us to
+access the real paths of the files.
+On the other hand, the samples would be updated executing <code class="code docutils literal"><span class="pre">python</span> <span class="pre">data.py</span></code>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">hep_rfm</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions-and-classes.html">Functions and classes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/file_management.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

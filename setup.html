@@ -1,0 +1,285 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Setting-up the system &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.0.dev1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="setting-up-the-system">
+<span id="setup"></span><h1>Setting-up the system<a class="headerlink" href="#setting-up-the-system" title="Permalink to this headline">¶</a></h1>
+<p>The first thing needed to profit from the different tools offered in this
+package is to start <strong>defining the set of files</strong> to work with, this means,
+a <a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-class docutils literal"><span class="pre">hep_rfm.Table</span></code></a> object.
+A <a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-class docutils literal"><span class="pre">hep_rfm.Table</span></code></a> is simply a dictionary with strings as keys,
+corresponding to the names of the files, and as values, <code class="xref py py-class docutils literal"><span class="pre">FileInfo</span></code>
+objects.
+The latter stores the information needed by this package to work.
+This information corresponds to:</p>
+<ul class="simple">
+<li><strong>Name</strong>: this is the user identifier of the file. In a table there can only be one file with the same name.</li>
+<li><strong>Path</strong>: the path to the file. This can be either a local or remote path. In the last case, the possibility to work with both SSH an XROOTD protocols is provided.</li>
+<li><strong>Time-stamp</strong>: the system time-stamp of the file, stored as a float value. This will be needed to determine which files are newer.</li>
+<li><strong>File ID</strong>: this is the result of hashing the file. For this purpose, the function <a class="reference internal" href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash" title="hep_rfm.rfm_hash"><code class="xref py py-func docutils literal"><span class="pre">hep_rfm.rfm_hash()</span></code></a> is used. The result allows to evaluate the integrity of the file, and to determine if two files aiming to be the same are different. Afterwards, the time-stamp will be used to determine which one is newer.</li>
+</ul>
+<p>Generally, it will become difficult for the user to generate a table by hand
+even using the functions here provided.
+A much easier method, makes use of the script <strong>hep-rfm-table</strong>, supplied
+together with this package.
+<strong>This script allows to create, modify and update tables directly from the
+terminal</strong>, avoiding the creation of custom python scripts for that purpose.
+To start-up, create a empty directory and then type:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> hep-rfm-table -h
+</pre></div>
+</div>
+<p>You can now see the different options we have to work with tables.
+We will start by creating a new table.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> hep-rfm-table table.db create
+<span class="gp">$</span> ls
+<span class="go">table.db</span>
+</pre></div>
+</div>
+<p>We can see the contents on the table at any point by typing</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">No entries found in &quot;table.db&quot;</span>
+</pre></div>
+</div>
+<p>which is telling us that there are no entries in the table.
+Let’s add some then.
+We will start by creating a new file, with some content, and then we will add it to the table.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">echo</span> <span class="s2">&quot;My first table file&quot;</span> &gt;&gt; file1.txt
+<span class="gp">$</span> hep-rfm-table table.db add file1 file1.txt
+<span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                            tmstp                   fid</span>
+<span class="go">file1        /home/user/rfm/file1.txt        1532441131.918498       b5f48e2bb67a3f11469f83899195464bda5f149c</span>
+</pre></div>
+</div>
+<p>So we have added our first file.
+In order to do this we had to give the name of the file and the path to it.
+You can see that we have added a file named <em>file1</em>, that the path to the file has been automatically expanded, to match a global path, and that the time-stamp and file ID have been extracted.
+Now let’s create two more files and add them to the table as well.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> <span class="nb">echo</span> <span class="s2">&quot;This is the second file&quot;</span> &gt;&gt; file2.txt
+<span class="gp">$</span> <span class="nb">echo</span> <span class="s2">&quot;This is the third file&quot;</span> &gt;&gt; file3.txt
+<span class="gp">$</span> hep-rfm-table table.db add_massive file2.txt file3.txt
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                            tmstp                   fid</span>
+<span class="go">file1        /home/user/rfm/file1.txt        1532468042.6981168      b5f48e2bb67a3f11469f83899195464bda5f149c</span>
+<span class="go">file2        /home/user/rfm/file2.txt        1532468062.7577875      41d87e380cb316535e4a97b523cf7dbfd94eaa80</span>
+<span class="go">file3        /home/user/rfm/file3.txt        1532468067.8457038      02a8fd5d7a7181ba405223b749a0ad9c574ab29b</span>
+</pre></div>
+</div>
+<p>With this command one can add easily new files, given only their paths, where
+the names will be extracted from the name of the files themselves, without
+extensions.
+Frequently one will have a whole system of files stored in different directories
+and subdirectories.
+This can easlity handed running another mode, which will take all the files
+within a directory and add them to the table.
+We can also specify a regular expression, so only the files whose names
+(including the extension) match that given.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> mkdir -p subdir/subsubdir
+<span class="gp">$</span> <span class="nb">echo</span> <span class="s2">&quot;This is the fourth file&quot;</span> &gt;&gt; subdir/file4.txt
+<span class="gp">$</span> <span class="nb">echo</span> <span class="s2">&quot;This is the fifth file&quot;</span> &gt;&gt; subdir/subsubdir/file5.txt
+<span class="gp">$</span> <span class="nb">echo</span> <span class="s2">&quot;This is the sixth file&quot;</span> &gt;&gt; subdir/subsubdir/file6.dt
+<span class="gp">$</span> hep-rfm-table table.db add_from_dir . --regex .*.txt
+<span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                                            tmstp                   fid</span>
+<span class="go">file1        /home/user/rfm/file1.txt                        1532468042.6981168      b5f48e2bb67a3f11469f83899195464bda5f149c</span>
+<span class="go">file2        /home/user/rfm/file2.txt                        1532468062.7577875      41d87e380cb316535e4a97b523cf7dbfd94eaa80</span>
+<span class="go">file3        /home/user/rfm/file3.txt                        1532468067.8457038      02a8fd5d7a7181ba405223b749a0ad9c574ab29b</span>
+<span class="go">file4        /home/user/rfm/subdir/file4.txt                 1532468131.9366517      801dabbdf8c7244883a896c418835599103b6ff0</span>
+<span class="go">file5        /home/user/rfm/subdir/subsubdir/file5.txt       1532468142.2924817      220d820bbb8939b69fb7ee028b5144c868cdf499</span>
+</pre></div>
+</div>
+<p>You can see that we have included all files in the current directory, but from
+<em>file6.dt</em>, which did not match the given regular expression.
+If we remove the regular expression requirement, then it is included</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> hep-rfm-table table.db add_from_dir .
+<span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                                            tmstp                   fid</span>
+<span class="go">file1        /home/user/rfm/file1.txt                        1532468042.6981168      b5f48e2bb67a3f11469f83899195464bda5f149c</span>
+<span class="go">file2        /home/user/rfm/file2.txt                        1532468062.7577875      41d87e380cb316535e4a97b523cf7dbfd94eaa80</span>
+<span class="go">file3        /home/user/rfm/file3.txt                        1532468067.8457038      02a8fd5d7a7181ba405223b749a0ad9c574ab29b</span>
+<span class="go">file4        /home/user/rfm/subdir/file4.txt                 1532468131.9366517      801dabbdf8c7244883a896c418835599103b6ff0</span>
+<span class="go">file5        /home/user/rfm/subdir/subsubdir/file5.txt       1532468142.2924817      220d820bbb8939b69fb7ee028b5144c868cdf499</span>
+<span class="go">file6        /home/user/rfm/subdir/subsubdir/file6.dt        1532468149.8963568      0372b573268f3c58d3d4e466607489f57ba17dd3</span>
+<span class="go">table        /home/user/rfm/table.db                         1532468283.6741607      18c6b58520eff3010c6fd140af092ceeaee2faa3</span>
+</pre></div>
+</div>
+<p>You can see that we have also included the table itself.
+This is very dangerous, and must be avoided, since it will lead to a replacement
+of the table files when working with <a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-class docutils literal"><span class="pre">hep_rfm.Manager</span></code></a>.
+Usually it is preferred that the files are located in a sub-directory, and the
+table file in the parent directory, so there are no conflicts.
+To return to a safe status, let’s remove the table entry, put everything on a
+new directory and add the files again.</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> hep-rfm-table table.db remove table
+<span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                                            tmstp                   fid</span>
+<span class="go">file1        /home/user/rfm/file1.txt                        1532468042.6981168      b5f48e2bb67a3f11469f83899195464bda5f149c</span>
+<span class="go">file2        /home/user/rfm/file2.txt                        1532468062.7577875      41d87e380cb316535e4a97b523cf7dbfd94eaa80</span>
+<span class="go">file3        /home/user/rfm/file3.txt                        1532468067.8457038      02a8fd5d7a7181ba405223b749a0ad9c574ab29b</span>
+<span class="go">file4        /home/user/rfm/subdir/file4.txt                 1532468131.9366517      801dabbdf8c7244883a896c418835599103b6ff0</span>
+<span class="go">file5        /home/user/rfm/subdir/subsubdir/file5.txt       1532468142.2924817      220d820bbb8939b69fb7ee028b5144c868cdf499</span>
+<span class="go">file6        /home/user/rfm/subdir/subsubdir/file6.dt        1532468149.8963568      0372b573268f3c58d3d4e466607489f57ba17dd3</span>
+<span class="gp">$</span> mkdir files
+<span class="gp">$</span> mv subdir *.txt files/.
+<span class="gp">$</span> hep-rfm-table table.db add_from_dir files
+<span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                                            tmstp                   fid</span>
+<span class="go">file1        /home/user/rfm/files/file1.txt                  1532468042.6981168      b5f48e2bb67a3f11469f83899195464bda5f149c</span>
+<span class="go">file2        /home/user/rfm/files/file2.txt                  1532468062.7577875      41d87e380cb316535e4a97b523cf7dbfd94eaa80</span>
+<span class="go">file3        /home/user/rfm/files/file3.txt                  1532468067.8457038      02a8fd5d7a7181ba405223b749a0ad9c574ab29b</span>
+<span class="go">file4        /home/user/rfm/files/subdir/file4.txt           1532468131.9366517      801dabbdf8c7244883a896c418835599103b6ff0</span>
+<span class="go">file5        /home/user/rfm/files/subdir/subsubdir/file5.txt 1532468142.2924817      220d820bbb8939b69fb7ee028b5144c868cdf499</span>
+<span class="go">file6        /home/user/rfm/files/subdir/subsubdir/file6.dt  1532468149.8963568      0372b573268f3c58d3d4e466607489f57ba17dd3</span>
+</pre></div>
+</div>
+<p>So now the entry <em>table</em> has been removed.
+The idea behind this is not only to have a way to keep our data files organized,
+but also to be able to <strong>keep files synchronized</strong> in different hosts.
+This means that we will have a <em>main</em> place, where we would be preferably
+placing our new versions of the files, and from there we would be updating the
+other locations.
+In order to do any modification on a remote we need to authenticate, and
+we would need to do it for every single file we want to update.
+Using <strong>SSH keys</strong> is thus the preferred way to handle this inconvenient,
+or make sure that the target host is directly accessible from your current one.
+In the <strong>remote host</strong>, we will need to have <strong>another table</strong> with the paths
+in it.
+However, we should <strong>specify the path but not the time-stamp or file ID</strong>, since
+we will not have a file there.
+This is solved adding the <em>--bare</em> option to <em>add</em> and <em>add_massive</em>.
+The mode <em>add_from_dir</em> will not make sense to be used here, since we do not
+have files there.
+This means that we could type</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> ssh username@host.com
+<span class="gp">$</span> mkdir files
+<span class="gp">$</span> hep-rfm-table table.db create
+<span class="gp">$</span> hep-rfm-table table.db add files/file1.txt --bare --remote @host.com
+<span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                                    tmstp                   fid</span>
+<span class="go">file1        @host.com:/home/user/files/file1.txt    0.0                     none</span>
+</pre></div>
+</div>
+<p>So you can see that the time-stamp and file ID are filled with default values,
+which are chosen so they do not cause conflicts.
+Note that we have <strong>specified the remote path</strong> “&#64;host.com”.
+This will be needed afterwards to correctly update the files.
+The other files will be added in a row, by typing</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> hep-rfm-table table.db add_massive <span class="sb">`</span><span class="nv">a</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">;</span> <span class="k">for</span> i in <span class="o">{</span><span class="m">2</span>..7<span class="o">}</span><span class="p">;</span><span class="k">do</span> <span class="nb">echo</span> files/file<span class="nv">$i</span>.txt<span class="p">;</span> <span class="k">done</span><span class="p">;</span> <span class="nb">echo</span> <span class="nv">$a</span><span class="sb">`</span> --bare --remote @host.com
+<span class="gp">$</span> hep-rfm-table table.db display
+<span class="go">Contents of table &quot;table.db&quot;</span>
+<span class="go">name         path                                                    tmstp   fid</span>
+<span class="go">file1        @host.com:/home/user/files/file1.txt                    0.0     none</span>
+<span class="go">file2        @host.com:/home/user/files/file2.txt                    0.0     none</span>
+<span class="go">file3        @host.com:/home/user/files/file3.txt                    0.0     none</span>
+<span class="go">file4        @host.com:/home/user/files/subdir/file4.txt             0.0     none</span>
+<span class="go">file5        @host.com:/home/user/files/subdir/subsubdir/file5.txt   0.0     none</span>
+<span class="go">file6        @host.com:/home/user/files/subdir/subsubdir/file6.txt   0.0     none</span>
+</pre></div>
+</div>
+<p>Note that here we have included all the files in the same directory.
+Files do not need to have similar paths in different hosts.
+One we have done this, we are ready to see how we can access the files
+and kee data updated in both sites, in the next section: <a class="reference internal" href="file_management.html#file-management"><span class="std std-ref">File management</span></a>.</p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">hep_rfm</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions-and-classes.html">Functions and classes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+      |
+      <a href="_sources/setup.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,21 @@
+Manager
+=======
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: Manager
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~Manager.add_table
+      ~Manager.available_table
+      ~Manager.update
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: add_table
+   .. automethod:: available_table
+   .. automethod:: update

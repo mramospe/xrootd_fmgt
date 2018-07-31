@@ -9,14 +9,14 @@ Introduction
 .. include:: ../../README.rst
    :start-after: inclusion-marker-do-not-remove
 
-Functions and classes
-=====================
+In order to get started into this package, or to see the function and classes
+here provided, please use the following links:
 
-Here you can find the documentation on the functions and classes
-of the hep_rfm package. The class inheritance diagram is also shown.
+.. toctree::
+   :maxdepth: 2
 
-.. automodapi:: hep_rfm
-   :no-heading:
+   getting-started
+   functions-and-classes
 
 Indices and tables
 ==================

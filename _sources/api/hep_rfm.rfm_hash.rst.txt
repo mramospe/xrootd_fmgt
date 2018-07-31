@@ -1,0 +1,6 @@
+rfm_hash
+========
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: rfm_hash

@@ -1,0 +1,303 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>hep_rfm.files &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.0.dev1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for hep_rfm.files</h1><div class="highlight"><pre>
+<span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Define classes and functions to manage files and information about files.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miguel Ramos Pernas&#39;</span><span class="p">]</span>
+<span class="n">__email__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
+
+<span class="c1"># Local</span>
+<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
+
+<span class="c1"># Python</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FileInfoBase&#39;</span><span class="p">,</span> <span class="s1">&#39;FileInfo&#39;</span><span class="p">,</span> <span class="s1">&#39;FileMarksBase&#39;</span><span class="p">,</span> <span class="s1">&#39;FileMarks&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># Default names for the file marks</span>
+<span class="n">__default_tmstp__</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">__default_fid__</span>   <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+<span class="c1"># Store the time-stamp and a file ID</span>
+<span class="n">FileMarksBase</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;FileMarksBase&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;tmstp&#39;</span><span class="p">,</span> <span class="s1">&#39;fid&#39;</span><span class="p">])</span>
+<span class="n">FileMarksBase</span><span class="o">.</span><span class="fm">__new__</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">Base class representing an object storing the time-stamp and file ID of a file.</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+<span class="c1"># Class to store the information of a file</span>
+<span class="n">FileInfoBase</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;FileInfoBase&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;marks&#39;</span><span class="p">])</span>
+<span class="n">FileInfoBase</span><span class="o">.</span><span class="fm">__new__</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
+<span class="s1">Base class for an object storing the information about a file.</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+<span class="c1"># Add documentation to classes comming from collections.namedtuple()</span>
+<span class="n">namedtuple_extradoc</span> <span class="o">=</span> <span class="s1">&#39;This object has been defined through :func:`collections.namedtuple`.&#39;</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="n">FileMarksBase</span><span class="p">,</span> <span class="n">FileInfoBase</span><span class="p">):</span>
+    <span class="n">c</span><span class="o">.</span><span class="fm">__new__</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+=</span> <span class="n">namedtuple_extradoc</span>
+
+
+<span class="c1"># Add references for classes comming from collections.namedtuple() (do not indent)</span>
+<span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="n">FileMarksBase</span><span class="p">,</span> <span class="n">FileInfoBase</span><span class="p">):</span>
+    <span class="n">c</span><span class="o">.</span><span class="fm">__new__</span><span class="o">.</span><span class="vm">__doc__</span> <span class="o">+=</span> <span class="s1">&#39;&#39;&#39;</span><span class="se">\n</span><span class="s1"></span>
+<span class="s1">.. seealso:: :class:`hep_rfm.FileInfo`, :class:`hep_rfm.FileMarks`</span>
+<span class="s1">&#39;&#39;&#39;</span>
+
+
+<div class="viewcode-block" id="FileInfo"><a class="viewcode-back" href="../../api/hep_rfm.FileInfo.html#hep_rfm.FileInfo">[docs]</a><span class="k">class</span> <span class="nc">FileInfo</span><span class="p">(</span><span class="n">FileInfoBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">marks</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Object to store the information about a file.</span>
+
+<span class="sd">        :param name: name of the file.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param path: path to the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :param marks: time-stamp and file ID.</span>
+<span class="sd">        :type marks: FileMarks</span>
+
+<span class="sd">        .. seealso:: :class:`hep_rfm.FileMarks`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">marks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">marks</span> <span class="o">=</span> <span class="n">FileMarks</span><span class="p">()</span>
+
+        <span class="n">fi</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileInfo</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">marks</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fi</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_stream_line</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">line</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class from a line read from a table file.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">tmstp</span><span class="p">,</span> <span class="n">fid</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">FileMarks</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmstp</span><span class="p">),</span> <span class="n">fid</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_name_and_path</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build a from the file at the given path.</span>
+<span class="sd">        The path must point to a local file or, in case of being a</span>
+<span class="sd">        remote path, its path must correspond to a local file.</span>
+
+<span class="sd">        :param name: name of the file.</span>
+<span class="sd">        :type name: str</span>
+<span class="sd">        :param path: path to the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :returns: built :class:`FileInfo` instance.</span>
+<span class="sd">        :rtype: FileInfo</span>
+<span class="sd">        :raises: ValueError: if failed to extract a valid path from that given.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">protocols</span><span class="o">.</span><span class="n">available_local_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to extract a local path from &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="n">marks</span> <span class="o">=</span> <span class="n">FileMarks</span><span class="o">.</span><span class="n">from_path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">marks</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        This method defines the way this class is saved to a file.</span>
+
+<span class="sd">        :returns: tuple with the information of this class</span>
+<span class="sd">        :rtype: tuple(str, str, str, str)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">tmstp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">fid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">is_bare</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return whether this is a bare file.</span>
+
+<span class="sd">        :returns: whether this is a bare file.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">tmstp</span> <span class="o">==</span> <span class="n">__default_tmstp__</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">fid</span> <span class="o">==</span> <span class="n">__default_fid__</span>
+
+    <span class="k">def</span> <span class="nf">local_path</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the actual path in the local system, removing the information</span>
+<span class="sd">        of the remote.</span>
+<span class="sd">        If this is a bare file, None is returned.</span>
+<span class="sd">        In the opposite case, an exception is raised if the file is not found</span>
+<span class="sd">        in the associated path.</span>
+
+<span class="sd">        :returns: path in the local system.</span>
+<span class="sd">        :rtype: str or None</span>
+<span class="sd">        :raises RuntimeError: if this is a non-bare file, and no file is found \</span>
+<span class="sd">        in the associated path.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_bare</span><span class="p">():</span>
+            <span class="k">return</span> <span class="kc">None</span>
+
+        <span class="n">p</span> <span class="o">=</span> <span class="n">protocols</span><span class="o">.</span><span class="n">available_local_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Unable to retrieve a valid path to a file from &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">p</span>
+
+    <span class="k">def</span> <span class="nf">newer_than</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return whether this object corresponds to a newer version than that</span>
+<span class="sd">        given.</span>
+<span class="sd">        A new :class:`FileInfo` object is considered to be &quot;newer&quot;</span>
+<span class="sd">        only if the two file IDs differ, and this class has a smaller</span>
+<span class="sd">        time-stamp than that given.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">fid</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">fid</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">tmstp</span> <span class="o">&gt;</span> <span class="n">other</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">tmstp</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">updated</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Return the updated version of this file.</span>
+
+<span class="sd">        :returns: updated version of this file.</span>
+<span class="sd">        :rtype: FileInfo</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">local_path</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">marks</span> <span class="o">=</span> <span class="n">FileMarks</span><span class="o">.</span><span class="n">from_path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">marks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span>
+
+        <span class="k">return</span> <span class="n">FileInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">marks</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FileMarks"><a class="viewcode-back" href="../../api/hep_rfm.FileMarks.html#hep_rfm.FileMarks">[docs]</a><span class="k">class</span> <span class="nc">FileMarks</span><span class="p">(</span><span class="n">FileMarksBase</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">tmstp</span> <span class="o">=</span> <span class="n">__default_tmstp__</span><span class="p">,</span> <span class="n">fid</span> <span class="o">=</span> <span class="n">__default_fid__</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Represent an object storing the time-stamp and file ID of a file.</span>
+
+<span class="sd">        :param tmstp: time-stamp of the file.</span>
+<span class="sd">        :type tmstp: float</span>
+<span class="sd">        :param fid: file ID.</span>
+<span class="sd">        :type fid: str</span>
+
+<span class="sd">        .. seealso:: :class:`hep_rfm.FileInfo`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileMarks</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tmstp</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_path</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">path</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class from a path to a file.</span>
+
+<span class="sd">        :param path: path to the file.</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">fid</span> <span class="o">=</span> <span class="n">core</span><span class="o">.</span><span class="n">rfm_hash</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">tmstp</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getmtime</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">tmstp</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">hep_rfm</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions-and-classes.html">Functions and classes</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

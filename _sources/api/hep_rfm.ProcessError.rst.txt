@@ -1,0 +1,6 @@
+ProcessError
+============
+
+.. currentmodule:: hep_rfm
+
+.. autoexception:: ProcessError
