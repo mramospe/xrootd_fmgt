@@ -6,7 +6,7 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 
-__all__ = []
+__all__ = ['ProcessError', 'CopyFileError', 'MakeDirsError']
 
 
 class ProcessError(RuntimeError):

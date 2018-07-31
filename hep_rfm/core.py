@@ -9,220 +9,79 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 from hep_rfm import protocols
 from hep_rfm import parallel
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
-from hep_rfm.parallel import JobHandler, Worker
 
 # Python
-import logging, os, subprocess, shutil, warnings
-import multiprocessing
+import hashlib
+import logging
+import os
+import subprocess
 
 
 __all__ = [
     'copy_file',
-    'FileProxy',
-    'getmtime',
     'make_directories',
-    'sync_proxies'
+    'rfm_hash',
     ]
 
-
-class FileProxy:
-
-    def __init__( self, source, *targets ):
-        '''
-        Object to store the path to a source file, and some other paths pointing
-        to some target locations. The former is used as a reference to update
-        the latter, using the :func:`copy_file` function.
-        Also provides a method to obtain the most accessible file.
-        The proxy is built from a source and the set of targets.
-
-        :param source: path to the file to use as a reference.
-        :type source: str
-        :param targets: path to some other locations to put the target files.
-        :type targets: list(str)
-        '''
-        if len(targets) == 0:
-            raise ValueError('At least one target file path must be specified')
-
-        self.source  = source
-        self.targets = list(targets)
-
-    def path( self, xrdav=False ):
-        '''
-        Get the most accessible path to one of the files in this class.
-
-        :param xrdav: whether the xrootd protocol is available in root.
-        :type xrdav: bool
-        :returns: path to the file.
-        :rtype: str
-
-        .. warning::
-           If the path to a file on a remote site matches that of a local file,
-           it will be returned. This allows to use local files while specifying
-           remote paths. However, if a path on a remote site matches a local
-           file, which does not correspond to a proxy of the path referenced by
-           this object, it will result on a fake reference to the file.
-        '''
-        all_paths = list(self.targets)
-        all_paths.append(self.source)
-
-        path = None
-        for s in all_paths:
-
-            if protocols.is_remote(s):
-
-                server, sepath = _split_remote(s)
-
-                if os.path.exists(sepath):
-                    path = sepath
-
-                if protocols.is_xrootd(s):
-                    if xrdav:
-                        path = s
-
-            else:
-                if os.path.exists(s):
-                    path = s
-
-            if path is not None:
-                break
-
-        if path is not None:
-            logging.getLogger(__name__).info('Using path "{}"'.format(path))
-            return path
-
-        raise RuntimeError('Unable to find an available path')
-
-    def set_username( self, uname, host=None ):
-        '''
-        Assign the user name "uname" to the source and targets with
-        host equal to "host", and which do not have a user name yet.
-
-        :param source: path to a file.
-        :type source: str
-        :param uname: user name.
-        :type uname: str
-        :param host: host name.
-        :type host: str or None
-        '''
-        self.source = _set_username(self.source, uname, host)
-        for i, t in enumerate(self.targets):
-            self.targets[i] = _set_username(t, uname, host)
-
-    def sync( self, **kwargs ):
-        '''
-        Synchronize the target files using the source file.
-
-        :param kwargs: extra arguments to :func:`sync_proxies`.
-        :type kwargs: dict
-
-        .. seealso:: :func:`sync_proxies`
-        '''
-        sync_proxies((self,))
+# Buffer size to be able to hash large files
+__buffer_size__ = 10485760 # 10MB
 
 
-def copy_file( source, target, force=False, loglock=None ):
+def copy_file( source, target, loglock=None, server_spec=None ):
     '''
     Main function to copy a file from a source to a target. The copy is done
-    if the modification time of both files do not coincide. If "force" is
-    specified, then the copy is done independently of this.
+    if the modification time of both files do not coincide.
 
-    :param force: if set to True, the files are copied even if they are \
-    up to date.
-    :type force: bool
-    :param loglock: possible locker to prevent from displaying at the same time
-    in the screen for two different processes.
+    :param loglock: possible locker to prevent from displaying at the same \
+    time in the screen for two different processes.
+    :type loglock: multiprocessing.Lock or None
+    :param server_spec: specification of user for each SSH server. Must \
+    be specified as a dictionary, where the keys are the hosts and the \
+    values are the user names.
+    :type server_spec: dict
+    :raises CopyFileError: if the file can not be copied.
     '''
-    itmstp = getmtime(source)
+    # Set the user names if dealing with SSH paths
+    if protocols.is_ssh(source):
+        source = _set_username(source, server_spec)
 
-    if itmstp == None:
-        raise RuntimeError('Unable to synchronize file "{}", the '\
-                               'file does not exist'.format(source))
+    if protocols.is_ssh(target):
+        target = _set_username(target, server_spec)
 
+    # Make the directories to the target
     make_directories(target)
 
-    logger = logging.getLogger(__name__)
-
-    if getmtime(target) != itmstp or force:
-
-        # Copy the file
-
-        dec = protocols.remote_protocol(source, target)
-        if dec == protocols.__different_protocols__:
-            # Copy to a temporal file
-            if protocols.is_remote(source):
-                _, path = _split_remote(source)
-            else:
-                path = source
-
-            with tempfile.TemporaryDirectory() as tmpdir:
-
-                tmp = os.path.join(tmpdir, os.path.basename(path))
-
-                copy_file(source, tmp, force=force)
-                copy_file(tmp, target, force=force)
-
+    # Copy the file
+    dec = protocols.remote_protocol(source, target)
+    if dec == protocols.__different_protocols__:
+        # Copy to a temporal file
+        if protocols.is_remote(source):
+            _, path = protocols.split_remote(source)
         else:
-            parallel.log(logger.info,
-                         'Copying file\n source: {}\n target: {}'.format(source, target),
-                         loglock)
+            path = source
 
-            if dec == protocols.__ssh_protocol__:
-                proc = _process('scp', '-q', '-p', source, target)
-            elif dec == protocols.__xrootd_protocol__:
-                proc = _process('xrdcp', '-f', '-s', source, target)
-            else:
-                proc = _process('cp', '-p', source, target)
+        with tempfile.TemporaryDirectory() as tmpdir:
 
-            if proc.wait() != 0:
-                _, stderr = proc.communicate()
-                raise CopyFileError(source, target, stderr)
+            tmp = os.path.join(tmpdir, os.path.basename(path))
 
-            if dec == protocols.__xrootd_protocol__ and not protocols.is_xrootd(target):
-                # Update the modification time since xrdcp does not
-                # preserve it.
-                os.utime(target, (os.stat(target).st_atime, itmstp))
+            copy_file(source, tmp)
+            copy_file(tmp, target)
 
     else:
-        parallel.log(logger.info,
-                     'File "{}" is up to date'.format(target),
+        parallel.log(logging.getLogger(__name__).info,
+                     'Copying file\n source: {}\n target: {}'.format(source, target),
                      loglock)
 
-
-def getmtime( path ):
-    '''
-    Get the modification time for the file in "path". Only the integer part of
-    the modification time is used. If no access is possible to the information
-    of the file, None is returned.
-
-    :param path: path to the input file.
-    :type path: str
-    :returns: modification time.
-    :rtype: int or None
-    '''
-    if protocols.is_remote(path):
-
-        server, sepath = _split_remote(path)
-
-        if protocols.is_ssh(path):
-            proc = _process('ssh', '-X', server, 'stat', '-c%Y', sepath)
+        if dec == protocols.__ssh_protocol__:
+            proc = _process('scp', '-q', source, target)
+        elif dec == protocols.__xrootd_protocol__:
+            proc = _process('xrdcp', '-f', '-s', source, target)
         else:
-            proc = _process('xrd', server, 'stat', sepath)
-    else:
-        proc = _process('stat', '-c%Y', path)
+            proc = _process('cp', source, target)
 
-    st = proc.wait()
-
-    tmpstp = proc.stdout.read().decode('utf-8')
-
-    if 'Connection timed out' in tmpstp:
-        raise RuntimeError('Connection timed out')
-    elif st != 0 or tmpstp.startswith('Error 3011: Unable to stat'):
-        return None
-
-    if protocols.is_xrootd(path):
-        tmpstp = tmpstp[tmpstp.find('Modtime:') + len('Modtime:'):]
-
-    return int(tmpstp)
+        if proc.wait() != 0:
+            _, stderr = proc.communicate()
+            raise CopyFileError(source, target, stderr.decode())
 
 
 def make_directories( target ):
@@ -231,10 +90,11 @@ def make_directories( target ):
 
     :param target: path to a target file.
     :type target: str
+    :raises MakeDirsError: if the directory could not be created.
     '''
     if protocols.is_remote(target):
 
-        server, sepath = _split_remote(target)
+        server, sepath = protocols.split_remote(target)
 
         dpath = os.path.dirname(sepath)
 
@@ -253,10 +113,7 @@ def make_directories( target ):
 
         _, stderr = proc.communicate()
 
-        if 'Connection timed out' in stderr.decode('utf-8'):
-            raise RuntimeError('Connection timed out')
-        else:
-            raise MakeDirsError(target, stderr)
+        raise MakeDirsError(target, stderr.decode())
 
 
 def _process( *args ):
@@ -274,87 +131,70 @@ def _process( *args ):
                              stderr = subprocess.PIPE )
 
 
-def _set_username( source, uname, host=None ):
+def rfm_hash( path ):
     '''
-    Return a modified version of "source" in case it contains the
-    given host. If no host is provided, then the user name will be
-    set unless "source" has already defined one.
+    Use the SHA512 hash function to get the file ID of the file
+    in the given path.
+    This is achieved by reading the file in binary mode, evaluating
+    the hash in chunks of 10 MB, adding them and converting the
+    result to hexadecimal.
 
-    :param source: path to a file.
-    :type source: str
-    :param uname: user name.
-    :type uname: str
-    :param host: host name.
-    :type host: str or None
-    :returns: modified version of "source".
+    :param path: path to the file.
+    :type path: str
+    :returns: hexadecimal result of evaluating the hash function.
     :rtype: str
     '''
-    if source.startswith('@'):
+    h = hashlib.sha512()
 
-        if host is None:
-            return uname + source
-        else:
-            if source[1:].startswith(host):
-                return uname + source
+    with open(path, 'rb') as f:
 
-    return source
+        # Read in chunks so we do not run out of memory
+        while True:
+
+            d = f.read(__buffer_size__)
+            if not d:
+                break
+
+            h.update(d)
+
+    return h.hexdigest()
 
 
-def _split_remote( path ):
+def _set_username( path, server_spec=None ):
     '''
-    Split a path related to a remote file in site and true path.
+    Process the given path and return a modified version of it adding
+    the correct user name.
+    The user name for each host must be specified in server_spec.
 
-    :param path: path to the input file.
+    :param path: path to a file.
     :type path: str
-    :returns: site and path to the file in the site.
-    :rtype: str, str
+    :param server_spec: specification of user for each SSH server. Must \
+    be specified as a dictionary, where the keys are the hosts and the \
+    values are the user names.
+    :type server_spec: dict
+    :returns: modified version of "path".
+    :rtype: str
+    :raises RuntimeError: if there is no way to determine the user name for \
+    the given path.
     '''
-    if protocols.is_ssh(path):
-        return path.split(':')
-    else:
-        rp = path.find('//', 7)
-        return path[7:rp], path[rp + 1:]
+    server_spec = server_spec if server_spec is not None else {}
 
+    l = path.find('@')
 
-def sync_proxies( proxies, parallelize = False, force = False ):
-    '''
-    Synchronize a given list of proxies. This function allows to fully
-    parallelize all the processes.
+    if l == 0 and server_spec is None:
+        raise RuntimeError('User name not specified for path "{}"'.format(path))
 
-    :param proxies: file proxies to synchronize.
-    :type proxies: collection(FileProxy)
-    :param parallelize: number of processes allowed to parallelize the \
-    synchronization of all the proxies. By default it is set to 0, so no \
-    parallelization  is done (0).
-    :type parallelize: int
-    :param force: if set to True, the files are copied even if they are \
-    up to date.
-    :type force: bool
+    uh, _ = protocols.split_remote(path)
 
-    .. seealso:: :meth:`FileProxy.sync`
+    u, h = uh.split('@')
 
-    .. warning:: beware that the base name of the source files in each proxy \
-       do not have the same names. This might result into overwriting temporal \
-       files if there are parallel calls to :func:`copy_file`.
-    '''
-    inputs = list((p.source, t) for p in proxies for t in p.targets)
+    for host, uname in server_spec.items():
 
-    kwargs = {'force': force}
+        if host == h:
+            path = uname + path[l:]
+            break
 
-    if parallelize:
+    if path.startswith('@'):
+        raise RuntimeError('Unable to find a proper user name for path "{}"'.format(path))
 
-        lock = multiprocessing.Lock()
-
-        handler = JobHandler(inputs, parallelize)
-
-        func = lambda obj, **kwargs: copy_file(*obj, **kwargs)
-
-        kwargs['loglock'] = lock
-
-        for i in range(handler.nproc):
-            Worker(handler, func, kwargs=kwargs)
-
-        handler.wait()
-    else:
-        for i in inputs:
-            copy_file(*i, **kwargs)
+    return path
