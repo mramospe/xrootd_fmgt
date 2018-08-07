@@ -132,44 +132,48 @@ class Manager(object):
             u.update_table()
 
         #
-        # Synchronize the files
+        # Synchronize files and tables.
         #
-        inputs = []
+        sync_files, sync_tables = [], []
 
         # Get the list of sources/targets to process from the update tables
         for u in update_tables:
 
-            inputs += u.changes()
+            sync_files += u.changes()
 
             if u.needs_update():
-                inputs.append((u.tmp_path, u.path))
+                sync_tables.append((u.tmp_path, u.path))
 
-        if len(inputs):
+        if len(sync_files):
             logging.getLogger(__name__).info('Starting to synchronize files')
         else:
             logging.getLogger(__name__).info('All files are up to date')
 
         kwargs = {'server_spec': server_spec}
 
+        # Do not swap "sync_files" and "sync_tables". First we must modify the
+        # files and, in the last step, update the information in the tables.
         if parallelize:
-
-            lock = multiprocessing.Lock()
-
-            handler = JobHandler()
-
-            for i in inputs:
-                handler.put(i)
 
             func = lambda obj, **kwargs: core.copy_file(*obj, **kwargs)
 
-            kwargs['loglock'] = lock
+            for lst in (sync_files, sync_tables):
 
-            for i in range(parallelize):
-                Worker(handler, func, kwargs=kwargs)
+                lock = multiprocessing.Lock()
 
-            handler.process()
+                handler = JobHandler()
+
+                for i in lst:
+                    handler.put(i)
+
+                kwargs['loglock'] = lock
+
+                for i in range(parallelize):
+                    Worker(handler, func, kwargs=kwargs)
+
+                handler.process()
         else:
-            for i in inputs:
+            for i in sync_files + sync_tables:
                 core.copy_file(*i, **kwargs)
 
 
