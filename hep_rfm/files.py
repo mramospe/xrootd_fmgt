@@ -80,7 +80,7 @@ class FileInfo(FileInfoBase):
     @classmethod
     def from_name_and_path( cls, name, path ):
         '''
-        Build a from the file at the given path.
+        Build from a name and a path to the file.
         The path must point to a local file or, in case of being a
         remote path, its path must correspond to a local file.
 
