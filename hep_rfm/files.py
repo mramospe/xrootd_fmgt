@@ -97,7 +97,7 @@ class FileInfo(FileInfoBase):
         if p is None:
             raise ValueError('Unable to extract a local path from "{}"'.format(path))
 
-        marks = FileMarks.from_path(p)
+        marks = FileMarks.from_local_path(p)
 
         return cls(name, path, marks)
 
@@ -165,7 +165,7 @@ class FileInfo(FileInfoBase):
         p = self.local_path()
 
         if p is not None:
-            marks = FileMarks.from_path(p)
+            marks = FileMarks.from_local_path(p)
         else:
             marks = self.marks
 
@@ -188,9 +188,9 @@ class FileMarks(FileMarksBase):
         return super(FileMarks, cls).__new__(cls, tmstp, fid)
 
     @classmethod
-    def from_path( cls, path ):
+    def from_local_path( cls, path ):
         '''
-        Build the class from a path to a file.
+        Build the class from a local path to a file.
 
         :param path: path to the file.
         :type path: str
