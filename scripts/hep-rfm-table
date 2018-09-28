@@ -182,6 +182,7 @@ def add_massive( table, files, nproc, remote, bare ):
     t.write(table)
 
 
+@decorate_access_mode
 def add_from_dir( directory, regex, **kwargs ):
     '''
     Add files from a given directory.
