@@ -85,9 +85,34 @@ def test_hep_rfm_table( tmpdir ):
 
     assert len(table) == 8
 
+    # Recreate substructure on a different table
+    new_table_path = tmpdir.join('table_clone.txt')
+
+    p = subprocess.Popen('hep-rfm-table {} create'.format(new_table_path).split())
+    assert p.wait() == 0
+
+    p = subprocess.Popen('hep-rfm-table {} copy_scheme --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir).split())
+    assert p.wait() == 0
+
+    old_table = hep_rfm.Table.read(table_path.strpath)
+    new_table = hep_rfm.Table.read(new_table_path.strpath)
+
+    assert len(table) == 8
+
+    assert list(sorted(old_table.keys())) == list(sorted(new_table.keys()))
+
+    for k, v in new_table.items():
+        assert old_table[k].path == v.path
+        assert v.marks.fid == hep_rfm.files.__default_fid__
+        assert v.marks.tmstp == hep_rfm.files.__default_tmstp__
+
     # Commands that break
     break_cmds = (
+        # Attempt to add a file that does not exist
         'hep-rfm-table {} add {} {}'.format(table_path, 'none', tmpdir.join('none.txt')),
+        # Attempt to recreate the structure of one table in another with
+        # colliding file names
+        'hep-rfm-table {} copy_scheme --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir),
     )
 
     for c in break_cmds:
