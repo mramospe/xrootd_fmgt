@@ -15,6 +15,7 @@ import hashlib
 import logging
 import os
 import subprocess
+import tempfile
 
 
 __all__ = [
