@@ -13,106 +13,110 @@ import subprocess
 import hep_rfm
 
 
-def test_hep_rfm_table( tmpdir ):
+def process( strfunc, code = 0 ):
     '''
-    Test function for the "hep-rfm-table" script.
+    Execute a string on a new process and check that the output code
+    is equal to "code"
     '''
-    # Add file in the current directory
-    file1_path = tmpdir.join('file1.txt')
-    file2_path = tmpdir.join('file2.txt')
-    file3_path = tmpdir.join('file3.txt')
-    file4_path = tmpdir.join('file4.txt')
+    p = subprocess.Popen(strfunc.split())
+    assert p.wait() == code
 
-    # Add file into a sub-directory as well
-    subdir = tmpdir.mkdir('subdir')
-    file5_path = subdir.join('file5.txt')
-    file6_path = subdir.join('file6.txt')
 
-    # Create a sub-sub-directory
-    subsubdir = subdir.mkdir('subsubdir')
-    file7_path = subsubdir.join('file7.txt')
-    file8_path = subsubdir.join('file8.db') # Does not end on ".txt"
+def with_file_schema( func ):
+    '''
+    Decorator to create a shema of directories with files to process.
+    '''
+    def wrapper( tmpdir ):
+        '''
+        Internal wrapper.
+        '''
+        files = {}
 
-    table_path = tmpdir.join('table.txt')
+        # Add file in the current directory
+        files['file1'] = tmpdir.join('file1.txt')
+        files['file2'] = tmpdir.join('file2.txt')
+        files['file3'] = tmpdir.join('file3.txt')
+        files['file4'] = tmpdir.join('file4.txt')
 
-    with file1_path.open('wb') as f:
-        f.write(b'file1 text in binary')
-    #
-    # file2 is missing
-    #
-    with file3_path.open('wt') as f:
-        f.write('file3 text')
-    with file4_path.open('wt') as f:
-        f.write('file4 text is a bit larger')
-    with file5_path.open('wt') as f:
-        f.write('file5 is in the sub-directory')
-    with file6_path.open('wt') as f:
-        f.write('file6 is in the sub-directory and has a larger text')
-    with file7_path.open('wt') as f:
-        f.write('file7 is in the sub-sub-directory')
-    with file8_path.open('wt') as f:
-        f.write('file8 is in the sub-sub-directory')
+        # Add file into a sub-directory as well
+        subdir = tmpdir.mkdir('subdir')
+        files['file5'] = subdir.join('file5.txt')
+        files['file6'] = subdir.join('file6.txt')
 
-    cmds = (
-        'hep-rfm-table {} create'.format(table_path),
-        'hep-rfm-table {} add {} {}'.format(table_path, 'file1', file1_path),
-        'hep-rfm-table {} add {} {} --bare'.format(table_path, 'file2', file2_path),
-        'hep-rfm-table {} add_massive {} {}'.format(table_path, file3_path, file4_path),
-        'hep-rfm-table {} update'.format(table_path),
-        )
+        # Create a sub-sub-directory
+        subsubdir = subdir.mkdir('subsubdir')
+        files['file7'] = subsubdir.join('file7.txt')
+        files['file8'] = subsubdir.join('file8.db') # Does not end on ".txt"
 
-    for c in cmds:
-        p = subprocess.Popen(c.split())
-        assert p.wait() == 0
+        table_path = tmpdir.join('table.txt')
 
-    # Add files in directory filtering by regular expression
-    p = subprocess.Popen('hep-rfm-table {} add_from_dir {} --regex .*.txt$'.format(table_path, subdir).split())
-    assert p.wait() == 0
+        with files['file1'].open('wb') as f:
+            f.write(b'file1 text in binary')
+        #
+        # file2 is missing
+        #
+        with files['file3'].open('wt') as f:
+            f.write('file3 text')
+        with files['file4'].open('wt') as f:
+            f.write('file4 text is a bit larger')
+        with files['file5'].open('wt') as f:
+            f.write('file5 is in the sub-directory')
+        with files['file6'].open('wt') as f:
+            f.write('file6 is in the sub-directory and has a larger text')
+        with files['file7'].open('wt') as f:
+            f.write('file7 is in the sub-sub-directory')
+        with files['file8'].open('wt') as f:
+            f.write('file8 is in the sub-sub-directory')
 
-    table = hep_rfm.Table.read(table_path.strpath)
+        func(tmpdir, table_path, files)
 
-    for f in table.values():
-        f.marks.tmstp != hep_rfm.files.__default_tmstp__
-        f.marks.fid   != hep_rfm.files.__default_fid__
+    return wrapper
 
-    assert len(table) == 7
 
-    # Add all files in the sub-directory
-    p = subprocess.Popen('hep-rfm-table {} add_from_dir {}'.format(table_path, subdir).split())
-    assert p.wait() == 0
+def with_table_created( func ):
+    '''
+    Decorator for test functions that need the table to be created.
+    '''
+    @with_file_schema
+    def wrapper( tmpdir, table_path, files ):
+        '''
+        Internal wrapper.
+        '''
+        process('hep-rfm-table {} create'.format(table_path))
 
-    table = hep_rfm.Table.read(table_path.strpath)
+        func(tmpdir, table_path, files)
 
-    assert len(table) == 8
+    return wrapper
 
-    # Recreate substructure on a different table
+
+def with_table_filled( func ):
+    '''
+    Decorator for test functions that need the table to be created
+    and filled.
+    '''
+    @with_table_created
+    def wrapper( tmpdir, table_path, files ):
+        '''
+        Internal wrapper.
+        '''
+        process('hep-rfm-table {} add_from_dir {}'.format(table_path, tmpdir))
+
+        func(tmpdir, table_path, files)
+
+    return wrapper
+
+
+@with_table_filled
+def test_hep_rfm_table_breaking_commands( tmpdir, table_path, files ):
+    '''
+    Test function for the "hep-rfm-table" script with modes that break.
+    '''
+    # Need to re-create a table
     new_table_path = tmpdir.join('table_clone.txt')
 
-    p = subprocess.Popen('hep-rfm-table {} create'.format(new_table_path).split())
-    assert p.wait() == 0
+    process('hep-rfm-table {} create'.format(new_table_path))
 
-    p = subprocess.Popen('hep-rfm-table {} copy_schema --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir).split())
-    assert p.wait() == 0
-
-    old_table = hep_rfm.Table.read(table_path.strpath)
-    new_table = hep_rfm.Table.read(new_table_path.strpath)
-
-    assert len(table) == 8
-
-    assert list(sorted(old_table.keys())) == list(sorted(new_table.keys()))
-
-    for k, v in new_table.items():
-        assert old_table[k].path == v.path
-        assert v.marks.fid == hep_rfm.files.__default_fid__
-        assert v.marks.tmstp == hep_rfm.files.__default_tmstp__
-
-    # Replace all entries previously added
-    p = subprocess.Popen('hep-rfm-table {} copy_schema --reference {} --location {} --refpath {} --collisions replace'.format(new_table_path, table_path, tmpdir, tmpdir).split())
-    assert p.wait() == 0
-
-    # Omit collisions
-    p = subprocess.Popen('hep-rfm-table {} copy_schema --reference {} --location {} --refpath {} --collisions omit'.format(new_table_path, table_path, tmpdir, tmpdir).split())
-    assert p.wait() == 0
+    process('hep-rfm-table {} copy_schema --reference {} --location {} --refpath {} --collisions omit'.format(new_table_path, table_path, tmpdir, tmpdir))
 
     # Commands that break
     break_cmds = (
@@ -124,5 +128,78 @@ def test_hep_rfm_table( tmpdir ):
     )
 
     for c in break_cmds:
-        p = subprocess.Popen(c.split())
-        assert p.wait() != 0
+        p = process(c, code=1)
+
+
+@with_table_filled
+def test_hep_rfm_table_copy_schema( tmpdir, table_path, files ):
+    '''
+    Test function for the "hep-rfm-table" script with modes that use another
+    table as a reference.
+    '''
+    # Recreate substructure on a different table
+    new_table_path = tmpdir.join('table_clone.txt')
+
+    process('hep-rfm-table {} create'.format(new_table_path))
+
+    process('hep-rfm-table {} copy_schema --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir))
+
+    old_table = hep_rfm.Table.read(table_path.strpath)
+    new_table = hep_rfm.Table.read(new_table_path.strpath)
+
+    assert len(new_table) == 8
+
+    assert list(sorted(old_table.keys())) == list(sorted(new_table.keys()))
+
+    for k, v in new_table.items():
+        assert old_table[k].path == v.path
+        assert v.marks.fid == hep_rfm.files.__default_fid__
+        assert v.marks.tmstp == hep_rfm.files.__default_tmstp__
+
+    # Replace all entries previously added
+    process('hep-rfm-table {} copy_schema --reference {} --location {} --refpath {} --collisions replace'.format(new_table_path, table_path, tmpdir, tmpdir))
+
+    # Omit collisions
+    process('hep-rfm-table {} copy_schema --reference {} --location {} --refpath {} --collisions omit'.format(new_table_path, table_path, tmpdir, tmpdir))
+
+
+@with_table_created
+def test_hep_rfm_table_from_dir( tmpdir, table_path, files ):
+    '''
+    Test modes of the "hep-rfm-table" script that massively add files from a
+    directory.
+    '''
+    # Add files in directory filtering by regular expression
+    process('hep-rfm-table {} add_from_dir {} --regex .*.txt$'.format(table_path, tmpdir))
+
+    table = hep_rfm.Table.read(table_path.strpath)
+
+    for f in table.values():
+        f.marks.tmstp != hep_rfm.files.__default_tmstp__
+        f.marks.fid   != hep_rfm.files.__default_fid__
+
+    assert len(table) == 7
+
+    # Add all files in the sub-directory
+    process('hep-rfm-table {} add_from_dir {}'.format(table_path, tmpdir.join('subdir')))
+
+    table = hep_rfm.Table.read(table_path.strpath)
+
+    assert len(table) == 8
+
+
+@with_file_schema
+def test_hep_rfm_table_general( tmpdir, table_path, files ):
+    '''
+    Test basic modes of the "hep-rfm-table" script.
+    '''
+    cmds = (
+        'hep-rfm-table {} create'.format(table_path),
+        'hep-rfm-table {} add {} {}'.format(table_path, 'file1', files['file1']),
+        'hep-rfm-table {} add {} {} --bare'.format(table_path, 'file2', files['file2']),
+        'hep-rfm-table {} add_massive {} {}'.format(table_path, files['file3'], files['file4']),
+        'hep-rfm-table {} update'.format(table_path),
+        )
+
+    for c in cmds:
+        p = process(c)
