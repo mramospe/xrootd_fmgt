@@ -27,5 +27,9 @@ mkdir files
 mv subdir *.txt files/.
 hep-rfm-table table.db add_from_dir files
 hep-rfm-table table.db display
+hep-rfm-table new_table.db create
+mkdir files_replica
+hep-rfm-table new_table.db replicate --reference table.db --location files_replica --refpath files
+hep-rfm-table new_table.db display
 cd ..
 rm -r rfm

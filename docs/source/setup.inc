@@ -210,5 +210,35 @@ The other files will be added in a row, by typing
 
 Note that here we have included all the files in the same directory.
 Files do not need to have similar paths in different hosts.
+
+Sometimes we might need to replicate a table, this is, create an entire copy of
+the structure of one table (the system of directories and file names) into
+another.
+This is done through the *replicate* mode:
+
+.. code-block:: console
+
+   $ hep-rfm-table rtable.db create
+   $ mkdir rfiles
+   $ hep-rfm-table rtable.db replicate --reference table.db --location files --refpath rfiles
+   $ hep-rfm-table rtable.db display
+   Contents of table "rtable.db"
+   name 	path                                            	tmstp	fid 
+   file1	/home/user/rfm/rfiles/file1.txt                 	0.0  	none
+   file2	/home/user/rfm/rfiles/file2.txt                 	0.0  	none
+   file3	/home/user/rfm/rfiles/file3.txt                 	0.0  	none
+   file4	/home/user/rfm/rfiles/subdir/file4.txt          	0.0  	none
+   file5	/home/user/rfm/rfiles/subdir/subsubdir/file5.txt	0.0  	none
+   file6	/home/user/rfm/rfiles/subdir/subsubdir/file6.dt 	0.0  	none
+
+You can see that we have created a new table *rtable.db* with the same
+structure as *table.txt*, but this time pointing to bare files in the directory
+*rfiles*.
+There is some policy regarding adding new files through the *replicate* mode
+if they already exist in the table.
+Options to raise and error, replace the contents or omit the changes are
+contemplated.
+
+For more information, you can always run any mode with *-h*.
 One we have done this, we are ready to see how we can access the files
-and kee data updated in both sites, in the next section: :ref:`file-management`.
+and keep data updated in both sites, in the next section: :ref:`file-management`.
