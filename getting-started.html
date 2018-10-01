@@ -5,13 +5,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Getting started &#8212; hep_rfm 0.0.0.dev1 documentation</title>
+    <title>Getting started &#8212; hep_rfm 0.0.0.dev2 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.0.dev1',
+        VERSION:     '0.0.0.dev2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -229,9 +229,35 @@ The other files will be added in a row, by typing</p>
 </pre></div>
 </div>
 <p>Note that here we have included all the files in the same directory.
-Files do not need to have similar paths in different hosts.
+Files do not need to have similar paths in different hosts.</p>
+<p>Sometimes we might need to replicate a table, this is, create an entire copy of
+the structure of one table (the system of directories and file names) into
+another.
+This is done through the <em>replicate</em> mode:</p>
+<div class="highlight-console"><div class="highlight"><pre><span></span><span class="gp">$</span> hep-rfm-table rtable.db create
+<span class="gp">$</span> mkdir rfiles
+<span class="gp">$</span> hep-rfm-table rtable.db replicate --reference table.db --location files --refpath rfiles
+<span class="gp">$</span> hep-rfm-table rtable.db display
+<span class="go">Contents of table &quot;rtable.db&quot;</span>
+<span class="go">name         path                                                    tmstp   fid</span>
+<span class="go">file1        /home/user/rfm/rfiles/file1.txt                         0.0     none</span>
+<span class="go">file2        /home/user/rfm/rfiles/file2.txt                         0.0     none</span>
+<span class="go">file3        /home/user/rfm/rfiles/file3.txt                         0.0     none</span>
+<span class="go">file4        /home/user/rfm/rfiles/subdir/file4.txt                  0.0     none</span>
+<span class="go">file5        /home/user/rfm/rfiles/subdir/subsubdir/file5.txt        0.0     none</span>
+<span class="go">file6        /home/user/rfm/rfiles/subdir/subsubdir/file6.dt         0.0     none</span>
+</pre></div>
+</div>
+<p>You can see that we have created a new table <em>rtable.db</em> with the same
+structure as <em>table.txt</em>, but this time pointing to bare files in the directory
+<em>rfiles</em>.
+There is some policy regarding adding new files through the <em>replicate</em> mode
+if they already exist in the table.
+Options to raise and error, replace the contents or omit the changes are
+contemplated.</p>
+<p>For more information, you can always run any mode with <em>-h</em>.
 One we have done this, we are ready to see how we can access the files
-and kee data updated in both sites, in the next section: <a class="reference internal" href="#file-management"><span class="std std-ref">File management</span></a>.</p>
+and keep data updated in both sites, in the next section: <a class="reference internal" href="#file-management"><span class="std std-ref">File management</span></a>.</p>
 </div>
 <div class="section" id="file-management">
 <span id="id1"></span><h2>File management<a class="headerlink" href="#file-management" title="Permalink to this headline">¶</a></h2>
