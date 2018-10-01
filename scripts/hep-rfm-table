@@ -254,69 +254,6 @@ def add_from_dir( directory, regex, **kwargs ):
     add_massive(files=files, bare=False, **kwargs)
 
 
-@decorate_multitable_mode
-def copy_schema( table, location, reference, refpath, collisions, remote ):
-    '''
-    Reproduce the structure of sub-directories of the files stored on a
-    reference table into another one, creating bare entries for all of them.
-    The keys and names of the files will be maintained.
-
-    The argument "refpath" corresponds to the fragment of the path that will
-    be used as the "base" directory in the reference table, while "location"
-    corresponds to the path where the schema will be reproduced. No directories
-    are created after calling this function.
-
-    The policy with collisions is governed by "collisions". If set to "raise"
-    (default), if an attempt is made to add a file with a name that already
-    exists in the table, warning will be displayed and the table will not be
-    processed. If set to "replace", then the files will be replaced by the new
-    value. Finally, if set to "omit", collisions will be omitted.
-    '''
-    trgtb = hep_rfm.Table.read(table)
-    reftb = hep_rfm.Table.read(reference)
-
-    def add_to_table( table, key, finfo, location, remote ):
-        '''
-        Add a new entry to the given table.
-        '''
-        if hep_rfm.is_remote(finfo.path):
-                _, p = hep_rfm.split_remote(finfo.path)
-        else:
-            p = finfo.path
-
-        p = _process_path(p.replace(refpath, location), remote, bare=True)
-
-        table[key] = hep_rfm.FileInfo(finfo.name, p)
-
-    process = True
-    for rk, rv in reftb.items():
-
-        if rk in trgtb:
-
-            if collisions == 'raise':
-                # Warnings are displayed for all files that cause collisions
-                # between the two tables
-                logging.getLogger(__name__).warn('Colliding file name "{}"'.format(rk))
-
-                process = False
-
-            elif collisions == 'replace':
-                add_to_table(trgtb, rk, rv, location, remote)
-
-            else: # collisions == 'omit'
-                pass
-
-        else:
-            add_to_table(trgtb, rk, rv, location, remote)
-
-    # Do not copy the tables if a collision was found
-    if not process:
-        raise RuntimeError('Colliding names in tables. See policy in "--collisions" argument.')
-        return
-
-    trgtb.write(table)
-
-
 @decorate_create_mode
 def create( table ):
     '''
@@ -385,6 +322,72 @@ def remove( table, files, regex ):
     t.write(table)
 
 
+@decorate_multitable_mode
+def replicate( table, location, reference, refpath, collisions, remote ):
+    '''
+    Reproduce the structure of sub-directories of the files stored on a
+    reference table into another one, creating bare entries for all of them.
+    The keys and names of the files will be maintained.
+
+    The argument "refpath" corresponds to the fragment of the path that will
+    be used as the "base" directory in the reference table, while "location"
+    corresponds to the path where the schema will be reproduced. No directories
+    are created after calling this function.
+
+    The policy with collisions is governed by "collisions". If set to "raise"
+    (default), if an attempt is made to add a file with a name that already
+    exists in the table, warning will be displayed and the table will not be
+    processed. If set to "replace", then the files will be replaced by the new
+    value. Finally, if set to "omit", collisions will be omitted.
+    '''
+    trgtb = hep_rfm.Table.read(table)
+    reftb = hep_rfm.Table.read(reference)
+
+    def add_to_table( table, key, finfo, location, remote ):
+        '''
+        Add a new entry to the given table.
+        '''
+        if hep_rfm.is_remote(finfo.path):
+                _, p = hep_rfm.split_remote(finfo.path)
+        else:
+            p = finfo.path
+
+        if not p.startswith(refpath):
+            raise RuntimeError('Paths in the reference table must start by "refpath"')
+
+        p = _process_path(p.replace(refpath, location), remote, bare=True)
+
+        table[key] = hep_rfm.FileInfo(finfo.name, p)
+
+    process = True
+    for rk, rv in reftb.items():
+
+        if rk in trgtb:
+
+            if collisions == 'raise':
+                # Warnings are displayed for all files that cause collisions
+                # between the two tables
+                logging.getLogger(__name__).warn('Colliding file name "{}"'.format(rk))
+
+                process = False
+
+            elif collisions == 'replace':
+                add_to_table(trgtb, rk, rv, location, remote)
+
+            else: # collisions == 'omit'
+                pass
+
+        else:
+            add_to_table(trgtb, rk, rv, location, remote)
+
+    # Do not copy the tables if a collision was found
+    if not process:
+        raise RuntimeError('Colliding names in tables. See policy in "--collisions" argument.')
+        return
+
+    trgtb.write(table)
+
+
 @decorate_access_mode
 def update( table, regex ):
     '''
@@ -448,15 +451,15 @@ if __name__ == '__main__':
     parser_add_from_dir.add_argument('--regex', type=str, default=None,
                                      help='Regular expression to filter the files to add')
 
-    parser_copy_schema = subparsers.add_parser('copy_schema', help=copy_schema.__doc__)
-    parser_copy_schema.set_defaults(func=copy_schema)
-    parser_copy_schema.add_argument('--location', type=str,
+    parser_replicate = subparsers.add_parser('replicate', help=replicate.__doc__)
+    parser_replicate.set_defaults(func=replicate)
+    parser_replicate.add_argument('--location', type=str,
                                     help='Location where to build the schema')
-    parser_copy_schema.add_argument('--reference', type=str,
+    parser_replicate.add_argument('--reference', type=str,
                                     help='Path to the reference table')
-    parser_copy_schema.add_argument('--refpath', type=str,
-                                    help='Path in the reference table to replace by "location"')
-    parser_copy_schema.add_argument('--collisions', default='raise',
+    parser_replicate.add_argument('--refpath', type=str,
+                                    help='Absolute path in the reference table to be replaced by "location"')
+    parser_replicate.add_argument('--collisions', default='raise',
                                     choices=('raise', 'replace', 'omit'),
                                     help='Whether to replace the paths to the files with colliding names')
 
@@ -481,7 +484,7 @@ if __name__ == '__main__':
         p.add_argument('--nproc', type=int, default=4, required=False,
                        help='Number of parallel process to invoke')
 
-    for p in (parser_add, parser_add_massive, parser_add_from_dir, parser_copy_schema):
+    for p in (parser_add, parser_add_massive, parser_add_from_dir, parser_replicate):
         p.add_argument('--remote', '-r', type=str, default=None, required=False,
                        help='Remote direction to prepend to the files. If you '\
                        'are specifying it in the file path, adding it as well '\
