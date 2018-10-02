@@ -41,6 +41,8 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     values are the user names.
     :type server_spec: dict
     :raises CopyFileError: if the file can not be copied.
+
+    .. note:: If source and target point to the same file, no copy will be done.
     '''
     # Set the user names if dealing with SSH paths
     if protocols.is_ssh(source):
@@ -69,16 +71,22 @@ def copy_file( source, target, loglock=None, server_spec=None ):
             copy_file(tmp, target)
 
     else:
-        parallel.log(logging.getLogger(__name__).info,
-                     'Copying file\n source: {}\n target: {}'.format(source, target),
-                     loglock)
-
+        # Copies are performed in silent mode. No errors are displayed if
+        # the target already exists or if source and target correspond to the
+        # same file.
         if dec == protocols.__ssh_protocol__:
             proc = _process('scp', '-q', source, target)
         elif dec == protocols.__xrootd_protocol__:
             proc = _process('xrdcp', '-f', '-s', source, target)
         else:
+            if os.path.isfile(source) and os.path.isfile(target) and os.path.samefile(source, target):
+                return
+
             proc = _process('cp', source, target)
+
+        parallel.log(logging.getLogger(__name__).info,
+                     'Copying file\n source: {}\n target: {}'.format(source, target),
+                     loglock)
 
         if proc.wait() != 0:
             _, stderr = proc.communicate()
@@ -182,7 +190,7 @@ def _set_username( path, server_spec=None ):
 
     l = path.find('@')
 
-    if l == 0 and server_spec is None:
+    if l == 0 and not server_spec:
         raise RuntimeError('User name not specified for path "{}"'.format(path))
 
     uh, _ = protocols.split_remote(path)

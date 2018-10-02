@@ -82,7 +82,7 @@ def with_table_created( func ):
         '''
         Internal wrapper.
         '''
-        process('hep-rfm-table {} create'.format(table_path))
+        process('hep-rfm-table create {}'.format(table_path))
 
         func(tmpdir, table_path, files)
 
@@ -99,7 +99,7 @@ def with_table_filled( func ):
         '''
         Internal wrapper.
         '''
-        process('hep-rfm-table {} add_from_dir {}'.format(table_path, tmpdir))
+        process('hep-rfm-table add_from_dir {} {}'.format(table_path, tmpdir))
 
         func(tmpdir, table_path, files)
 
@@ -112,27 +112,69 @@ def test_hep_rfm_table_breaking_commands( tmpdir, table_path, files ):
     Test function for the "hep-rfm-table" script with modes that break.
     '''
     # Need to re-create a table
-    new_table_path = tmpdir.join('table_clone.txt')
+    new_table_path = tmpdir.join('table_replica.txt')
 
-    process('hep-rfm-table {} create'.format(new_table_path))
+    process('hep-rfm-table create {}'.format(new_table_path))
 
-    process('hep-rfm-table {} replicate --reference {} --location {} --refpath {} --collisions omit'.format(new_table_path, table_path, tmpdir, tmpdir))
+    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions omit'.format(new_table_path, table_path, tmpdir, tmpdir))
 
     incpath = table_path.strpath[table_path.strpath.find('/', 1):]
 
     # Commands that break
     break_cmds = (
         # Attempt to add a file that does not exist
-        'hep-rfm-table {} add {} {}'.format(table_path, 'none', tmpdir.join('none.txt')),
+        'hep-rfm-table add {} {} {}'.format(table_path, 'none', tmpdir.join('none.txt')),
         # Attempt to recreate the structure of one table in another with
         # colliding file names
-        'hep-rfm-table {} replicate --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir),
+        'hep-rfm-table replicate {} --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir),
         # Refpath must be absolute
-        'hep-rfm-table {} replicate --reference {} --location {} --refpath {}'.format(new_table_path, incpath, tmpdir, tmpdir),
+        'hep-rfm-table replicate {} --reference {} --location {} --refpath {}'.format(new_table_path, incpath, tmpdir, tmpdir),
     )
 
     for c in break_cmds:
         p = process(c, code=1)
+
+
+@with_table_created
+def test_hep_rfm_table_from_dir( tmpdir, table_path, files ):
+    '''
+    Test modes of the "hep-rfm-table" script that massively add files from a
+    directory.
+    '''
+    # Add files in directory filtering by regular expression
+    process('hep-rfm-table add_from_dir {} {} --regex .*.txt$'.format(table_path, tmpdir))
+
+    table = hep_rfm.Table.read(table_path.strpath)
+
+    for f in table.values():
+        f.marks.tmstp != hep_rfm.files.__default_tmstp__
+        f.marks.fid   != hep_rfm.files.__default_fid__
+
+    assert len(table) == 7
+
+    # Add all files in the sub-directory
+    process('hep-rfm-table add_from_dir {} {}'.format(table_path, tmpdir.join('subdir')))
+
+    table = hep_rfm.Table.read(table_path.strpath)
+
+    assert len(table) == 8
+
+
+@with_file_schema
+def test_hep_rfm_table_general( tmpdir, table_path, files ):
+    '''
+    Test basic modes of the "hep-rfm-table" script.
+    '''
+    cmds = (
+        'hep-rfm-table create {}'.format(table_path),
+        'hep-rfm-table add {} {} {}'.format(table_path, 'file1', files['file1']),
+        'hep-rfm-table add {} {} {} --bare'.format(table_path, 'file2', files['file2']),
+        'hep-rfm-table add_massive {} {} {}'.format(table_path, files['file3'], files['file4']),
+        'hep-rfm-table update {}'.format(table_path),
+        )
+
+    for c in cmds:
+        p = process(c)
 
 
 @with_table_filled
@@ -142,11 +184,11 @@ def test_hep_rfm_table_replicate( tmpdir, table_path, files ):
     table as a reference.
     '''
     # Recreate substructure on a different table
-    new_table_path = tmpdir.join('table_clone.txt')
+    new_table_path = tmpdir.join('table_replica.txt')
 
-    process('hep-rfm-table {} create'.format(new_table_path))
+    process('hep-rfm-table create {}'.format(new_table_path))
 
-    process('hep-rfm-table {} replicate --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir))
+    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {}'.format(new_table_path, table_path, tmpdir, tmpdir))
 
     old_table = hep_rfm.Table.read(table_path.strpath)
     new_table = hep_rfm.Table.read(new_table_path.strpath)
@@ -161,49 +203,32 @@ def test_hep_rfm_table_replicate( tmpdir, table_path, files ):
         assert v.marks.tmstp == hep_rfm.files.__default_tmstp__
 
     # Replace all entries previously added
-    process('hep-rfm-table {} replicate --reference {} --location {} --refpath {} --collisions replace'.format(new_table_path, table_path, tmpdir, tmpdir))
+    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions replace'.format(new_table_path, table_path, tmpdir, tmpdir))
 
     # Omit collisions
-    process('hep-rfm-table {} replicate --reference {} --location {} --refpath {} --collisions omit'.format(new_table_path, table_path, tmpdir, tmpdir))
+    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions omit'.format(new_table_path, table_path, tmpdir, tmpdir))
 
 
-@with_table_created
-def test_hep_rfm_table_from_dir( tmpdir, table_path, files ):
+@with_table_filled
+def test_hep_rfm_table_synchronize( tmpdir, table_path, files ):
     '''
-    Test modes of the "hep-rfm-table" script that massively add files from a
-    directory.
+    Test function for the "hep-rfm-table" script with the "synchronize" mode.
     '''
-    # Add files in directory filtering by regular expression
-    process('hep-rfm-table {} add_from_dir {} --regex .*.txt$'.format(table_path, tmpdir))
+    tp1 = tmpdir.join('table_replica_1.txt')
 
-    table = hep_rfm.Table.read(table_path.strpath)
+    # Create a replica of the already existing table
+    process('hep-rfm-table create {}'.format(tp1))
+    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions replace'.format(tp1, table_path, tmpdir, tmpdir))
 
-    for f in table.values():
-        f.marks.tmstp != hep_rfm.files.__default_tmstp__
-        f.marks.fid   != hep_rfm.files.__default_fid__
+    # Create another table where all the files in the subdirectory are added,
+    # and the remaining are bare files.
+    tp2 = tmpdir.join('table_replica_2.txt')
 
-    assert len(table) == 7
+    process('hep-rfm-table create {}'.format(tp2))
+    process('hep-rfm-table add_from_dir {} {}'.format(tp2, tmpdir.join('subdir')))
+    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions omit'.format(tp2, table_path, tmpdir, tmpdir))
 
-    # Add all files in the sub-directory
-    process('hep-rfm-table {} add_from_dir {}'.format(table_path, tmpdir.join('subdir')))
+    # Synchronize everything
+    tables = [t.strpath for t in (table_path, tp1, tp2)]
 
-    table = hep_rfm.Table.read(table_path.strpath)
-
-    assert len(table) == 8
-
-
-@with_file_schema
-def test_hep_rfm_table_general( tmpdir, table_path, files ):
-    '''
-    Test basic modes of the "hep-rfm-table" script.
-    '''
-    cmds = (
-        'hep-rfm-table {} create'.format(table_path),
-        'hep-rfm-table {} add {} {}'.format(table_path, 'file1', files['file1']),
-        'hep-rfm-table {} add {} {} --bare'.format(table_path, 'file2', files['file2']),
-        'hep-rfm-table {} add_massive {} {}'.format(table_path, files['file3'], files['file4']),
-        'hep-rfm-table {} update'.format(table_path),
-        )
-
-    for c in cmds:
-        p = process(c)
+    process('hep-rfm-table synchronize {}'.format(' '.join(tables)))
