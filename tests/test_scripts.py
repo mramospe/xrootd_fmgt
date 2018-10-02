@@ -214,11 +214,13 @@ def test_hep_rfm_table_synchronize( tmpdir, table_path, files ):
     '''
     Test function for the "hep-rfm-table" script with the "synchronize" mode.
     '''
+    # Create a replica of the already existing table
     tp1 = tmpdir.join('table_replica_1.txt')
 
-    # Create a replica of the already existing table
+    rdir = tmpdir.mkdir('replica_dir')
+
     process('hep-rfm-table create {}'.format(tp1))
-    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions replace'.format(tp1, table_path, tmpdir, tmpdir))
+    process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions replace'.format(tp1, table_path, rdir, tmpdir))
 
     # Create another table where all the files in the subdirectory are added,
     # and the remaining are bare files.
@@ -229,6 +231,26 @@ def test_hep_rfm_table_synchronize( tmpdir, table_path, files ):
     process('hep-rfm-table replicate {} --reference {} --location {} --refpath {} --collisions omit'.format(tp2, table_path, tmpdir, tmpdir))
 
     # Synchronize everything
-    tables = [t.strpath for t in (table_path, tp1, tp2)]
+    pt = [t.strpath for t in (table_path, tp1, tp2)]
 
-    process('hep-rfm-table synchronize {}'.format(' '.join(tables)))
+    process('hep-rfm-table synchronize {}'.format(' '.join(pt)))
+
+    # Check that all the tables contain similar information
+    main_table = hep_rfm.Table.read(table_path.strpath)
+    diff_table = hep_rfm.Table.read(tp1.strpath)
+    same_table = hep_rfm.Table.read(tp2.strpath)
+
+    for k, v in main_table.items():
+
+        # File ID and names must be the same
+        assert k in diff_table
+        dk = diff_table[k]
+
+        assert dk.marks.fid == v.marks.fid
+
+        # Must act as a clone, having the same information
+        assert k in same_table
+        sk = same_table[k]
+
+        assert sk.marks.fid == v.marks.fid
+        assert sk.path == v.path
