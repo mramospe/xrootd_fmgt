@@ -96,7 +96,7 @@ class FileInfo(FileInfoBase):
         '''
         pp = protocols.protocol_path(path)
 
-        if pp.pid != 'local':
+        if pp.is_remote:
             raise ValueError('Unable to extract a local path from "{}"'.format(path))
 
         marks = FileMarks.from_local_path(pp.path)
