@@ -28,7 +28,7 @@ Base class representing an object storing the time-stamp and file ID of a file.
 '''
 
 # Class to store the information of a file
-FileInfoBase = namedtuple('FileInfoBase', ['name', 'path', 'marks'])
+FileInfoBase = namedtuple('FileInfoBase', ['name', 'protocol_path', 'marks'])
 FileInfoBase.__new__.__doc__ = '''
 Base class for an object storing the information about a file.
 '''
@@ -48,14 +48,14 @@ for c in (FileMarksBase, FileInfoBase):
 
 class FileInfo(FileInfoBase):
 
-    def __new__( cls, name, path, marks = None ):
+    def __new__( cls, name, protocol_path, marks = None ):
         '''
         Object to store the information about a file.
 
         :param name: name of the file.
         :type name: str
-        :param path: path to the file.
-        :type path: str
+        :param protocol_path: path to the file.
+        :type protocol_path: ProtocolPath
         :param marks: time-stamp and file ID.
         :type marks: FileMarks
 
@@ -64,7 +64,7 @@ class FileInfo(FileInfoBase):
         if marks is None:
             marks = FileMarks()
 
-        fi = super(FileInfo, cls).__new__(cls, name, path, marks)
+        fi = super(FileInfo, cls).__new__(cls, name, protocol_path, marks)
 
         return fi
 
@@ -75,7 +75,9 @@ class FileInfo(FileInfoBase):
         '''
         name, path, tmstp, fid = line.split()
 
-        return cls(name, path, FileMarks(float(tmstp), fid))
+        pp = protocols.protocol_path(path)
+
+        return cls(name, pp, FileMarks(float(tmstp), fid))
 
     @classmethod
     def from_name_and_path( cls, name, path ):
@@ -92,14 +94,14 @@ class FileInfo(FileInfoBase):
         :rtype: FileInfo
         :raises: ValueError: if failed to extract a valid path from that given.
         '''
-        p = protocols.available_local_path(path)
+        pp = protocols.protocol_path(path)
 
-        if p is None:
+        if pp.pid != 'local':
             raise ValueError('Unable to extract a local path from "{}"'.format(path))
 
-        marks = FileMarks.from_local_path(p)
+        marks = FileMarks.from_local_path(pp.path)
 
-        return cls(name, path, marks)
+        return cls(name, pp, marks)
 
     def info( self ):
         '''
@@ -108,7 +110,7 @@ class FileInfo(FileInfoBase):
         :returns: tuple with the information of this class
         :rtype: tuple(str, str, str, str)
         '''
-        return (self.name, self.path, self.marks.tmstp, self.marks.fid)
+        return (self.name, self.protocol_path.path, self.marks.tmstp, self.marks.fid)
 
     def is_bare( self ):
         '''
@@ -135,12 +137,12 @@ class FileInfo(FileInfoBase):
         if self.is_bare():
             return None
 
-        p = protocols.available_local_path(self.path)
+        pp = protocols.available_local_path(self.protocol_path)
 
-        if p is None:
-            raise RuntimeError('Unable to retrieve a valid path to a file from "{}"'.format(self.path))
+        if pp is None:
+            raise RuntimeError('Unable to retrieve a valid path to a file from "{}"'.format(self.protocol_path.path))
 
-        return p
+        return pp.path
 
     def newer_than( self, other ):
         '''
@@ -162,14 +164,14 @@ class FileInfo(FileInfoBase):
         :returns: updated version of this file.
         :rtype: FileInfo
         '''
-        p = self.local_path()
+        path = self.local_path()
 
-        if p is not None:
-            marks = FileMarks.from_local_path(p)
+        if path is not None:
+            marks = FileMarks.from_local_path(path)
         else:
             marks = self.marks
 
-        return FileInfo(self.name, self.path, marks)
+        return FileInfo(self.name, self.protocol_path, marks)
 
 
 class FileMarks(FileMarksBase):

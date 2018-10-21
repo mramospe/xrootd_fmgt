@@ -31,7 +31,7 @@ def _process_path( path, remote, bare = False ):
 
     if remote:
 
-        if hep_rfm.is_ssh(remote):
+        if hep_rfm.protocol_path(remote).pid == 'ssh':
             path = remote + ':' + path
         else:
             while remote.endswith('/'):
@@ -42,14 +42,15 @@ def _process_path( path, remote, bare = False ):
 
             path = remote + '//' + path
 
+    pp = hep_rfm.protocol_path(path)
     if not bare:
 
-        p = hep_rfm.protocols.available_local_path(path)
+        p = hep_rfm.protocols.available_local_path(pp)
 
         if p is None:
             raise RuntimeError('Attempt to create a table entry with a path that is not present locally')
 
-    return path
+    return pp
 
 
 def decorate_access_mode( mode ):
@@ -62,15 +63,15 @@ def decorate_access_mode( mode ):
         If the path specified in "table" is remote, then copy the table
         to a temporary directory, modify it there, and copy it back.
         '''
-        table = kwargs['table']
+        kwargs['table'] = table = hep_rfm.protocol_path(kwargs['table'])
 
-        if hep_rfm.is_remote(table):
+        if table.is_remote:
 
             logging.getLogger(__name__).info('Copying remote table to a temporary directory')
 
             with tempfile.TemporaryDirectory() as d:
 
-                tmp_table = os.path.join(d, 'tmp_table.txt')
+                tmp_table = hep_rfm.protocol_path(os.path.join(d, 'tmp_table.txt'))
 
                 hep_rfm.copy_file(table, tmp_table)
 
@@ -97,15 +98,15 @@ def decorate_create_mode( mode ):
         If the keyword "table" refers to a remote path,
         create the file on a temporary directory and then copy it.
         '''
-        table = kwargs['table']
+        kwargs['table'] = table = hep_rfm.protocol_path(kwargs['table'])
 
-        if hep_rfm.is_remote(table):
+        if table.is_remote:
 
             logging.getLogger(__name__).info('Creating table on a temporary directory')
 
             with tempfile.TemporaryDirectory() as d:
 
-                tmp_table = os.path.join(d, 'tmp_table.txt')
+                tmp_table = hep_rfm.protocol_path(os.path.join(d, 'tmp_table.txt'))
 
                 kwargs['table'] = tmp_table
 
@@ -130,11 +131,11 @@ def decorate_multitable_mode( mode ):
         If the keywords "table" and/or "reference" refer to remote paths,
         create the file(s) on a temporary directory and then copy it(them).
         '''
-        tab = kwargs['table']
-        ref = kwargs['reference']
+        kwargs['table']     = tab = hep_rfm.protocol_path(kwargs['table'])
+        kwargs['reference'] = ref = hep_rfm.protocol_path(kwargs['reference'])
 
-        r_tab = hep_rfm.is_remote(tab)
-        r_ref = hep_rfm.is_remote(ref)
+        r_tab = tab.is_remote
+        r_ref = ref.is_remote
 
         if r_tab or r_ref:
 
@@ -143,12 +144,12 @@ def decorate_multitable_mode( mode ):
             with tempfile.TemporaryDirectory() as d:
 
                 if r_tab:
-                    tmp_tab = os.path.join(d, 'tmp_table.txt')
+                    tmp_tab = hep_rfm.protocol_path(os.path.join(d, 'tmp_table.txt'))
                     hep_rfm.copy_file(tab, tmp_tab)
                     kwargs['table'] = tmp_tab
 
                 if r_ref:
-                    tmp_ref = os.path.join(d, 'tmp_reference.txt')
+                    tmp_ref = hep_rfm.protocol_path(os.path.join(d, 'tmp_reference.txt'))
                     hep_rfm.copy_file(ref, tmp_ref)
                     kwargs['reference'] = tmp_ref
 
@@ -170,18 +171,18 @@ def add( table, name, path, bare, remote ):
     '''
     Add a new file to the table in the given path
     '''
-    t = hep_rfm.Table.read(table)
+    t = hep_rfm.Table.read(table.path)
 
-    path = _process_path(path, remote, bare)
+    pp = _process_path(path, remote, bare)
 
     if bare:
-        f = hep_rfm.FileInfo(name, path)
+        f = hep_rfm.FileInfo(name, pp)
     else:
-        f = hep_rfm.FileInfo.from_name_and_path(name, path)
+        f = hep_rfm.FileInfo.from_name_and_path(name, pp.path)
 
     t[f.name] = f
 
-    t.write(table)
+    t.write(table.path)
 
 
 @decorate_access_mode
@@ -190,7 +191,7 @@ def add_massive( table, files, nproc, remote, bare ):
     Add a list of files to the given table.
     The name of the files will be used as name for the table index.
     '''
-    t = hep_rfm.Table.read(table)
+    t = hep_rfm.Table.read(table.path)
 
     handler = hep_rfm.parallel.JobHandler()
 
@@ -211,11 +212,11 @@ def add_massive( table, files, nproc, remote, bare ):
 
     for p in files:
 
-        p = _process_path(p, remote, bare)
+        pp = _process_path(p, remote, bare)
 
-        name = os.path.basename(os.path.splitext(p)[0])
+        name = os.path.basename(os.path.splitext(pp.path)[0])
 
-        handler.put((name, p))
+        handler.put((name, pp.path))
 
     handler.process()
 
@@ -225,10 +226,9 @@ def add_massive( table, files, nproc, remote, bare ):
 
     queue.close()
 
-    t.write(table)
+    t.write(table.path)
 
 
-@decorate_access_mode
 def add_from_dir( directory, regex, **kwargs ):
     '''
     Add files from a given directory.
@@ -260,10 +260,10 @@ def create( table ):
     '''
     Create a new empty table
     '''
-    if os.path.isfile(table):
-        raise RuntimeError('File "{}" already exists'.format(table))
+    if os.path.isfile(table.path):
+        raise RuntimeError('File "{}" already exists'.format(table.path))
 
-    with open(table, 'wt'):
+    with open(table.path, 'wt'):
         pass
 
 
@@ -272,10 +272,10 @@ def display( table, regex ):
     '''
     Display the contents of the table at the given path
     '''
-    t = hep_rfm.Table.read(table)
+    t = hep_rfm.Table.read(table.path)
 
     if len(t) == 0:
-        logging.getLogger(__name__).info('No entries found in "{}"'.format(table))
+        logging.getLogger(__name__).info('No entries found in "{}"'.format(table.path))
         return
 
     mn = max(len('name'), max(len(f.name) for f in t.values()))
@@ -296,7 +296,7 @@ def display( table, regex ):
             lines.append(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
 
     if len(lines) != 0:
-        logging.getLogger(__name__).info('Contents of table "{}"'.format(table))
+        logging.getLogger(__name__).info('Contents of table "{}"'.format(table.path))
         logging.getLogger(__name__).info(to_string('name', 'path', 'tmstp', 'fid'))
 
         for l in lines:
@@ -309,7 +309,7 @@ def remove( table, files, regex ):
     Remove the given entries from the table.
     One can provide both a set of file names and a regular expression.
     '''
-    t = hep_rfm.Table.read(table)
+    t = hep_rfm.Table.read(table.path)
 
     for e in files:
         t.pop(e)
@@ -320,7 +320,7 @@ def remove( table, files, regex ):
             if c.match(e):
                 t.pop(e)
 
-    t.write(table)
+    t.write(table.path)
 
 
 @decorate_multitable_mode
@@ -341,17 +341,17 @@ def replicate( table, location, reference, refpath, collisions, remote ):
     processed. If set to "replace", then the files will be replaced by the new
     value. Finally, if set to "omit", collisions will be omitted.
     '''
-    trgtb = hep_rfm.Table.read(table)
-    reftb = hep_rfm.Table.read(reference)
+    trgtb = hep_rfm.Table.read(table.path)
+    reftb = hep_rfm.Table.read(reference.path)
 
     def add_to_table( table, key, finfo, location, remote ):
         '''
         Add a new entry to the given table.
         '''
-        if hep_rfm.is_remote(finfo.path):
-                _, p = hep_rfm.split_remote(finfo.path)
+        if finfo.protocol_path.is_remote:
+                _, p = hep_rfm.split_remote(finfo.protocol_path.path)
         else:
-            p = finfo.path
+            p = finfo.protocol_path.path
 
         if not p.startswith(refpath):
             raise RuntimeError('Paths in the reference table must start by "refpath"')
@@ -386,7 +386,7 @@ def replicate( table, location, reference, refpath, collisions, remote ):
         raise RuntimeError('Colliding names in tables. See policy in "--collisions" argument.')
         return
 
-    trgtb.write(table)
+    trgtb.write(table.path)
 
 
 def synchronize( tables, nproc, server_spec ):
@@ -406,7 +406,7 @@ def update( table, regex ):
     Update the table located in the given path. One can select the files
     to update using a regular expression.
     '''
-    t = hep_rfm.Table.read(table)
+    t = hep_rfm.Table.read(table.path)
 
     if regex:
 
@@ -426,7 +426,7 @@ def update( table, regex ):
         t.write(table)
 
     else:
-        t.updated().write(table)
+        t.updated().write(table.path)
 
 
 if __name__ == '__main__':

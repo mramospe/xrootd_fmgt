@@ -37,11 +37,15 @@ class Manager(object):
     def add_table( self, path ):
         '''
         Add a new table to the list of tables.
+        The path is automatically transformed into the corresponding
+        :class:`ProtocolPath` instance.
 
         :param path: path to the new table.
         :type path: str
         '''
-        self.tables.append(path)
+        pp = protocols.protocol_path(path)
+
+        self.tables.append(pp)
 
     def available_table( self, use_xrd = False ):
         '''
@@ -85,7 +89,8 @@ class Manager(object):
         tmp = tempfile.TemporaryDirectory()
         for i, n in enumerate(self.tables):
 
-            fpath = os.path.join(tmp.name, 'table_{}.txt'.format(i))
+            fpath = protocols.LocalPath(
+                os.path.join(tmp.name, 'table_{}.txt'.format(i)))
 
             core.copy_file(n, fpath, server_spec=server_spec)
 
@@ -115,7 +120,7 @@ class Manager(object):
 
                     name_error = True
 
-                    logging.getLogger(__name__).error('Table in "{}" does not have file "{}"'.format(tu.path, name))
+                    logging.getLogger(__name__).error('Table in "{}" does not have file "{}"'.format(tu.protocol_path.path, name))
 
         if name_error:
             raise RuntimeError('Missing files in some tables')
@@ -196,7 +201,7 @@ class Table(dict):
     @classmethod
     def read( cls, path ):
         '''
-        Build a table from the information in the file at the given path.
+        Build a table from the information in the file at the given local path.
 
         :param path: path to the text file storing the table.
         :type path: str
@@ -225,6 +230,7 @@ class Table(dict):
     def write( self, path ):
         '''
         Write this table in the following location.
+        Must be a local path.
 
         :param path: where to write this table to.
         :type path: str
@@ -261,7 +267,7 @@ class TableUpdater(object):
 
         self.path     = path
         self.tmp_path = tmp_path
-        self.table    = Table.read(tmp_path)
+        self.table    = Table.read(tmp_path.path)
         self._changes = []
 
     def changes( self ):
@@ -271,7 +277,7 @@ class TableUpdater(object):
         :returns: changes to apply (input and output paths).
         :rtype: list(tuple(str, str))
         '''
-        return list(map(lambda t: (t[0].path, t[1].path), self._changes))
+        return list(map(lambda t: (t[0].protocol_path, t[1].protocol_path), self._changes))
 
     def check_changed( self, f ):
         '''
@@ -299,6 +305,6 @@ class TableUpdater(object):
         '''
         for src, tgt in self._changes:
 
-            self.table[tgt.name] = FileInfo(tgt.name, tgt.path, src.marks)
+            self.table[tgt.name] = FileInfo(tgt.name, tgt.protocol_path, src.marks)
 
-        self.table.write(self.tmp_path)
+        self.table.write(self.tmp_path.path)
