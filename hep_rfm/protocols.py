@@ -129,10 +129,18 @@ class ProtocolPath(object):
         dictionary, where the keys are the protocol IDs.
         This is an abstract class, and any class inheriting from it must
         override the following methods:
-        1. :func:`ProtocolPath.check_path`
-        3. :func:`ProtocolPath.copy`
-        3. :func:`ProtocolPath.is_remote`
-        4. :func:`ProtocolPath.mkdirs`
+        1. :func:`ProtocolPath.copy`
+        2. :func:`ProtocolPath.is_remote`
+        3. :func:`ProtocolPath.mkdirs`
+
+        :param path: path to save, pointing to a file.
+        :type path: str
+        :param path_checker: possible function that checks the the given path \
+        actually corresponds to the protocol. It must take a path as argument \
+        and return a bool.
+        :type path_checker: function
+        :raises ValueError: if the path does not satisfy the requirements \
+        from "path_checker".
         '''
         if path_checker is not None and not path_checker(path):
             raise ValueError('Instance of protocol path "{}" can not be built from path "{}"'.format(self.__class__.__name__, path))
@@ -219,6 +227,9 @@ class LocalPath(ProtocolPath):
     def __init__( self, path ):
         '''
         Represent a path to a local file.
+
+        :param path: path to save, pointing to a file.
+        :type path: str
         '''
         super(LocalPath, self).__init__(path)
 
@@ -263,10 +274,18 @@ class RemotePath(ProtocolPath):
         Represent a remote path.
         This is an abstract class, any class inheriting from it must override
         the following methods:
-        1. :func:`ProtocolPath.check_path`
-        2. :func:`ProtocolPath.copy`
-        3. :func:`ProtocolPath.mkdirs`
-        4. :func:`RemotePath.split_path`
+        1. :func:`ProtocolPath.copy`
+        2. :func:`ProtocolPath.mkdirs`
+        3. :func:`RemotePath.split_path`
+
+        :param path: path to save, pointing to a file.
+        :type path: str
+        :param path_checker: possible function that checks the the given path \
+        actually corresponds to the protocol. It must take a path as argument \
+        and return a bool.
+        :type path_checker: function
+        :raises ValueError: if the path does not satisfy the requirements \
+        from "path_checker".
         '''
         super(RemotePath, self).__init__(path, path_checker)
 
@@ -274,6 +293,9 @@ class RemotePath(ProtocolPath):
     def is_remote( self ):
         '''
         Return whether this is a remote protocol or not.
+
+        :returns: whether the protocol is local (True in this case).
+        :rtype: bool
         '''
         return True
 
@@ -292,6 +314,9 @@ class SSHPath(RemotePath):
     def __init__( self, path ):
         '''
         Represent a path to be handled using SSH.
+
+        :param path: path to save, pointing to a file.
+        :type path: str
         '''
         if '@' not in path:
             raise ValueError('Path "{}" is not a valid SSH path'.format(path))
@@ -381,6 +406,9 @@ class XRootDPath(RemotePath):
     def __init__( self, path ):
         '''
         Represent a path to be handled using XROOTD protocol.
+
+        :param path: path to save, pointing to a file.
+        :type path: str
         '''
         super(XRootDPath, self).__init__(path, lambda p: p.startswith('root://'))
 
@@ -487,16 +515,16 @@ def available_path( paths, use_xrd=False ):
 
 def protocol_path( path, protocol = None ):
     '''
-    Return a instantiated protocol using the given path.
-    It can be any of the declared protocols, as far as it satisfies the
-    :func:`Protocol.check_path` function for it.
-    The local protocol is considered as the last option.
+    Return a instantiated protocol using the given path and protocol ID.
+    If None is provided for "protocol", then a :class:`LocalPath` will
+    be used.
 
+    :param path: path to process.
+    :type path: ProtocolPath
+    :param protocol: protocol ID to use.
+    :type protocol: str
     :returns: protocol associated to the given path.
     :rtype: ProtocolPath
-
-    .. warning:: If the result of the :func:`Protocol.check_path` function is \
-       True for more than one protocol path, it will return the first found.
     '''
     if protocol == None:
         return LocalPath(path)

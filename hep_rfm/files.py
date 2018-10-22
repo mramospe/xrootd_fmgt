@@ -80,7 +80,7 @@ class FileInfo(FileInfoBase):
         '''
         name, path, pid, tmstp, fid = line.split()
 
-        pp = protocols.protocol_path(path, protocol=pid)
+        pp = protocols.protocol_path(path, pid)
 
         return cls(name, pp, FileMarks(float(tmstp), fid))
 
@@ -95,6 +95,8 @@ class FileInfo(FileInfoBase):
         :type name: str
         :param path: path to the file.
         :type path: str
+        :type protocol: str
+        :returns: protocol associated to the given path.
         :returns: built :class:`FileInfo` instance.
         :rtype: FileInfo
         :raises: ValueError: if failed to extract a valid path from that given.

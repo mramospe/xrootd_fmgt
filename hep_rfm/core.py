@@ -48,10 +48,10 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     .. note:: If source and target point to the same file, no copy will be done.
     '''
     # Set the user names if dealing with SSH paths
-    if source.pid == 'ssh':
+    if source.pid == protocols.SSHPath.pid:
         source = source.specify_server(server_spec)
 
-    if target.pid == 'ssh':
+    if target.pid == protocols.SSHPath.pid:
         target = target.specify_server(server_spec)
 
     # Make the directories to the target
