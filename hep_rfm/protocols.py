@@ -12,6 +12,7 @@ import subprocess
 
 # Local
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
+from hep_rfm.parallel import Registry
 
 
 __all__ = [
@@ -108,6 +109,12 @@ def register_protocol( name ):
         if name in ProtocolPath.__protocols__:
             raise ValueError('Protocol path with name "{}" already exists'.format(name))
 
+        # Apply the decorators
+        protocol.copy      = decorate_copy(protocol.copy)
+        protocol.is_remote = property(protocol.is_remote)
+        protocol.mkdirs    = decorate_mkdirs(protocol.mkdirs)
+
+        # Add protocol to dictionary
         ProtocolPath.__protocols__[name] = protocol
         protocol.pid = name
 
@@ -119,7 +126,7 @@ def register_protocol( name ):
 class ProtocolPath(object):
 
     # All protocols must have a protocol ID.
-    __protocols__ = {}
+    __protocols__ = Registry()
 
     def __init__( self, path, path_checker = None ):
         '''
@@ -184,7 +191,6 @@ class ProtocolPath(object):
         '''
         return "{}(path='{}')".format(self.__class__.__name__, self.path)
 
-    @decorate_copy
     def copy( self, target ):
         '''
         Copy the file associated to this protocol to the target location.
@@ -193,7 +199,6 @@ class ProtocolPath(object):
         '''
         raise NotImplementedError('Attempt to call abstract class method')
 
-    @property
     def is_remote( self ):
         '''
         Method to be overriden which determines whether this is a remote
@@ -202,7 +207,6 @@ class ProtocolPath(object):
         '''
         raise NotImplementedError('Attempt to call abstract class method')
 
-    @decorate_mkdirs
     def mkdirs( self ):
         '''
         Make directories to the file path within this protocol.
@@ -233,7 +237,6 @@ class LocalPath(ProtocolPath):
         '''
         super(LocalPath, self).__init__(path)
 
-    @decorate_copy
     def copy( self, target ):
         '''
         Copy the file associated to this protocol to the target location.
@@ -245,7 +248,6 @@ class LocalPath(ProtocolPath):
         '''
         return _process('cp', self.path, target.path)
 
-    @property
     def is_remote( self ):
         '''
         Return whether this is a remote protocol or not.
@@ -255,7 +257,6 @@ class LocalPath(ProtocolPath):
         '''
         return False
 
-    @decorate_mkdirs
     def mkdirs( self ):
         '''
         Make directories to the file path within this protocol.
@@ -289,7 +290,6 @@ class RemotePath(ProtocolPath):
         '''
         super(RemotePath, self).__init__(path, path_checker)
 
-    @property
     def is_remote( self ):
         '''
         Return whether this is a remote protocol or not.
@@ -323,7 +323,6 @@ class SSHPath(RemotePath):
 
         super(SSHPath, self).__init__(path, lambda p: ('@' in p))
 
-    @decorate_copy
     def copy( self, target ):
         '''
         Copy the file associated to this protocol to the target location.
@@ -335,7 +334,6 @@ class SSHPath(RemotePath):
         '''
         return _process('scp', '-q', self.path, target.path)
 
-    @decorate_mkdirs
     def mkdirs( self ):
         '''
         Make directories to the file path within this protocol.
@@ -412,7 +410,6 @@ class XRootDPath(RemotePath):
         '''
         super(XRootDPath, self).__init__(path, lambda p: p.startswith('root://'))
 
-    @decorate_copy
     def copy( self, target ):
         '''
         Copy the file associated to this protocol to the target location.
@@ -424,7 +421,6 @@ class XRootDPath(RemotePath):
         '''
         return _process('xrdcp', '-f', '-s', self.path, target.path)
 
-    @decorate_mkdirs
     def mkdirs( self ):
         '''
         Make directories to the file path within this protocol.

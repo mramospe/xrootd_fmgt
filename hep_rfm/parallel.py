@@ -99,6 +99,53 @@ class JobHandler(object):
             raise RuntimeError('{} jobs processed with errors'.format(self._failed.value))
 
 
+class Registry(object):
+
+    def __init__( self ):
+        '''
+        Define a registry of objects, where the operation of setting the objects
+        is thread-safe.
+        '''
+        super(Registry, self).__init__()
+
+        self._lock     = mp.Lock()
+        self._registry = {}
+
+    def __contains__( self, key ):
+        '''
+        Check whether the given key is registered.
+
+        :param key: key object.
+        :type key: hashable object.
+        :returns: whether the key is registered.
+        :rtype: bool
+        '''
+        return key in self._registry
+
+    def __getitem__( self, key ):
+        '''
+        Get an item from the registry.
+
+        :param key: key object.
+        :type key: hashable object
+        :returns: value object.
+        :rtype: object
+        '''
+        return self._registry[key]
+
+    def __setitem__( self, key, value ):
+        '''
+        Set an item, locking the access.
+
+        :param key: key object.
+        :type key: hashable object
+        :param value: value object.
+        :type value: object
+        '''
+        with self._lock:
+            self._registry[key] = value
+
+
 class Worker(object):
 
     def __init__( self, handler, func, args=(), kwargs={} ):
