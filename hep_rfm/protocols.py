@@ -23,6 +23,7 @@ __all__ = [
     'available_path',
     'available_local_path',
     'protocol_path',
+    'register_protocol',
     'remote_protocol',
     ]
 
@@ -101,6 +102,12 @@ def register_protocol( name ):
         '''
         Wrapper around the protocol constructor.
         '''
+        if not issubclass(protocol, ProtocolPath):
+            raise RuntimeError('Attempt to register a protocol path that does not inherit from ProtocolPath')
+
+        if name in ProtocolPath.__protocols__:
+            raise ValueError('Protocol path with name "{}" already exists'.format(name))
+
         ProtocolPath.__protocols__[name] = protocol
         protocol.pid = name
 
@@ -120,6 +127,12 @@ class ProtocolPath(object):
         The protocol IDs are defined at runtime, using
         :func:`ProtocolPath.register_protocol`. The protocols are saved on a
         dictionary, where the keys are the protocol IDs.
+        This is an abstract class, and any class inheriting from it must
+        override the following methods:
+        1. :func:`ProtocolPath.check_path`
+        3. :func:`ProtocolPath.copy`
+        3. :func:`ProtocolPath.is_remote`
+        4. :func:`ProtocolPath.mkdirs`
         '''
         self._path = path
 
@@ -159,6 +172,14 @@ class ProtocolPath(object):
         :rtype: str
         '''
         return "{}(path='{}')".format(self.__class__.__name__, self.path)
+
+    def check_path( path ):
+        '''
+        Check whether the path corresponds to a file to be used with this
+        protocol.
+        In this case, this is an abstract method.
+        '''
+        raise NotImplementedError('Attempt to call abstract class function')
 
     @decorate_copy
     def copy( self, target ):
@@ -206,6 +227,18 @@ class LocalPath(ProtocolPath):
         '''
         super(LocalPath, self).__init__(path)
 
+    def check_path( path ):
+        '''
+        Check whether the path corresponds to a file to be used with this
+        protocol.
+        In this special case, it will always return True, since any string can
+        represent a local path.
+
+        :returns: whether the path points to a file to be used with this protocol.
+        :rtype: bool
+        '''
+        return True
+
     @decorate_copy
     def copy( self, target ):
         '''
@@ -244,17 +277,15 @@ class RemotePath(ProtocolPath):
 
     def __init__( self, path ):
         '''
-
+        Represent a remote path.
+        This is an abstract class, any class inheriting from it must override
+        the following methods:
+        1. :func:`ProtocolPath.check_path`
+        2. :func:`ProtocolPath.copy`
+        3. :func:`ProtocolPath.mkdirs`
+        4. :func:`RemotePath.split_path`
         '''
         super(RemotePath, self).__init__(path)
-
-    def check_path( path ):
-        '''
-        Check whether the path corresponds to a file to be used with this
-        protocol.
-        In this case, this is an abstract method.
-        '''
-        raise NotImplementedError('Attempt to call abstract class function')
 
     @property
     def is_remote( self ):
@@ -276,6 +307,9 @@ class RemotePath(ProtocolPath):
 class SSHPath(RemotePath):
 
     def __init__( self, path ):
+        '''
+        Represent a path to be handled using SSH.
+        '''
         super(SSHPath, self).__init__(path)
 
     def check_path( path ):
@@ -369,6 +403,9 @@ class SSHPath(RemotePath):
 class XRootDPath(RemotePath):
 
     def __init__( self, path ):
+        '''
+        Represent a path to be handled using XROOTD protocol.
+        '''
         super(XRootDPath, self).__init__(path)
 
     def check_path( path ):

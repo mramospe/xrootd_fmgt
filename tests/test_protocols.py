@@ -102,6 +102,30 @@ def test_localpath( tmpdir ):
     assert os.path.isdir(os.path.dirname(pp.path))
 
 
+def test_register_protocol():
+    '''
+    Test for the "register_protocol" decorator.
+    '''
+    @hep_rfm.register_protocol('special-protocol')
+    class SpecialPath(hep_rfm.ProtocolPath):
+        def check_path( path ):
+            return False
+
+    assert SpecialPath('/local/file.txt').pid == 'special-protocol'
+
+    with pytest.raises(RuntimeError):
+        # Does not inherit from ProtocolPath
+        @hep_rfm.register_protocol('another-protocol')
+        class AnotherPath(object):
+            pass
+
+    with pytest.raises(ValueError):
+        # There is already a protocol path with that name
+        @hep_rfm.register_protocol('special-protocol')
+        class SpecialPath(hep_rfm.ProtocolPath):
+            pass
+
+
 def test_remotepath():
     '''
     Test for the "RemotePath" class.
