@@ -72,15 +72,20 @@ class FileInfo(FileInfoBase):
     def from_stream_line( cls, line ):
         '''
         Build the class from a line read from a table file.
-        '''
-        name, path, tmstp, fid = line.split()
 
-        pp = protocols.protocol_path(path)
+        :param line: line to read.
+        :type line: str
+        :returns: :class:`FileInfo` instance.
+        :rtype: FileInfo
+        '''
+        name, path, pid, tmstp, fid = line.split()
+
+        pp = protocols.protocol_path(path, protocol=pid)
 
         return cls(name, pp, FileMarks(float(tmstp), fid))
 
     @classmethod
-    def from_name_and_path( cls, name, path ):
+    def from_name_and_path( cls, name, path, protocol = None ):
         '''
         Build from a name and a path to the file.
         The path must point to a local file or, in case of being a
@@ -94,7 +99,7 @@ class FileInfo(FileInfoBase):
         :rtype: FileInfo
         :raises: ValueError: if failed to extract a valid path from that given.
         '''
-        pp = protocols.protocol_path(path)
+        pp = protocols.protocol_path(path, protocol)
 
         if pp.is_remote:
             raise ValueError('Unable to extract a local path from "{}"'.format(path))
@@ -110,7 +115,7 @@ class FileInfo(FileInfoBase):
         :returns: tuple with the information of this class
         :rtype: tuple(str, str, str, str)
         '''
-        return (self.name, self.protocol_path.path, self.marks.tmstp, self.marks.fid)
+        return (self.name, self.protocol_path.path, self.protocol_path.pid, self.marks.tmstp, self.marks.fid)
 
     def is_bare( self ):
         '''

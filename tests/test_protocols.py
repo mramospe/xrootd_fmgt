@@ -25,7 +25,7 @@ def test_available_path( tmpdir ):
         f.write('something')
 
     xr = 'root://my-site//file.txt'
-    xrootd_path = hep_rfm.protocol_path(xr)
+    xrootd_path = hep_rfm.protocol_path(xr, 'xrootd')
 
     paths = [xrootd_path, local_path]
 
@@ -49,8 +49,8 @@ def test_available_local_path( tmpdir ):
         f.write('something')
 
     nlocal_path = hep_rfm.protocol_path('non-existing-file.txt')
-    xrootd_path = hep_rfm.protocol_path('root://my-site//file.txt')
-    ssh_path    = hep_rfm.protocol_path('user@host:/file.txt')
+    xrootd_path = hep_rfm.protocol_path('root://my-site//file.txt', 'xrootd')
+    ssh_path    = hep_rfm.protocol_path('user@host:/file.txt', 'ssh')
 
     assert hep_rfm.available_local_path(local_path)
     assert not hep_rfm.available_local_path(nlocal_path)
@@ -63,12 +63,12 @@ def test_protocol_path():
     '''
     Test for the "protocol_path" function.
     '''
-    for p in (
-            '/local/path/file.txt',
-            'root://my-site//file.txt',
-            'user@host:/file.txt',
+    for path, protocol in (
+            ('/local/path/file.txt', 'local'),
+            ('root://my-site//file.txt', 'xrootd'),
+            ('user@host:/file.txt', 'ssh'),
             ):
-        p = hep_rfm.protocol_path(p)
+        p = hep_rfm.protocol_path(path, protocol)
 
 
 def test_protocolpath():
@@ -142,8 +142,8 @@ def test_remote_paths():
     Test for the "is_remote" method in ProtocolPath classes.
     '''
     remotes = (
-        hep_rfm.protocol_path('root://my-site//'),
-        hep_rfm.protocol_path('username@server'),
+        hep_rfm.protocol_path('root://my-site//', 'xrootd'),
+        hep_rfm.protocol_path('username@server', 'ssh'),
         )
 
     for r in remotes:
@@ -157,8 +157,8 @@ def test_remote_protocol():
     Test for the "remote_protocol" function.
     '''
     local  = hep_rfm.protocol_path('/local/path/file.txt')
-    ssh    = hep_rfm.protocol_path('user@host:/file.txt')
-    xrootd = hep_rfm.protocol_path('root://server//file.txt')
+    ssh    = hep_rfm.protocol_path('user@host:/file.txt', 'ssh')
+    xrootd = hep_rfm.protocol_path('root://server//file.txt', 'xrootd')
 
     assert hep_rfm.remote_protocol(local, local) == 'local'
     assert hep_rfm.remote_protocol(local, ssh) == 'ssh'
@@ -170,25 +170,27 @@ def test_sshpath():
     '''
     Test for the "is_ssh" function.
     '''
-    assert not hep_rfm.protocol_path('root://my-site//').pid == 'ssh'
-    assert hep_rfm.protocol_path('username@server').pid == 'ssh'
-    assert not hep_rfm.protocol_path('/local/path/file.txt').pid == 'ssh'
+    assert hep_rfm.protocol_path('username@server', 'ssh').pid == 'ssh'
 
-    pp = hep_rfm.protocol_path('user@my-site:path/to/file')
+    pp = hep_rfm.protocol_path('user@my-site:path/to/file', 'ssh')
 
     s, p = pp.split_path()
     assert s == 'user@my-site' and p == 'path/to/file'
+
+    with pytest.raises(ValueError):
+        hep_rfm.protocol_path('/local/file.txt', 'ssh')
 
 
 def test_xrootdpath():
     '''
     Test for the "XRootDPath" protocol path.
     '''
-    assert hep_rfm.protocol_path('root://my-site//').pid == 'xrootd'
-    assert not hep_rfm.protocol_path('username@server').pid == 'xrootd'
-    assert not hep_rfm.protocol_path('/local/path/file.txt').pid == 'xrootd'
+    assert hep_rfm.protocol_path('root://my-site//', 'xrootd').pid == 'xrootd'
 
-    pp = hep_rfm.protocol_path('root://my-site//path/to/file')
+    pp = hep_rfm.protocol_path('root://my-site//path/to/file', 'xrootd')
 
     s, p = pp.split_path()
     assert s == 'my-site' and p == '/path/to/file'
+
+    with pytest.raises(ValueError):
+        hep_rfm.protocol_path('/local/file.txt', 'xrootd')

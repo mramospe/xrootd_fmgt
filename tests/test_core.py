@@ -26,7 +26,7 @@ def test_copy_file():
     f = tempfile.NamedTemporaryFile()
 
     source = hep_rfm.protocol_path(f.name)
-    target = hep_rfm.protocol_path('no-user@no-server.com:/path/to/file')
+    target = hep_rfm.protocol_path('no-user@no-server.com:/path/to/file', 'ssh')
 
     with pytest.raises(hep_rfm.exceptions.MakeDirsError):
         hep_rfm.copy_file(source, target)

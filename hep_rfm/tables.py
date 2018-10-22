@@ -34,7 +34,7 @@ class Manager(object):
 
         super(Manager, self).__init__()
 
-    def add_table( self, path ):
+    def add_table( self, path, protocol = None ):
         '''
         Add a new table to the list of tables.
         The path is automatically transformed into the corresponding
@@ -43,7 +43,7 @@ class Manager(object):
         :param path: path to the new table.
         :type path: str
         '''
-        pp = protocols.protocol_path(path)
+        pp = protocols.protocol_path(path, protocol)
 
         self.tables.append(pp)
 
