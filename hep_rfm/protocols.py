@@ -522,11 +522,15 @@ def available_path( paths, use_xrd=False ):
 def protocol_path( path ):
     '''
     Return a instantiated protocol using the given path.
-    It can be any of the declared protocols.
+    It can be any of the declared protocols, as far as it satisfies the
+    :func:`Protocol.check_path` function for it.
     The local protocol is considered as the last option.
 
     :returns: protocol associated to the given path.
     :rtype: ProtocolPath
+
+    .. warning:: If the result of the :func:`Protocol.check_path` function is \
+       True for more than one protocol path, it will return the first found.
     '''
     for k, p in ProtocolPath.__protocols__.items():
         if k != 'local' and p.check_path(path):
