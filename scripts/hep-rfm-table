@@ -316,7 +316,7 @@ def remove( table, files, regex ):
 
     if regex:
         c = re.compile(regex)
-        for e in tables:
+        for e in tuple(t.keys()):
             if c.match(e):
                 t.pop(e)
 
@@ -493,7 +493,7 @@ if __name__ == '__main__':
     parser_display.add_argument('--regex', type=str, default=None,
                                 help='Regular expression to filter the files to show')
     # remove
-    parser_remove.add_argument('files', nargs='*',
+    parser_remove.add_argument('--files', nargs='+', default=[],
                                help='Path to the files to add')
     parser_remove.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to remove')
