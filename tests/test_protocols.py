@@ -85,6 +85,16 @@ def test_protocolpath():
 
     assert pp1 == pp2
 
+    assert pp1.__protocols__ is pp2.__protocols__
+
+    lp1 = hep_rfm.LocalPath(path)
+
+    assert lp1.__protocols__ is pp1.__protocols__
+
+    lp2 = hep_rfm.LocalPath(path)
+
+    assert lp1.pid is lp2.pid
+
 
 def test_localpath( tmpdir ):
     '''
@@ -95,7 +105,7 @@ def test_localpath( tmpdir ):
 
     assert pp.pid == 'local'
     assert pp.path == path
-    assert not pp.is_remote
+    assert not hep_rfm.is_remote(pp)
 
     pp.mkdirs()
 
@@ -108,15 +118,18 @@ def test_register_protocol():
     '''
     @hep_rfm.register_protocol('special-protocol')
     class SpecialPath(hep_rfm.ProtocolPath):
-        def check_path( path ):
-            return False
+        def copy( self, path ):
+            return process('cp', path, self.target)
+        def mkdirs( self ):
+            dpath = os.path.dirname(self.path)
+            return process('mkdir', '-p', dpath if dpath != '' else './')
 
     assert SpecialPath('/local/file.txt').pid == 'special-protocol'
 
     with pytest.raises(RuntimeError):
         # Does not inherit from ProtocolPath
-        @hep_rfm.register_protocol('another-protocol')
-        class AnotherPath(object):
+        @hep_rfm.register_protocol('another-protocol-1')
+        class AnotherPath1(object):
             pass
 
     with pytest.raises(ValueError):
@@ -124,6 +137,25 @@ def test_register_protocol():
         @hep_rfm.register_protocol('special-protocol')
         class SpecialPath(hep_rfm.ProtocolPath):
             pass
+
+    #
+    # Test missing overrides
+    #
+    with pytest.raises(hep_rfm.exceptions.MustOverrideError):
+        # Some methods from ProtocolPath are missing
+        @hep_rfm.register_protocol('another-protocol-2')
+        class AnotherPath2(hep_rfm.ProtocolPath):
+            pass
+
+    with pytest.raises(hep_rfm.exceptions.MustOverrideError):
+        # Some methods from RemotePath are missing
+        @hep_rfm.register_protocol('another-protocol-3')
+        class AnotherPath3(hep_rfm.RemotePath):
+            def copy( self, path ):
+                return process('cp', path, self.target)
+            def mkdirs( self ):
+                dpath = os.path.dirname(self.path)
+                return process('mkdir', '-p', dpath if dpath != '' else './')
 
 
 def test_remotepath():
@@ -137,9 +169,9 @@ def test_remotepath():
     assert pp.path == path
 
 
-def test_remote_paths():
+def test_is_remote():
     '''
-    Test for the "is_remote" method in ProtocolPath classes.
+    Test for the "is_remote" function.
     '''
     remotes = (
         hep_rfm.protocol_path('root://my-site//', 'xrootd'),
@@ -147,9 +179,21 @@ def test_remote_paths():
         )
 
     for r in remotes:
-        assert r.is_remote
+        assert hep_rfm.is_remote(r)
 
-    assert not hep_rfm.protocol_path('/local/path/file.txt').is_remote
+    assert not hep_rfm.is_remote(hep_rfm.protocol_path('/local/path/file.txt'))
+
+
+def test_process( tmpdir ):
+    '''
+    Test for the "process" function.
+    '''
+    path = tmpdir.join('example.txt').strpath
+
+    p = hep_rfm.process('touch', path)
+    assert p.wait() == 0
+
+    assert os.path.isfile(path)
 
 
 def test_remote_protocol():

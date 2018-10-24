@@ -9,6 +9,28 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 __all__ = ['ProcessError', 'CopyFileError', 'MakeDirsError']
 
 
+class MustOverrideError(Exception):
+
+    def __init__( self, cls, parent, method ):
+        '''
+        Define an error to be raised when a class must override a method and it
+        does not.
+
+        :param cls: class that must override the method.
+        :type cls: class
+        :param parent: parent class where it must inherit from.
+        :type parent: class
+        :param method: method that must be overriding.
+        :type method: method
+        '''
+        cn = cls.__name__
+        mn = method.__name__
+        pn = parent.__name__
+        msg = 'Class "{}" must override method "{}" from class "{}"'.format(cn, mn, pn)
+
+        super(MustOverrideError, self).__init__(msg)
+
+
 class ProcessError(RuntimeError):
 
     def __init__( self, msg, stderr ):

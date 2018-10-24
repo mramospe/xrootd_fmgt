@@ -31,7 +31,7 @@ def _process_path( path, remote, bare = False ):
 
     if remote:
 
-        if hep_rfm.protocol_path(remote).pid == 'ssh':
+        if hep_rfm.protocol_path(remote).__protocol_id__ == 'ssh':
             path = remote + ':' + path
         else:
             while remote.endswith('/'):
@@ -65,7 +65,7 @@ def decorate_access_mode( mode ):
         '''
         kwargs['table'] = table = hep_rfm.protocol_path(kwargs['table'])
 
-        if table.is_remote:
+        if hep_rfm.is_remote(table):
 
             logging.getLogger(__name__).info('Copying remote table to a temporary directory')
 
@@ -100,7 +100,7 @@ def decorate_create_mode( mode ):
         '''
         kwargs['table'] = table = hep_rfm.protocol_path(kwargs['table'])
 
-        if table.is_remote:
+        if hep_rfm.is_remote(table):
 
             logging.getLogger(__name__).info('Creating table on a temporary directory')
 
@@ -134,8 +134,8 @@ def decorate_multitable_mode( mode ):
         kwargs['table']     = tab = hep_rfm.protocol_path(kwargs['table'])
         kwargs['reference'] = ref = hep_rfm.protocol_path(kwargs['reference'])
 
-        r_tab = tab.is_remote
-        r_ref = ref.is_remote
+        r_tab = hep_rfm.is_remote(tab)
+        r_ref = hep_rfm.is_remote(ref)
 
         if r_tab or r_ref:
 
@@ -348,7 +348,7 @@ def replicate( table, location, reference, refpath, collisions, remote ):
         '''
         Add a new entry to the given table.
         '''
-        if finfo.protocol_path.is_remote:
+        if hep_rfm.is_remote(finfo.protocol_path):
                 _, p = hep_rfm.split_remote(finfo.protocol_path.path)
         else:
             p = finfo.protocol_path.path

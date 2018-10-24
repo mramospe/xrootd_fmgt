@@ -6,12 +6,13 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
+import functools
 import logging
 import os
 import subprocess
 
 # Local
-from hep_rfm.exceptions import CopyFileError, MakeDirsError
+from hep_rfm.exceptions import CopyFileError, MakeDirsError, MustOverrideError
 from hep_rfm.parallel import Registry
 
 
@@ -23,6 +24,8 @@ __all__ = [
     'XRootDPath',
     'available_path',
     'available_local_path',
+    'is_remote',
+    'process',
     'protocol_path',
     'register_protocol',
     'remote_protocol',
@@ -39,6 +42,7 @@ def decorate_copy( method ):
     :returns: wrapper around the method.
     :rtype: function
     '''
+    @functools.wraps(method)
     def wrapper( self, target ):
         '''
         Internal wrapper to copy the file to a target.
@@ -62,6 +66,7 @@ def decorate_mkdirs( method ):
     :returns: wrapper around the method.
     :rtype: function
     '''
+    @functools.wraps(method)
     def wrapper( self ):
         '''
         Internal wrapper to create the necessary directories to a target.
@@ -73,21 +78,6 @@ def decorate_mkdirs( method ):
             raise MakeDirsError(self.path, stderr.decode())
 
     return wrapper
-
-
-def _process( *args ):
-    '''
-    Create a subprocess object with a defined "stdout" and "stderr",
-    using the given commands.
-
-    :param args: set of commands to call.
-    :type args: tuple
-    :returns: subprocess applying the given commands.
-    :rtype: subprocess.Popen
-    '''
-    return subprocess.Popen( args,
-                             stdout = subprocess.PIPE,
-                             stderr = subprocess.PIPE )
 
 
 def register_protocol( name ):
@@ -103,16 +93,30 @@ def register_protocol( name ):
         '''
         Wrapper around the protocol constructor.
         '''
-        if not issubclass(protocol, ProtocolPath):
-            raise RuntimeError('Attempt to register a protocol path that does not inherit from ProtocolPath')
-
         if name in ProtocolPath.__protocols__:
             raise ValueError('Protocol path with name "{}" already exists'.format(name))
 
+        must_override = (
+            (ProtocolPath, ProtocolPath.copy),
+            (ProtocolPath, ProtocolPath.mkdirs),
+            )
+
+        if issubclass(protocol, RemotePath):
+            must_override += (
+                (RemotePath, RemotePath.split_path),
+                )
+        elif issubclass(protocol, ProtocolPath):
+            pass
+        else:
+            raise RuntimeError('Attempt to register a protocol path that does not inherit from ProtocolPath')
+
+        for c, m in must_override:
+            if getattr(protocol, m.__name__) == m:
+                raise MustOverrideError(protocol, c, m)
+
         # Apply the decorators
-        protocol.copy      = decorate_copy(protocol.copy)
-        protocol.is_remote = property(protocol.is_remote)
-        protocol.mkdirs    = decorate_mkdirs(protocol.mkdirs)
+        protocol.copy   = decorate_copy(protocol.copy)
+        protocol.mkdirs = decorate_mkdirs(protocol.mkdirs)
 
         # Add protocol to dictionary
         ProtocolPath.__protocols__[name] = protocol
@@ -132,13 +136,17 @@ class ProtocolPath(object):
         '''
         Base class to represent a protocol to manage a path to a file.
         The protocol IDs are defined at runtime, using
-        :func:`ProtocolPath.register_protocol`. The protocols are saved on a
-        dictionary, where the keys are the protocol IDs.
+        :func:`ProtocolPath.register_protocol`.
+        These IDs are saved in the registered classes on the attribute
+        "pid".
+        It is very important not to ovewrite this value, since it would
+        lead to undefined behaviour.
+        The protocols are saved on a dictionary, where the keys are the
+        protocol IDs.
         This is an abstract class, and any class inheriting from it must
         override the following methods:
         1. :func:`ProtocolPath.copy`
-        2. :func:`ProtocolPath.is_remote`
-        3. :func:`ProtocolPath.mkdirs`
+        2. :func:`ProtocolPath.mkdirs`
 
         :param path: path to save, pointing to a file.
         :type path: str
@@ -195,22 +203,26 @@ class ProtocolPath(object):
         '''
         Copy the file associated to this protocol to the target location.
         The target must be accessible.
+        It must return a :class:`subprocess.Popen` object.
         In this case, this is an abstract method.
-        '''
-        raise NotImplementedError('Attempt to call abstract class method')
 
-    def is_remote( self ):
-        '''
-        Method to be overriden which determines whether this is a remote
-        protocol or not.
-        In this case, this is an abstract method.
+        :param target: path where to copy the file to.
+        :type target: ProtocolPath
+        :returns: running process copying the file in the current location \
+        to the target.
+        :rtype: subprocess.Popen
         '''
         raise NotImplementedError('Attempt to call abstract class method')
 
     def mkdirs( self ):
         '''
         Make directories to the file path within this protocol.
+        It must return a :class:`subprocess.Popen` object.
         In this case, this is an abstract method.
+
+        :returns: running process to make the necessary directories to the \
+        target.
+        :rtype: subprocess.Popen
         '''
         raise NotImplementedError('Attempt to call abstract class method')
 
@@ -223,49 +235,6 @@ class ProtocolPath(object):
         :rtype: str
         '''
         return self._path
-
-
-@register_protocol('local')
-class LocalPath(ProtocolPath):
-
-    def __init__( self, path ):
-        '''
-        Represent a path to a local file.
-
-        :param path: path to save, pointing to a file.
-        :type path: str
-        '''
-        super(LocalPath, self).__init__(path)
-
-    def copy( self, target ):
-        '''
-        Copy the file associated to this protocol to the target location.
-        The target must be accessible.
-
-        :param target: where to copy the file.
-        :type target: ProtocolPath
-        :raises CopyFileError: if a problem appears while copying the file.
-        '''
-        return _process('cp', self.path, target.path)
-
-    def is_remote( self ):
-        '''
-        Return whether this is a remote protocol or not.
-
-        :returns: whether the protocol is local (True in this case).
-        :rtype: bool
-        '''
-        return False
-
-    def mkdirs( self ):
-        '''
-        Make directories to the file path within this protocol.
-
-        :raises MakeDirsError: if an error occurs while creating directories.
-        '''
-        dpath = os.path.dirname(self.path)
-
-        return _process('mkdir', '-p', dpath if dpath != '' else './')
 
 
 class RemotePath(ProtocolPath):
@@ -290,15 +259,6 @@ class RemotePath(ProtocolPath):
         '''
         super(RemotePath, self).__init__(path, path_checker)
 
-    def is_remote( self ):
-        '''
-        Return whether this is a remote protocol or not.
-
-        :returns: whether the protocol is local (True in this case).
-        :rtype: bool
-        '''
-        return True
-
     def split_path( self ):
         '''
         Split the remote path in the server specifications and path in the
@@ -306,6 +266,40 @@ class RemotePath(ProtocolPath):
         In this case, this is an abstract method.
         '''
         raise NotImplementedError('Attempt to call abstract class method')
+
+
+@register_protocol('local')
+class LocalPath(ProtocolPath):
+
+    def __init__( self, path ):
+        '''
+        Represent a path to a local file.
+
+        :param path: path to save, pointing to a file.
+        :type path: str
+        '''
+        super(LocalPath, self).__init__(path)
+
+    def copy( self, target ):
+        '''
+        Copy the file associated to this protocol to the target location.
+        The target must be accessible.
+
+        :param target: where to copy the file.
+        :type target: ProtocolPath
+        :raises CopyFileError: if a problem appears while copying the file.
+        '''
+        return process('cp', self.path, target.path)
+
+    def mkdirs( self ):
+        '''
+        Make directories to the file path within this protocol.
+
+        :raises MakeDirsError: if an error occurs while creating directories.
+        '''
+        dpath = os.path.dirname(self.path)
+
+        return process('mkdir', '-p', dpath if dpath != '' else './')
 
 
 @register_protocol('ssh')
@@ -332,7 +326,7 @@ class SSHPath(RemotePath):
         :type target: ProtocolPath
         :raises CopyFileError: if a problem appears while copying the file.
         '''
-        return _process('scp', '-q', self.path, target.path)
+        return process('scp', '-q', self.path, target.path)
 
     def mkdirs( self ):
         '''
@@ -344,7 +338,7 @@ class SSHPath(RemotePath):
 
         dpath = os.path.dirname(sepath)
 
-        return _process('ssh', '-X', server, 'mkdir', '-p', dpath)
+        return process('ssh', '-X', server, 'mkdir', '-p', dpath)
 
     def specify_server( self, server_spec = None ):
         '''
@@ -419,7 +413,7 @@ class XRootDPath(RemotePath):
         :type target: ProtocolPath
         :raises CopyFileError: if a problem appears while copying the file.
         '''
-        return _process('xrdcp', '-f', '-s', self.path, target.path)
+        return process('xrdcp', '-f', '-s', self.path, target.path)
 
     def mkdirs( self ):
         '''
@@ -431,7 +425,7 @@ class XRootDPath(RemotePath):
 
         dpath = os.path.dirname(sepath)
 
-        return _process('xrd', server, 'mkdir', dpath)
+        return process('xrd', server, 'mkdir', dpath)
 
     def split_path( self ):
         '''
@@ -459,7 +453,7 @@ def available_local_path( path, use_xrd = False ):
     :returns: local path.
     :rtype: ProtocolPath or None
     '''
-    if path.is_remote:
+    if is_remote(path):
 
         if use_xrd and path.pid == XRootDPath.pid:
             # Using XRootD protocol is allowed
@@ -509,6 +503,31 @@ def available_path( paths, use_xrd=False ):
     raise RuntimeError('Unable to find an available path')
 
 
+def is_remote( path ):
+    '''
+    Return whether the given protocol path belongs to a remote protocol or not.
+
+    :param path: protocol path to process.
+    :type path: ProtocolPath
+    :returns: whether the protocol is local (True in this case).
+    :rtype: bool
+    '''
+    return issubclass(path.__class__, RemotePath)
+
+
+def process( *args ):
+    '''
+    Create a subprocess object where the output from "stdout" and "stderr"
+    is redirected to subprocess.PIPE.
+
+    :param args: set of commands to call.
+    :type args: tuple
+    :returns: subprocess applying the given commands.
+    :rtype: subprocess.Popen
+    '''
+    return subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+
+
 def protocol_path( path, protocol = None ):
     '''
     Return a instantiated protocol using the given path and protocol ID.
@@ -543,9 +562,9 @@ def remote_protocol( a, b ):
     :returns: protocol ID.
     :rtype: int
     '''
-    if a.is_remote:
+    if is_remote(a):
 
-        if b.is_remote:
+        if is_remote(b):
 
             if a.pid != b.pid:
                 return None
