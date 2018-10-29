@@ -349,7 +349,7 @@ def replicate( table, location, reference, refpath, collisions, remote ):
         Add a new entry to the given table.
         '''
         if hep_rfm.is_remote(finfo.protocol_path):
-                _, p = hep_rfm.split_remote(finfo.protocol_path.path)
+                _, p = finfo.protocol_path.split_path()
         else:
             p = finfo.protocol_path.path
 
