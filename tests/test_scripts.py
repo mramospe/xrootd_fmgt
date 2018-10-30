@@ -171,10 +171,16 @@ def test_hep_rfm_table_general( tmpdir, table_path, files ):
         'hep-rfm-table add {} {} {} --bare'.format(table_path, 'file2', files['file2']),
         'hep-rfm-table add_massive {} {} {}'.format(table_path, files['file3'], files['file4']),
         'hep-rfm-table update {}'.format(table_path),
+        'hep-rfm-table remove {} --files {} {}'.format(table_path, 'file1', 'file2'),
+        'hep-rfm-table remove {} --regex {}'.format(table_path, 'file(3|4)'),
         )
 
     for c in cmds:
         p = process(c)
+
+    table = hep_rfm.Table.read(table_path.strpath)
+
+    assert len(table) == 0
 
 
 @with_table_filled
@@ -198,7 +204,7 @@ def test_hep_rfm_table_replicate( tmpdir, table_path, files ):
     assert list(sorted(old_table.keys())) == list(sorted(new_table.keys()))
 
     for k, v in new_table.items():
-        assert old_table[k].path == v.path
+        assert old_table[k].protocol_path == v.protocol_path
         assert v.marks.fid == hep_rfm.files.__default_fid__
         assert v.marks.tmstp == hep_rfm.files.__default_tmstp__
 
@@ -253,4 +259,4 @@ def test_hep_rfm_table_synchronize( tmpdir, table_path, files ):
         sk = same_table[k]
 
         assert sk.marks.fid == v.marks.fid
-        assert sk.path == v.path
+        assert sk.protocol_path == v.protocol_path

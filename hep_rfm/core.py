@@ -20,7 +20,6 @@ import tempfile
 
 __all__ = [
     'copy_file',
-    'make_directories',
     'rfm_hash',
     ]
 
@@ -33,6 +32,10 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     Main function to copy a file from a source to a target. The copy is done
     if the modification time of both files do not coincide.
 
+    :param source: where to copy the file from.
+    :type source: ProtocolPath
+    :param target: where to copy the file.
+    :type target: ProtocolPath
     :param loglock: possible locker to prevent from displaying at the same \
     time in the screen for two different processes.
     :type loglock: multiprocessing.Lock or None
@@ -45,99 +48,41 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     .. note:: If source and target point to the same file, no copy will be done.
     '''
     # Set the user names if dealing with SSH paths
-    if protocols.is_ssh(source):
-        source = _set_username(source, server_spec)
+    if source.pid == protocols.SSHPath.pid:
+        source = source.specify_server(server_spec)
 
-    if protocols.is_ssh(target):
-        target = _set_username(target, server_spec)
+    if target.pid == protocols.SSHPath.pid:
+        target = target.specify_server(server_spec)
 
     # Make the directories to the target
-    make_directories(target)
+    target.mkdirs()
 
     # Copy the file
     dec = protocols.remote_protocol(source, target)
-    if dec == protocols.__different_protocols__:
+    if dec == None:
         # Copy to a temporal file
-        if protocols.is_remote(source):
-            _, path = protocols.split_remote(source)
+        if source.is_remote:
+            _, path = source.split_path()
         else:
-            path = source
+            path = source.path
 
         with tempfile.TemporaryDirectory() as tmpdir:
 
-            tmp = os.path.join(tmpdir, os.path.basename(path))
+            tmp = protocols.protocol_path(
+                os.path.join(tmpdir, os.path.basename(path)))
 
             copy_file(source, tmp)
             copy_file(tmp, target)
 
     else:
-        # Copies are performed in silent mode. No errors are displayed if
-        # the target already exists or if source and target correspond to the
-        # same file.
-        if dec == protocols.__ssh_protocol__:
-            proc = _process('scp', '-q', source, target)
-        elif dec == protocols.__xrootd_protocol__:
-            proc = _process('xrdcp', '-f', '-s', source, target)
-        else:
-            if os.path.isfile(source) and os.path.isfile(target) and os.path.samefile(source, target):
-                return
-
-            proc = _process('cp', source, target)
+        if os.path.isfile(source.path) and os.path.isfile(target.path) and os.path.samefile(source.path, target.path):
+            return
 
         parallel.log(logging.getLogger(__name__).info,
                      'Copying file\n source: {}\n target: {}'.format(source, target),
                      loglock)
 
-        if proc.wait() != 0:
-            _, stderr = proc.communicate()
-            raise CopyFileError(source, target, stderr.decode())
-
-
-def make_directories( target ):
-    '''
-    Make the directories for the given target in case they do not exist already.
-
-    :param target: path to a target file.
-    :type target: str
-    :raises MakeDirsError: if the directory could not be created.
-    '''
-    if protocols.is_remote(target):
-
-        server, sepath = protocols.split_remote(target)
-
-        dpath = os.path.dirname(sepath)
-
-        if protocols.is_xrootd(target):
-            proc = _process('xrd', server, 'mkdir', dpath)
-        else:
-            proc = _process('ssh', '-X', server, 'mkdir', '-p', dpath)
-
-    else:
-
-        dpath = os.path.dirname(target)
-
-        proc = _process('mkdir', '-p', dpath if dpath != '' else './')
-
-    if proc.wait() != 0:
-
-        _, stderr = proc.communicate()
-
-        raise MakeDirsError(target, stderr.decode())
-
-
-def _process( *args ):
-    '''
-    Create a subprocess object with a defined "stdout" and "stderr",
-    using the given commands.
-
-    :param args: set of commands to call.
-    :type args: tuple
-    :returns: subprocess applying the given commands.
-    :rtype: subprocess.Popen
-    '''
-    return subprocess.Popen( args,
-                             stdout = subprocess.PIPE,
-                             stderr = subprocess.PIPE )
+        source.copy(target)
 
 
 def rfm_hash( path ):
@@ -167,43 +112,3 @@ def rfm_hash( path ):
             h.update(d)
 
     return h.hexdigest()
-
-
-def _set_username( path, server_spec=None ):
-    '''
-    Process the given path and return a modified version of it adding
-    the correct user name.
-    The user name for each host must be specified in server_spec.
-
-    :param path: path to a file.
-    :type path: str
-    :param server_spec: specification of user for each SSH server. Must \
-    be specified as a dictionary, where the keys are the hosts and the \
-    values are the user names.
-    :type server_spec: dict
-    :returns: modified version of "path".
-    :rtype: str
-    :raises RuntimeError: if there is no way to determine the user name for \
-    the given path.
-    '''
-    server_spec = server_spec if server_spec is not None else {}
-
-    l = path.find('@')
-
-    if l == 0 and not server_spec:
-        raise RuntimeError('User name not specified for path "{}"'.format(path))
-
-    uh, _ = protocols.split_remote(path)
-
-    u, h = uh.split('@')
-
-    for host, uname in server_spec.items():
-
-        if host == h:
-            path = uname + path[l:]
-            break
-
-    if path.startswith('@'):
-        raise RuntimeError('Unable to find a proper user name for path "{}"'.format(path))
-
-    return path
