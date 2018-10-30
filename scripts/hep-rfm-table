@@ -29,18 +29,11 @@ def _process_path( path, remote, bare = False ):
     '''
     path = os.path.abspath(path)
 
-    if remote:
+    if remote is not None:
 
-        if hep_rfm.protocol_path(remote).__protocol_id__ == 'ssh':
-            path = remote + ':' + path
-        else:
-            while remote.endswith('/'):
-                remote = remote[:-1]
+        protocol, prefix = remote
 
-            while path.startswith('/'):
-                path = path[1:]
-
-            path = remote + '//' + path
+        path = hep_rfm.ProtocolPath.__protocols__[protocol].join_path(prefix, path)
 
     pp = hep_rfm.protocol_path(path)
     if not bare:
@@ -524,10 +517,10 @@ if __name__ == '__main__':
                        help='Number of parallel process to invoke')
 
     for p in (parser_add, parser_add_massive, parser_add_from_dir, parser_replicate):
-        p.add_argument('--remote', '-r', type=str, default=None, required=False,
-                       help='Remote direction to prepend to the files. If you '\
-                       'are specifying it in the file path, adding it as well '\
-                       'here will cause an error.')
+        p.add_argument('--remote', '-r', nargs=2, default=None, required=False,
+                       help='Remote protocol type and direction to prepend'\
+                       'to the files. If you are specifying it in the file path,'\
+                       'adding it as well here will cause an error.')
 
     for p in (parser_add, parser_add_massive):
         p.add_argument('--bare', '-b', action='store_true',

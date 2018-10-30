@@ -12,7 +12,7 @@ import os
 import subprocess
 
 # Local
-from hep_rfm.exceptions import CopyFileError, MakeDirsError, MustOverrideError
+from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
 from hep_rfm.parallel import Registry
 
 
@@ -103,6 +103,7 @@ def register_protocol( name ):
 
         if issubclass(protocol, RemotePath):
             must_override += (
+                (RemotePath, RemotePath.join_path),
                 (RemotePath, RemotePath.split_path),
                 )
         elif issubclass(protocol, ProtocolPath):
@@ -212,7 +213,7 @@ class ProtocolPath(object):
         to the target.
         :rtype: subprocess.Popen
         '''
-        raise NotImplementedError('Attempt to call abstract class method')
+        raise AbstractMethodError()
 
     def mkdirs( self ):
         '''
@@ -224,7 +225,7 @@ class ProtocolPath(object):
         target.
         :rtype: subprocess.Popen
         '''
-        raise NotImplementedError('Attempt to call abstract class method')
+        raise AbstractMethodError()
 
     @property
     def path( self ):
@@ -245,8 +246,9 @@ class RemotePath(ProtocolPath):
         This is an abstract class, any class inheriting from it must override
         the following methods:
         1. :func:`ProtocolPath.copy`
-        2. :func:`ProtocolPath.mkdirs`
-        3. :func:`RemotePath.split_path`
+        2. :func:`RemotePath.join_path` (must be decorated with :func:`staticmethod`)
+        4. :func:`ProtocolPath.mkdirs`
+        5. :func:`RemotePath.split_path`
 
         :param path: path to save, pointing to a file.
         :type path: str
@@ -259,13 +261,28 @@ class RemotePath(ProtocolPath):
         '''
         super(RemotePath, self).__init__(path, path_checker)
 
+    @staticmethod
+    def join_path( prefix, path ):
+        '''
+        Policy to merge a prefix and a path in this protocol.
+        In this case, this is an abstract method.
+
+        :param prefix: prefix to add to the current path.
+        :type prefix: str
+        :param path: path to the file in the remote.
+        :type path: str
+        :returns: result of joining the prefix and the path for this protocol.
+        :rtype: str
+        '''
+        raise AbstractMethodError()
+
     def split_path( self ):
         '''
         Split the remote path in the server specifications and path in the
         server.
         In this case, this is an abstract method.
         '''
-        raise NotImplementedError('Attempt to call abstract class method')
+        raise AbstractMethodError()
 
 
 @register_protocol('local')
@@ -327,6 +344,20 @@ class SSHPath(RemotePath):
         :raises CopyFileError: if a problem appears while copying the file.
         '''
         return process('scp', '-q', self.path, target.path)
+
+    @staticmethod
+    def join_path( prefix, path ):
+        '''
+        Policy to merge a prefix and a path in this protocol.
+
+        :param prefix: prefix to add to the current path.
+        :type prefix: str
+        :param path: path to the file in the remote.
+        :type path: str
+        :returns: result of joining the prefix and the path for this protocol.
+        :rtype: str
+        '''
+        return prefix + ':' + path
 
     def mkdirs( self ):
         '''
@@ -414,6 +445,26 @@ class XRootDPath(RemotePath):
         :raises CopyFileError: if a problem appears while copying the file.
         '''
         return process('xrdcp', '-f', '-s', self.path, target.path)
+
+    @staticmethod
+    def join_path( prefix, path ):
+        '''
+        Policy to merge a prefix and a path in this protocol.
+
+        :param prefix: prefix to add to the current path.
+        :type prefix: str
+        :param path: path to the file in the remote.
+        :type path: str
+        :returns: result of joining the prefix and the path for this protocol.
+        :rtype: str
+        '''
+        while prefix.endswith('/'):
+            prefix = prefix[:-1]
+
+        while path.startswith('/'):
+            path = path[1:]
+
+        return prefix + '//' + path
 
     def mkdirs( self ):
         '''

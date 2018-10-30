@@ -6,7 +6,16 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 
-__all__ = ['ProcessError', 'CopyFileError', 'MakeDirsError']
+__all__ = ['AbstractMethodError', 'ProcessError', 'CopyFileError', 'MakeDirsError']
+
+
+class AbstractMethodError(Exception):
+
+    def __init__( self ):
+        '''
+        Define an error for base classes with abstract methods.
+        '''
+        super(AbstractMethodError, self).__init__('Attempt to call abstract class method')
 
 
 class MustOverrideError(Exception):

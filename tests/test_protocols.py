@@ -216,13 +216,16 @@ def test_sshpath():
     '''
     assert hep_rfm.protocol_path('username@server', 'ssh').pid == 'ssh'
 
-    pp = hep_rfm.protocol_path('user@my-site:path/to/file', 'ssh')
+    pp = hep_rfm.protocol_path('user@my-site:path/to/file.txt', 'ssh')
 
     s, p = pp.split_path()
-    assert s == 'user@my-site' and p == 'path/to/file'
+    assert s == 'user@my-site' and p == 'path/to/file.txt'
 
     with pytest.raises(ValueError):
         hep_rfm.protocol_path('/local/file.txt', 'ssh')
+
+    p = hep_rfm.SSHPath.join_path('user@my-site', '/path/to/file.txt')
+    assert p == 'user@my-site:/path/to/file.txt'
 
 
 def test_xrootdpath():
@@ -238,3 +241,10 @@ def test_xrootdpath():
 
     with pytest.raises(ValueError):
         hep_rfm.protocol_path('/local/file.txt', 'xrootd')
+
+    for p in (
+            hep_rfm.XRootDPath.join_path('root://server', 'path/in/server/file.txt'),
+            hep_rfm.XRootDPath.join_path('root://server/', 'path/in/server/file.txt'),
+            hep_rfm.XRootDPath.join_path('root://server//', '/path/in/server/file.txt'),
+            ):
+        assert p == 'root://server//path/in/server/file.txt'

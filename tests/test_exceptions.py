@@ -11,6 +11,15 @@ import pytest
 # Local
 import hep_rfm
 
+
+def test_abstractmethoderror():
+    '''
+    Test for the "AbstractMethodError"
+    '''
+    with pytest.raises(hep_rfm.AbstractMethodError):
+        raise hep_rfm.AbstractMethodError()
+
+
 def test_processerror():
     '''
     Test for the "ProcessError" class.
