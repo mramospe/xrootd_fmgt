@@ -272,13 +272,14 @@ def display( table, regex ):
         return
 
     mn = max(len('name'), max(len(f.name) for f in t.values()))
-    mp = max(len('path'), max(len(f.path) for f in t.values()))
+    mp = max(len('path'), max(len(f.protocol_path.path) for f in t.values()))
+    mi = max(len('path'), max(len(f.protocol_path.pid) for f in t.values()))
     mt = max(len('tmstp'), max(len(str(f.marks.tmstp)) for f in t.values()))
     mf = max(len('fid'), max(len(f.marks.fid) for f in t.values()))
 
-    frmt = '{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}'
+    frmt = '{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}'
 
-    to_string = lambda name, path, tmstp, fid: frmt.format(name, mn, path, mp, tmstp, mt, fid, mf)
+    to_string = lambda name, path, pid, tmstp, fid: frmt.format(name, mn, path, mp, pid, mi, tmstp, mt, fid, mf)
 
     if regex:
         m = re.compile(regex)
@@ -286,11 +287,11 @@ def display( table, regex ):
     lines = []
     for k, f in sorted(t.items()):
         if not regex or m.match(k):
-            lines.append(to_string(f.name, f.path, f.marks.tmstp, f.marks.fid))
+            lines.append(to_string(f.name, f.protocol_path.path, f.protocol_path.pid, f.marks.tmstp, f.marks.fid))
 
     if len(lines) != 0:
         logging.getLogger(__name__).info('Contents of table "{}"'.format(table.path))
-        logging.getLogger(__name__).info(to_string('name', 'path', 'tmstp', 'fid'))
+        logging.getLogger(__name__).info(to_string('name', 'path', 'pid', 'tmstp', 'fid'))
 
         for l in lines:
             logging.getLogger(__name__).info(l)
@@ -347,7 +348,7 @@ def replicate( table, location, reference, refpath, collisions, remote ):
             p = finfo.protocol_path.path
 
         if not p.startswith(refpath):
-            raise RuntimeError('Paths in the reference table must start by "refpath"')
+            raise RuntimeError('Paths in the reference table must start by "refpath": "{}"'.format(refpath))
 
         p = _process_path(p.replace(refpath, location), remote, bare=True)
 
@@ -487,7 +488,7 @@ if __name__ == '__main__':
                                 help='Regular expression to filter the files to show')
     # remove
     parser_remove.add_argument('--files', nargs='+', default=[],
-                               help='Path to the files to add')
+                               help='Names of the files to remove')
     parser_remove.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to remove')
     # replicate
