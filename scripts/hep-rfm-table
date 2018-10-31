@@ -171,7 +171,8 @@ def add( table, name, path, bare, remote ):
     if bare:
         f = hep_rfm.FileInfo(name, pp)
     else:
-        f = hep_rfm.FileInfo.from_name_and_path(name, pp.path)
+        m = hep_rfm.FileMarks.from_local_path(pp.path)
+        f = hep_rfm.FileInfo(name, pp, m)
 
     t[f.name] = f
 
@@ -192,10 +193,13 @@ def add_massive( table, files, nproc, remote, bare ):
         '''
         Create a FileInfo from the inputs, and put it in the queue
         '''
+        name, pp = obj
+
         if bare:
-            f = hep_rfm.FileInfo(*obj)
+            f = hep_rfm.FileInfo(name, pp)
         else:
-            f = hep_rfm.FileInfo.from_name_and_path(*obj)
+            m = hep_rfm.FileMarks.from_local_path(pp.path)
+            f = hep_rfm.FileInfo(name, pp, m)
 
         queue.put(f)
 
@@ -209,7 +213,7 @@ def add_massive( table, files, nproc, remote, bare ):
 
         name = os.path.basename(os.path.splitext(pp.path)[0])
 
-        handler.put((name, pp.path))
+        handler.put((name, pp))
 
     handler.process()
 
