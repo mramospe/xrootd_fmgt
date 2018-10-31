@@ -128,29 +128,6 @@ class FileInfo(FileInfoBase):
         '''
         return self.marks.tmstp == __default_tmstp__ and self.marks.fid == __default_fid__
 
-    def local_path( self ):
-        '''
-        Return the actual path in the local system, removing the information
-        of the remote.
-        If this is a bare file, None is returned.
-        In the opposite case, an exception is raised if the file is not found
-        in the associated path.
-
-        :returns: path in the local system.
-        :rtype: str or None
-        :raises RuntimeError: if this is a non-bare file, and no file is found \
-        in the associated path.
-        '''
-        if self.is_bare():
-            return None
-
-        pp = protocols.available_local_path(self.protocol_path)
-
-        if pp is None:
-            raise RuntimeError('Unable to retrieve a valid path to a file from "{}"'.format(self.protocol_path.path))
-
-        return pp.path
-
     def newer_than( self, other ):
         '''
         Return whether this object corresponds to a newer version than that
@@ -171,9 +148,12 @@ class FileInfo(FileInfoBase):
         :returns: updated version of this file.
         :rtype: FileInfo
         '''
-        path = self.local_path()
+        if protocols.is_remote(self.protocol_path):
+            _, path = self.protocol_path.split_path()
+        else:
+            path = self.protocol_path.path
 
-        if path is not None:
+        if os.path.isfile(path):
             marks = FileMarks.from_local_path(path)
         else:
             marks = self.marks
