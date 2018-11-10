@@ -125,34 +125,21 @@ def decorate_multitable_mode( mode ):
         create the file(s) on a temporary directory and then copy it(them).
         '''
         kwargs['table']     = tab = hep_rfm.protocol_path(kwargs['table'])
-        kwargs['reference'] = ref = hep_rfm.protocol_path(kwargs['reference'])
+        kwargs['reference'] = ref = hep_rfm.protocol_path(kwargs['reference'], kwargs['refpid'])
 
-        r_tab = hep_rfm.is_remote(tab)
-        r_ref = hep_rfm.is_remote(ref)
-
-        if r_tab or r_ref:
-
-            logging.getLogger(__name__).info('Creating table(s) on a temporary directory')
+        if hep_rfm.is_remote(ref):
 
             with tempfile.TemporaryDirectory() as d:
 
-                if r_tab:
-                    tmp_tab = hep_rfm.protocol_path(os.path.join(d, 'tmp_table.txt'))
-                    hep_rfm.copy_file(tab, tmp_tab)
-                    kwargs['table'] = tmp_tab
+                tmp_ref = hep_rfm.protocol_path(os.path.join(d, 'tmp_reference.txt'))
 
-                if r_ref:
-                    tmp_ref = hep_rfm.protocol_path(os.path.join(d, 'tmp_reference.txt'))
-                    hep_rfm.copy_file(ref, tmp_ref)
-                    kwargs['reference'] = tmp_ref
+                logging.getLogger(__name__).info('Copying reference table to a temporary directory')
+
+                hep_rfm.copy_file(ref, tmp_ref)
+
+                kwargs['reference'] = tmp_ref
 
                 mode(**kwargs)
-
-                logging.getLogger(__name__).info('Copying the table(s) to the remote path(s)')
-
-                if r_tab:
-                    # We only need to copy the target table
-                    hep_rfm.copy_file(tmp_tab, tab)
         else:
             mode(**kwargs)
 
@@ -322,7 +309,7 @@ def remove( table, files, regex ):
 
 
 @decorate_multitable_mode
-def replicate( table, location, reference, refpath, collisions, remote ):
+def replicate( table, location, reference, refpath, refpid, collisions, remote ):
     '''
     Reproduce the structure of sub-directories of the files stored on a
     reference table into another one, creating bare entries for all of them.
@@ -431,7 +418,7 @@ if __name__ == '__main__':
 
     # Logging configuration
     logging.basicConfig(format='%(message)s')
-    logging.getLogger(__name__).setLevel(logging.INFO)
+    logging.getLogger().setLevel(logging.INFO)
 
     def add_mode( subparsers, func ):
         '''
@@ -496,12 +483,14 @@ if __name__ == '__main__':
     parser_remove.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to remove')
     # replicate
-    parser_replicate.add_argument('--location', type=str,
+    parser_replicate.add_argument('location', type=str,
                                     help='Location where to build the schema')
-    parser_replicate.add_argument('--reference', type=str,
+    parser_replicate.add_argument('reference', type=str,
                                     help='Path to the reference table')
-    parser_replicate.add_argument('--refpath', type=str,
+    parser_replicate.add_argument('refpath', type=str,
                                     help='Absolute path in the reference table to be replaced by "location"')
+    parser_replicate.add_argument('--refpid', type=str, default='local',
+                                  help='Possible protocol ID of the reference path')
     parser_replicate.add_argument('--collisions', default='raise',
                                     choices=('raise', 'replace', 'omit'),
                                     help='Whether to replace the paths to the files with colliding names')
