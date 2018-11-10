@@ -61,7 +61,7 @@ def copy_file( source, target, loglock=None, server_spec=None ):
     dec = protocols.remote_protocol(source, target)
     if dec == None:
         # Copy to a temporal file
-        if source.is_remote:
+        if protocols.is_remote(source):
             _, path = source.split_path()
         else:
             path = source.path
