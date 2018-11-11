@@ -59,7 +59,7 @@ class Manager(object):
         '''
         return protocols.available_path(self.tables, allow_protocols)
 
-    def update( self, parallelize = False, wdir = None, server_spec = None ):
+    def update( self, parallelize = False, wdir = None, modifiers = None ):
         '''
         Update the different tables registered within this manager.
 
@@ -70,15 +70,15 @@ class Manager(object):
         :param wdir: where to create the temporary directory. The option \
         is passed to :class:`tempfile.TemporaryDirectory` as "dir".
         :type wdir: str
-        :param server_spec: specification of user for each SSH server. Must \
-        be specified as a dictionary, where the keys are the hosts and the \
-        values are the user names.
-        :type server_spec: dict
+        :param modifiers: information to modify the path of this class. For \
+        more information on its structure, see the definition of \
+        :func:`hep_rfm.ProtocolPath.with_modifiers` for each protocol.
+        :type modifiers: dict
         :raises RuntimeError: if a file is missing for any of the tables.
 
         .. seealso:: :class:`hep_rfm.Table`, :func:`hep_rfm.copy_file`
         '''
-        kwargs = {'wdir': wdir, 'server_spec': server_spec}
+        kwargs = {'wdir': wdir, 'modifiers': modifiers}
 
         #
         # Determine the files to update

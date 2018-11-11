@@ -240,6 +240,21 @@ class ProtocolPath(object):
         '''
         return self._path
 
+    def with_modifiers( self, modifiers ):
+        '''
+        Return an instance of this class after applying modifications.
+        The input dictionary can contain information not understood for a given
+        :class:`hep_rfm.ProtocolPath`.
+        By default the same class, with no modifications, is returned.
+
+        :param modifiers: information to modify the path of this class.
+        :type modifiers: dict
+        :returns: modified instance if a modification is applied. Otherwise \
+        same instance.
+        :rtype: ProtocolPath
+        '''
+        return self
+
 
 class RemotePath(ProtocolPath):
 
@@ -430,6 +445,44 @@ class SSHPath(RemotePath):
         :rtype: str, str
         '''
         return self.path.split(':')
+
+    def with_modifiers( self, modifiers ):
+        '''
+        Return an instance of this class after applying modifications.
+        The input dictionary "modifiers" might contain information about the
+        user-name for the host in the stored path.
+        This information must be provided on a key called "ssh-usernames",
+        containing the user-name to use for each host (although only one will
+        be appliable for a given :class:`hep_rfm.SSHPath` instance).
+        In case the path has already one user-name defined, it will be
+        overwritten.
+
+        :param modifiers: information to modify the path of this class.
+        :type modifiers: dict
+        :returns: modified instance if a modification is applied. Otherwise \
+        same instance.
+        :rtype: ProtocolPath
+        '''
+        modifiers = modifiers if modifiers is not None else {}
+
+        path = self.path
+
+        if 'ssh-usernames' in modifiers:
+
+            uh, _ = self.split_path()
+
+            _, h = uh.split('@')
+
+            for host, uname in modifiers['ssh-usernames'].items():
+
+                if host == h:
+                    path = uname + path[path.find('@'):]
+                    break
+
+        if path.startswith('@'):
+            raise RuntimeError('User name must be specified for "{}"'.format(self))
+
+        return self.__class__(path)
 
 
 @register_protocol('xrootd')

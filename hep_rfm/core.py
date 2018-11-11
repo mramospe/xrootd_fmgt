@@ -27,7 +27,7 @@ __all__ = [
 __buffer_size__ = 10485760 # 10MB
 
 
-def copy_file( source, target, wdir=None, loglock=None, server_spec=None ):
+def copy_file( source, target, wdir=None, loglock=None, modifiers=None ):
     '''
     Main function to copy a file from a source to a target.
     The copy is done if the modification time of both files do not coincide.
@@ -45,20 +45,16 @@ def copy_file( source, target, wdir=None, loglock=None, server_spec=None ):
     :param loglock: possible locker to prevent from displaying at the same \
     time in the screen for two different processes.
     :type loglock: multiprocessing.Lock or None
-    :param server_spec: specification of user for each SSH server. Must \
-    be specified as a dictionary, where the keys are the hosts and the \
-    values are the user names.
-    :type server_spec: dict
+    :param modifiers: dictionary with the information to modify the path \
+    of the input :class:`hep_rfm.ProtocolPath` instances.
+    :type modifiers: dict
     :raises CopyFileError: if the file can not be copied.
 
     .. note:: If source and target point to the same file, no copy will be done.
     '''
     # Set the user names if dealing with SSH paths
-    if source.pid == protocols.SSHPath.pid:
-        source = source.specify_server(server_spec)
-
-    if target.pid == protocols.SSHPath.pid:
-        target = target.specify_server(server_spec)
+    source = source.with_modifiers(modifiers)
+    target = target.with_modifiers(modifiers)
 
     # Make the directories to the target
     target.mkdirs()
