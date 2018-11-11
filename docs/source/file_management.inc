@@ -84,11 +84,12 @@ An example of such module would be
    table = mgr.available_table()
 
    if __name__ == '__main__':
-       mgr.update(server_spec={'host.com': 'username'})
+       mgr.update(modifiers={'ssh-usernames': {'host.com': 'username'}})
 
 so if we put this in a file called "data.py", we can access it via
 :code:`import data` and then :code:`data.table` would allow us to
 access the real paths of the files.
 On the other hand, the samples would be updated executing :code:`python data.py`.
-Note that we have specified the keyword argument *server_spec*.
-This allows us to specify in a dictionary the user-name to be used for each host.
+Note that we have specified the keyword argument *modifiers*.
+This allows us to specify in a dictionary the user-name to be used for each ssh
+host, for example.

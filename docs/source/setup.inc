@@ -18,7 +18,7 @@ This information corresponds to:
 - **Protocol ID (PID)**: name of the protocol to be used to access the file.
 - **Time-stamp**: the system time-stamp of the file, stored as a float value. \
   This will be needed to determine which files are newer.
-- **File ID**: this is the result of hashing the file. For this purpose, the \
+- **File ID (FID)**: this is the result of hashing the file. For this purpose, the \
   function :func:`hep_rfm.rfm_hash` is used. \
   The result allows to evaluate the integrity of the file, and to determine if \
   two files aiming to be the same are different. Afterwards, the time-stamp \
