@@ -32,16 +32,16 @@ def test_available_path( tmpdir ):
     p = hep_rfm.available_path(paths)
     assert p == lp
 
-    p = hep_rfm.available_path(paths, use_xrd=True)
+    p = hep_rfm.available_path(paths, allow_protocols=('xrootd',))
     assert p == xr
 
     with pytest.raises(RuntimeError):
         hep_rfm.available_path(paths[:-1])
 
 
-def test_available_local_path( tmpdir ):
+def test_available_working_path( tmpdir ):
     '''
-    Test for the "available_local_path" function.
+    Test for the "available_working_path" function.
     '''
     local_path = hep_rfm.protocol_path(tmpdir.join('file.txt').strpath)
 
@@ -52,11 +52,11 @@ def test_available_local_path( tmpdir ):
     xrootd_path = hep_rfm.protocol_path('root://my-site//file.txt', 'xrootd')
     ssh_path    = hep_rfm.protocol_path('user@host:/file.txt', 'ssh')
 
-    assert hep_rfm.available_local_path(local_path)
-    assert not hep_rfm.available_local_path(nlocal_path)
-    assert hep_rfm.available_local_path(xrootd_path, use_xrd=True)
-    assert not hep_rfm.available_local_path(xrootd_path)
-    assert not hep_rfm.available_local_path(ssh_path)
+    assert hep_rfm.available_working_path(local_path)
+    assert not hep_rfm.available_working_path(nlocal_path)
+    assert hep_rfm.available_working_path(xrootd_path, allow_protocols=('xrootd',))
+    assert not hep_rfm.available_working_path(xrootd_path)
+    assert not hep_rfm.available_working_path(ssh_path)
 
 
 def test_protocol_path():

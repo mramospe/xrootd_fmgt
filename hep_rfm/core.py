@@ -79,7 +79,7 @@ def copy_file( source, target, loglock=None, server_spec=None ):
             return
 
         parallel.log(logging.getLogger(__name__).info,
-                     'Copying file\n source: {}\n target: {}'.format(source, target),
+                     'Copying file\n source: {}\n target: {}'.format(source.path, target.path),
                      loglock)
 
         protocols.ProtocolPath.__protocols__[dec].copy(source, target)

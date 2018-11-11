@@ -47,16 +47,17 @@ class Manager(object):
 
         self.tables.append(pp)
 
-    def available_table( self, use_xrd = False ):
+    def available_table( self, allow_protocols = None ):
         '''
         Get the path to the first available table.
+        The behavior is similar to that of :class:`hep_rfm.available_path`.
 
-        :param use_xrd: whether to use the xrootd protocol if needed.
-        :type use_xrd: bool
+        :param allow_protocols: possible protocols to consider.
+        :type allow_protocols: container(str)
         :returns: path to the first available table.
         :rtype: str
         '''
-        return protocols.available_path(self.tables, use_xrd)
+        return protocols.available_path(self.tables, allow_protocols)
 
     def update( self, parallelize = False, server_spec = None ):
         '''

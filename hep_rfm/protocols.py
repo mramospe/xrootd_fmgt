@@ -23,7 +23,7 @@ __all__ = [
     'SSHPath',
     'XRootDPath',
     'available_path',
-    'available_local_path',
+    'available_working_path',
     'is_remote',
     'process',
     'protocol_path',
@@ -502,25 +502,26 @@ class XRootDPath(RemotePath):
         return self.path[7:rp], self.path[rp + 1:]
 
 
-def available_local_path( path, use_xrd = False ):
+def available_working_path( path, allow_protocols = None ):
     '''
-    If a local-accessible path can be resolved from "path", it returns it.
+    If an accessible path can be resolved from "path", it returns it.
     Return None otherwise.
-    If "use_xrd" is True, and the given path is a xrd-protocol path, then
-    it will be directly returned.
+    If "path" is remote, then "allow_protocols" permits the user to make
+    this function return a path if it belongs to one of the given
+    protocols, that must be specified as a container of strings.
 
     :param path: path to process.
     :type path: ProtocolPath
-    :param use_xrd: whether to use the xrootd protocol.
-    :type use_xrd: bool
+    :param allow_protocols: possible protocols to consider.
+    :type allow_protocols: container(str)
     :returns: local path.
     :rtype: str or None
     '''
-    if is_remote(path):
-
-        if use_xrd and path.pid == XRootDPath.pid:
-            # Using XRootD protocol is allowed
+    if allow_protocols is not None:
+        if path.pid in allow_protocols:
             return path.path
+
+    if is_remote(path):
 
         server, sepath = path.split_path()
 
@@ -535,16 +536,18 @@ def available_local_path( path, use_xrd = False ):
     return None
 
 
-def available_path( paths, use_xrd=False ):
+def available_path( paths, allow_protocols = None ):
     '''
-    Return the first available path from a list of paths. If "use_xrd" is
-    set to True, then this also stands for any path using the XRootD
-    protocol (by default they are avoided).
+    Return the first available path from a list of paths.
+    If any of the paths in "paths" is remote, then "allow_protocols" permits
+    the user to make this function return a path if it belongs to one of the
+    given protocols, that must be specified as a container of strings.
+    The first matching path will be returned.
 
     :param paths: list of paths to process.
     :type paths: collection(ProtocolPath)
-    :param use_xrd: whether using XRootD protocol is allowed.
-    :type use_xrd: bool
+    :param allow_protocols: possible protocols to consider.
+    :type allow_protocols: container(str)
     :returns: first available path found.
     :rtype: str
     :raises RuntimeError: if it fails to find an available path.
@@ -558,7 +561,7 @@ def available_path( paths, use_xrd=False ):
     '''
     for path in paths:
 
-        p = available_local_path(path, use_xrd)
+        p = available_working_path(path, allow_protocols)
 
         if p is not None:
             return p
