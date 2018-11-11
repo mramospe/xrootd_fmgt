@@ -51,7 +51,7 @@ def decorate_copy( method ):
 
         if proc.wait() != 0:
             _, stderr = proc.communicate()
-            raise CopyFileError(self.path, target, stderr.decode())
+            raise CopyFileError(self.path, target.path, stderr.decode())
 
     return wrapper
 
