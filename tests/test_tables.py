@@ -90,7 +90,7 @@ def test_manager():
             assert f1.marks.fid == f2.marks.fid
 
         # It should return the first one
-        t = hep_rfm.Table.read(mgr.available_table().path)
+        t = hep_rfm.Table.read(mgr.available_table())
 
         assert 'f1' in t
         assert 'f2' in t

@@ -26,24 +26,24 @@ import hep_rfm
 def _process_path( path, remote, bare = False ):
     '''
     Process the given path adding the remote if necessary.
+    Check also that we can obtain a local path from it.
     '''
-    path = os.path.abspath(path)
+    local_path = os.path.abspath(path)
+
+    if not os.path.isfile(local_path) and bare == False:
+        raise RuntimeError('Attempt to create a table entry with a file that is not present locally')
 
     if remote is not None:
 
         protocol, prefix = remote
 
-        path = hep_rfm.ProtocolPath.__protocols__[protocol].join_path(prefix, path)
+        p = hep_rfm.ProtocolPath.__protocols__[protocol].join_path(prefix, local_path)
 
-    pp = hep_rfm.protocol_path(path)
-    if not bare:
+        pp = hep_rfm.protocol_path(p, protocol)
+    else:
+        pp = hep_rfm.protocol_path(local_path)
 
-        p = hep_rfm.protocols.available_local_path(pp)
-
-        if p is None:
-            raise RuntimeError('Attempt to create a table entry with a path that is not present locally')
-
-    return pp
+    return pp, local_path
 
 
 def decorate_access_mode( mode ):
@@ -166,12 +166,12 @@ def add( table, name, path, bare, remote ):
     '''
     t = hep_rfm.Table.read(table.path)
 
-    pp = _process_path(path, remote, bare)
+    pp, lp = _process_path(path, remote, bare)
 
     if bare:
         f = hep_rfm.FileInfo(name, pp)
     else:
-        m = hep_rfm.FileMarks.from_local_path(pp.path)
+        m = hep_rfm.FileMarks.from_local_path(lp)
         f = hep_rfm.FileInfo(name, pp, m)
 
     t[f.name] = f
@@ -193,12 +193,12 @@ def add_massive( table, files, nproc, remote, bare ):
         '''
         Create a FileInfo from the inputs, and put it in the queue
         '''
-        name, pp = obj
+        name, pp, lp = obj
 
         if bare:
             f = hep_rfm.FileInfo(name, pp)
         else:
-            m = hep_rfm.FileMarks.from_local_path(pp.path)
+            m = hep_rfm.FileMarks.from_local_path(lp)
             f = hep_rfm.FileInfo(name, pp, m)
 
         queue.put(f)
@@ -209,11 +209,11 @@ def add_massive( table, files, nproc, remote, bare ):
 
     for p in files:
 
-        pp = _process_path(p, remote, bare)
+        pp, lp = _process_path(p, remote, bare)
 
         name = os.path.basename(os.path.splitext(pp.path)[0])
 
-        handler.put((name, pp))
+        handler.put((name, pp, lp))
 
     handler.process()
 
@@ -354,9 +354,9 @@ def replicate( table, location, reference, refpath, collisions, remote ):
         if not p.startswith(refpath):
             raise RuntimeError('Paths in the reference table must start by "refpath": "{}"'.format(refpath))
 
-        p = _process_path(p.replace(refpath, location), remote, bare=True)
+        pp, _ = _process_path(p.replace(refpath, location), remote, bare=True)
 
-        table[key] = hep_rfm.FileInfo(finfo.name, p)
+        table[key] = hep_rfm.FileInfo(finfo.name, pp)
 
     process = True
     for rk, rv in reftb.items():
@@ -523,8 +523,8 @@ if __name__ == '__main__':
 
     for p in (parser_add, parser_add_massive, parser_add_from_dir, parser_replicate):
         p.add_argument('--remote', '-r', nargs=2, default=None, required=False,
-                       help='Remote protocol type and direction to prepend'\
-                       'to the files. If you are specifying it in the file path,'\
+                       help='Remote protocol type and direction to prepend '\
+                       'to the files. If you are specifying it in the file path, '\
                        'adding it as well here will cause an error.')
 
     for p in (parser_add, parser_add_massive):

@@ -30,10 +30,10 @@ def test_available_path( tmpdir ):
     paths = [xrootd_path, local_path]
 
     p = hep_rfm.available_path(paths)
-    assert p.path == lp
+    assert p == lp
 
     p = hep_rfm.available_path(paths, use_xrd=True)
-    assert p.path == xr
+    assert p == xr
 
     with pytest.raises(RuntimeError):
         hep_rfm.available_path(paths[:-1])

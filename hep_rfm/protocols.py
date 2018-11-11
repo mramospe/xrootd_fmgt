@@ -492,7 +492,7 @@ class XRootDPath(RemotePath):
 
 def available_local_path( path, use_xrd = False ):
     '''
-    If a local path can be resolved from "path", it returns it.
+    If a local-accessible path can be resolved from "path", it returns it.
     Return None otherwise.
     If "use_xrd" is True, and the given path is a xrd-protocol path, then
     it will be directly returned.
@@ -502,13 +502,13 @@ def available_local_path( path, use_xrd = False ):
     :param use_xrd: whether to use the xrootd protocol.
     :type use_xrd: bool
     :returns: local path.
-    :rtype: ProtocolPath or None
+    :rtype: str or None
     '''
     if is_remote(path):
 
         if use_xrd and path.pid == XRootDPath.pid:
             # Using XRootD protocol is allowed
-            return path
+            return path.path
 
         server, sepath = path.split_path()
 
@@ -518,7 +518,7 @@ def available_local_path( path, use_xrd = False ):
 
     else:
         if os.path.exists(path.path):
-            return path
+            return path.path
 
     return None
 
