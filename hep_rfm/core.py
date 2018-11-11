@@ -82,7 +82,7 @@ def copy_file( source, target, loglock=None, server_spec=None ):
                      'Copying file\n source: {}\n target: {}'.format(source, target),
                      loglock)
 
-        source.copy(target)
+        protocols.ProtocolPath.__protocols__[dec].copy(source, target)
 
 
 def rfm_hash( path ):

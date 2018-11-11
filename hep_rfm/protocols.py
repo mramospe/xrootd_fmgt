@@ -43,15 +43,15 @@ def decorate_copy( method ):
     :rtype: function
     '''
     @functools.wraps(method)
-    def wrapper( self, target ):
+    def wrapper( source, target ):
         '''
         Internal wrapper to copy the file to a target.
         '''
-        proc = method(self, target)
+        proc = method(source, target)
 
         if proc.wait() != 0:
             _, stderr = proc.communicate()
-            raise CopyFileError(self.path, target.path, stderr.decode())
+            raise CopyFileError(source.path, target.path, stderr.decode())
 
     return wrapper
 
@@ -200,13 +200,16 @@ class ProtocolPath(object):
         '''
         return "{}(path='{}')".format(self.__class__.__name__, self.path)
 
-    def copy( self, target ):
+    @staticmethod
+    def copy( source, target ):
         '''
-        Copy the file associated to this protocol to the target location.
+        Copy the source file to the target using this protocol.
         The target must be accessible.
         It must return a :class:`subprocess.Popen` object.
         In this case, this is an abstract method.
 
+        :param source: source file to copy.
+        :type source: ProtocolPath
         :param target: path where to copy the file to.
         :type target: ProtocolPath
         :returns: running process copying the file in the current location \
@@ -297,16 +300,19 @@ class LocalPath(ProtocolPath):
         '''
         super(LocalPath, self).__init__(path)
 
-    def copy( self, target ):
+    @staticmethod
+    def copy( source, target ):
         '''
-        Copy the file associated to this protocol to the target location.
+        Copy the source file to the target using this protocol.
         The target must be accessible.
 
+        :param source: source file to copy.
+        :type source: ProtocolPath
         :param target: where to copy the file.
         :type target: ProtocolPath
         :raises CopyFileError: if a problem appears while copying the file.
         '''
-        return process('cp', self.path, target.path)
+        return process('cp', source.path, target.path)
 
     def mkdirs( self ):
         '''
@@ -334,16 +340,19 @@ class SSHPath(RemotePath):
 
         super(SSHPath, self).__init__(path, lambda p: ('@' in p))
 
-    def copy( self, target ):
+    @staticmethod
+    def copy( source, target ):
         '''
-        Copy the file associated to this protocol to the target location.
+        Copy the source file to the target using this protocol.
         The target must be accessible.
 
+        :param source: source file to copy.
+        :type source: ProtocolPath
         :param target: where to copy the file.
         :type target: ProtocolPath
         :raises CopyFileError: if a problem appears while copying the file.
         '''
-        return process('scp', '-q', self.path, target.path)
+        return process('scp', '-q', source.path, target.path)
 
     @staticmethod
     def join_path( prefix, path ):
@@ -435,16 +444,19 @@ class XRootDPath(RemotePath):
         '''
         super(XRootDPath, self).__init__(path, lambda p: p.startswith('root://'))
 
-    def copy( self, target ):
+    @staticmethod
+    def copy( source, target ):
         '''
-        Copy the file associated to this protocol to the target location.
+        Copy the source file to the target using this protocol.
         The target must be accessible.
 
+        :param source: source file to copy.
+        :type source: ProtocolPath
         :param target: where to copy the file.
         :type target: ProtocolPath
         :raises CopyFileError: if a problem appears while copying the file.
         '''
-        return process('xrdcp', '-f', '-s', self.path, target.path)
+        return process('xrdcp', '-f', '-s', source.path, target.path)
 
     @staticmethod
     def join_path( prefix, path ):
@@ -611,7 +623,7 @@ def remote_protocol( a, b ):
     :param b: path to the second file.
     :type b: str
     :returns: protocol ID.
-    :rtype: int
+    :rtype: int or None
     '''
     if is_remote(a):
 
