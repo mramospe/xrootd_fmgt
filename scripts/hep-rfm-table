@@ -483,17 +483,17 @@ if __name__ == '__main__':
     parser_remove.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to remove')
     # replicate
-    parser_replicate.add_argument('location', type=str,
-                                    help='Location where to build the schema')
     parser_replicate.add_argument('reference', type=str,
-                                    help='Path to the reference table')
+                                  help='Path to the reference table')
+    parser_replicate.add_argument('location', type=str,
+                                  help='Location where to build the schema')
     parser_replicate.add_argument('refpath', type=str,
-                                    help='Absolute path in the reference table to be replaced by "location"')
+                                  help='Absolute path in the reference table to be replaced by "location"')
     parser_replicate.add_argument('--refpid', type=str, default='local',
                                   help='Possible protocol ID of the reference path')
     parser_replicate.add_argument('--collisions', default='raise',
-                                    choices=('raise', 'replace', 'omit'),
-                                    help='Whether to replace the paths to the files with colliding names')
+                                  choices=('raise', 'replace', 'omit'),
+                                  help='Whether to replace the paths to the files with colliding names')
     # synchronize
     parser_synchronize.add_argument('tables', nargs='*',
                                     help='Path to the tables to synchronize')
