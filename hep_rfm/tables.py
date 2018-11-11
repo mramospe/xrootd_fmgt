@@ -59,7 +59,7 @@ class Manager(object):
         '''
         return protocols.available_path(self.tables, allow_protocols)
 
-    def update( self, parallelize = False, server_spec = None ):
+    def update( self, parallelize = False, wdir = None, server_spec = None ):
         '''
         Update the different tables registered within this manager.
 
@@ -67,6 +67,9 @@ class Manager(object):
         synchronization of all the proxies. By default it is set to 0, so no \
         parallelization  is done.
         :type parallelize: int
+        :param wdir: where to create the temporary directory. The option \
+        is passed to :class:`tempfile.TemporaryDirectory` as "dir".
+        :type wdir: str
         :param server_spec: specification of user for each SSH server. Must \
         be specified as a dictionary, where the keys are the hosts and the \
         values are the user names.
@@ -75,6 +78,8 @@ class Manager(object):
 
         .. seealso:: :class:`hep_rfm.Table`, :func:`hep_rfm.copy_file`
         '''
+        kwargs = {'wdir': wdir, 'server_spec': server_spec}
+
         #
         # Determine the files to update
         #
@@ -93,7 +98,7 @@ class Manager(object):
             fpath = protocols.LocalPath(
                 os.path.join(tmp.name, 'table_{}.txt'.format(i)))
 
-            core.copy_file(n, fpath, server_spec=server_spec)
+            core.copy_file(n, fpath, **kwargs)
 
             tu = TableUpdater(n, fpath)
 
@@ -154,8 +159,6 @@ class Manager(object):
             logging.getLogger(__name__).info('Starting to synchronize files')
         else:
             logging.getLogger(__name__).info('All files are up to date')
-
-        kwargs = {'server_spec': server_spec}
 
         # Do not swap "sync_files" and "sync_tables". First we must modify the
         # files and, in the last step, update the information in the tables.

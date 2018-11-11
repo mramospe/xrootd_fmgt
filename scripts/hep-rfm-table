@@ -374,7 +374,7 @@ def replicate( table, location, reference, refpath, refpid, collisions, remote )
     trgtb.write(table.path)
 
 
-def synchronize( tables, nproc, server_spec ):
+def synchronize( tables, nproc, wdir, server_spec ):
     '''
     Synchronize a set of tables.
     '''
@@ -382,7 +382,7 @@ def synchronize( tables, nproc, server_spec ):
     for t in tables:
         mgr.add_table(t)
 
-    mgr.update(parallelize=nproc, server_spec=server_spec)
+    mgr.update(parallelize=nproc, wdir=wdir, server_spec=server_spec)
 
 
 @decorate_access_mode
@@ -497,6 +497,9 @@ if __name__ == '__main__':
     # synchronize
     parser_synchronize.add_argument('tables', nargs='*',
                                     help='Path to the tables to synchronize')
+    parser_synchronize.add_argument('--wdir', type=str, default=None,
+                                    help='Directory to put temporary files. Typically used when one is working '\
+                                        'with different protocols and files are very large.')
     parser_synchronize.add_argument('--server-spec', type=json.loads, default='{}',
                                     help='User names to use for each remote server. It must be given as a dictionary, for example \'{"hostname_1": "username_1", "hostname_2": "username_2"}\'.')
     # update

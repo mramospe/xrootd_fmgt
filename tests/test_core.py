@@ -6,6 +6,7 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
+import os
 import pytest
 import tempfile
 
@@ -17,6 +18,19 @@ def test_copy_file():
     '''
     Tests for the "copy_file" function.
     '''
+    with tempfile.TemporaryDirectory() as td:
+
+        p1 = os.path.join(td, 'file1.txt')
+        p2 = os.path.join(td, 'file2.txt')
+
+        with open(p1, 'wt') as f1:
+            f1.write('something')
+
+        pp1 = hep_rfm.protocol_path(p1)
+        pp2 = hep_rfm.protocol_path(p2)
+
+        hep_rfm.copy_file(pp1, pp2, wdir=td)
+
     source = hep_rfm.protocol_path('non-existing-source')
     target = hep_rfm.protocol_path('non-existing-target')
 

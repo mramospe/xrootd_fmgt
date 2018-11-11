@@ -27,15 +27,21 @@ __all__ = [
 __buffer_size__ = 10485760 # 10MB
 
 
-def copy_file( source, target, loglock=None, server_spec=None ):
+def copy_file( source, target, wdir=None, loglock=None, server_spec=None ):
     '''
-    Main function to copy a file from a source to a target. The copy is done
-    if the modification time of both files do not coincide.
+    Main function to copy a file from a source to a target.
+    The copy is done if the modification time of both files do not coincide.
+    Since sometimes the files are very large, in this case it is recommendable
+    to specify a directory to copy the temporal files "wdir", so files can be
+    copied on disk.
 
     :param source: where to copy the file from.
     :type source: ProtocolPath
     :param target: where to copy the file.
     :type target: ProtocolPath
+    :param wdir: where to create the possible temporary directory. The \
+    option is passed to :class:`tempfile.TemporaryDirectory` as "dir".
+    :type wdir: str
     :param loglock: possible locker to prevent from displaying at the same \
     time in the screen for two different processes.
     :type loglock: multiprocessing.Lock or None
@@ -66,10 +72,10 @@ def copy_file( source, target, loglock=None, server_spec=None ):
         else:
             path = source.path
 
-        with tempfile.TemporaryDirectory() as tmpdir:
+        with tempfile.TemporaryDirectory(dir=wdir) as td:
 
             tmp = protocols.protocol_path(
-                os.path.join(tmpdir, os.path.basename(path)))
+                os.path.join(td, os.path.basename(path)))
 
             copy_file(source, tmp)
             copy_file(tmp, target)
