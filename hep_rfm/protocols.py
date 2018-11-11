@@ -240,7 +240,7 @@ class ProtocolPath(object):
         '''
         return self._path
 
-    def with_modifiers( self, modifiers ):
+    def with_modifiers( self, modifiers = None ):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary can contain information not understood for a given
@@ -446,7 +446,7 @@ class SSHPath(RemotePath):
         '''
         return self.path.split(':')
 
-    def with_modifiers( self, modifiers ):
+    def with_modifiers( self, modifiers = None ):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary "modifiers" might contain information about the

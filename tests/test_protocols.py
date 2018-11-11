@@ -224,8 +224,19 @@ def test_sshpath():
     with pytest.raises(ValueError):
         hep_rfm.protocol_path('/local/file.txt', 'ssh')
 
-    p = hep_rfm.SSHPath.join_path('user@my-site', '/path/to/file.txt')
-    assert p == 'user@my-site:/path/to/file.txt'
+    p = hep_rfm.SSHPath.join_path('user@my-site', 'path/to/file.txt')
+    assert p == 'user@my-site:path/to/file.txt'
+
+    pp = pp.with_modifiers({'ssh-usernames': {'my-site': 'other.user'}})
+    assert pp.path == 'other.user@my-site:path/to/file.txt'
+
+    pp = hep_rfm.protocol_path('@my-site:path/to/file.txt', 'ssh')
+    pp = pp.with_modifiers({'ssh-usernames': {'my-site': 'user'}})
+    assert pp.path == 'user@my-site:path/to/file.txt'
+
+    pp = hep_rfm.protocol_path('@my-site:path/to/file.txt', 'ssh')
+    with pytest.raises(RuntimeError):
+        pp.with_modifiers()
 
 
 def test_xrootdpath():
