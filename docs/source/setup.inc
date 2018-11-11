@@ -220,7 +220,7 @@ This is done through the *replicate* mode:
 
    $ hep-rfm-table create rtable.db
    $ mkdir rfiles
-   $ hep-rfm-table replicate rtable.db --reference table.db --location files --refpath rfiles
+   $ hep-rfm-table replicate rtable.db table.db files rfiles
    $ hep-rfm-table display rtable.db
    Contents of table "rtable.db"
    name 	path                                            	pid  	tmstp	fid 

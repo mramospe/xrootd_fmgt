@@ -31,7 +31,7 @@ hep-rfm-table add_from_dir table.db files
 hep-rfm-table display table.db
 hep-rfm-table create rtable.db
 mkdir rfiles
-hep-rfm-table replicate rtable.db --reference table.db --location rfiles --refpath `realpath files`
+hep-rfm-table replicate rtable.db table.db rfiles `realpath files`
 hep-rfm-table display rtable.db
 cd ..
 rm -r rfm
