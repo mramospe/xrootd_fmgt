@@ -252,40 +252,46 @@ def create( table ):
 
 
 @decorate_access_mode
-def display( table, regex ):
+def display( table, fields, regex ):
     '''
-    Display the contents of the table at the given path
+    Display the contents of the table at the given path.
+    One can select the fields to show.
+    The names of the files will always be displayed.
     '''
     t = hep_rfm.Table.read(table.path)
 
     if len(t) == 0:
-        logging.getLogger(__name__).info('No entries found in "{}"'.format(table.path))
+        logging.getLogger(__name__).info('No entries found')
         return
 
-    mn = max(len('name'), max(len(f.name) for f in t.values()))
-    mp = max(len('path'), max(len(f.protocol_path.path) for f in t.values()))
-    mi = max(len('path'), max(len(f.protocol_path.pid) for f in t.values()))
-    mt = max(len('tmstp'), max(len(str(f.marks.tmstp)) for f in t.values()))
-    mf = max(len('fid'), max(len(f.marks.fid) for f in t.values()))
+    # The field 'name' is always displayed
+    fields = list(fields)
+    if 'name' not in fields:
+        fields.insert(0, 'name')
 
-    frmt = '{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}'
-
-    to_string = lambda name, path, pid, tmstp, fid: frmt.format(name, mn, path, mp, pid, mi, tmstp, mt, fid, mf)
-
+    # Get the files to show
     if regex:
         m = re.compile(regex)
 
-    lines = []
-    for k, f in sorted(t.items()):
-        if not regex or m.match(k):
-            lines.append(to_string(f.name, f.protocol_path.path, f.protocol_path.pid, f.marks.tmstp, f.marks.fid))
+    lines = tuple(
+        tuple(str(f.field(fi)) for fi in fields)
+        for k, f in sorted(t.items()) if not regex or m.match(k)
+        )
 
+    frmt = '\t'.join(
+        '{{:<{}}}'.format(max(len(fi), max(len(v) for v in values)))
+        for fi, values in zip(fields, zip(*lines))
+        )
+
+    # Display the information
     if len(lines) != 0:
         logging.getLogger(__name__).info('Contents of table "{}"'.format(table.path))
-        logging.getLogger(__name__).info(to_string('name', 'path', 'pid', 'tmstp', 'fid'))
+        logging.getLogger(__name__).info(frmt.format(*fields))
 
         for l in lines:
-            logging.getLogger(__name__).info(l)
+            logging.getLogger(__name__).info(frmt.format(*l))
+    else:
+        logging.getLogger(__name__).info('No entries found matching regular expression "{}"'.format(regex))
 
 
 @decorate_access_mode
@@ -465,6 +471,9 @@ if __name__ == '__main__':
     # display
     parser_display.add_argument('--regex', type=str, default=None,
                                 help='Regular expression to filter the files to show')
+    parser_display.add_argument('--fields', nargs='+', default=hep_rfm.FileInfo.__fields__,
+                                help='Fields to display')
+
     # remove
     parser_remove.add_argument('--files', nargs='+', default=[],
                                help='Names of the files to remove')

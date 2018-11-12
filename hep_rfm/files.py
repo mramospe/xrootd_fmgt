@@ -48,6 +48,8 @@ for c in (FileMarksBase, FileInfoBase):
 
 class FileInfo(FileInfoBase):
 
+    __fields__ = ('name', 'path', 'pid', 'tmstp', 'fid')
+
     def __new__( cls, name, protocol_path, marks = None ):
         '''
         Object to store the information about a file.
@@ -67,6 +69,28 @@ class FileInfo(FileInfoBase):
         fi = super(FileInfo, cls).__new__(cls, name, protocol_path, marks)
 
         return fi
+
+    def field( self, fi ):
+        '''
+        Get the value of field "fi", that can be any of
+        ('name', 'path', 'pid', 'tmstp', 'fid')
+
+        :param fi: name of the field.
+        :type fi: str
+        :returns: value of the field.
+        :rtype: str or float
+        :raises ValueError: if the field name is not recognized.
+        '''
+        if fi in ('name',):
+            obj = self
+        elif fi in ('path', 'pid'):
+            obj = self.protocol_path
+        elif fi in ('tmstp', 'fid'):
+            obj = self.marks
+        else:
+            raise ValueError('Unrecognized field "{}". Choose between {}.'.format(self.__fields__))
+
+        return getattr(obj, fi)
 
     @classmethod
     def from_stream_line( cls, line ):
