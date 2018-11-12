@@ -386,7 +386,7 @@ def synchronize( tables, nproc, wdir, modifiers ):
 
 
 @decorate_access_mode
-def update( table, regex ):
+def update( table, nproc, regex ):
     '''
     Update the table located in the given path. One can select the files
     to update using a regular expression.
@@ -404,14 +404,14 @@ def update( table, regex ):
             else:
                 maintain.append(f)
 
-        t = hep_rfm.Table(to_update).updated()
+        t = hep_rfm.Table(to_update).updated(parallelize=nproc)
         for f in maintain:
             t[f.name] = f
 
         t.write(table)
 
     else:
-        t.updated().write(table.path)
+        t.updated(parallelize=nproc).write(table.path)
 
 
 if __name__ == '__main__':
@@ -511,7 +511,7 @@ if __name__ == '__main__':
     #
     # Add arguments common to different parsers
     #
-    for p in (parser_add_massive, parser_add_from_dir, parser_synchronize):
+    for p in (parser_add_massive, parser_add_from_dir, parser_synchronize, parser_update):
         p.add_argument('--nproc', type=int, default=4, required=False,
                        help='Number of parallel process to invoke')
 

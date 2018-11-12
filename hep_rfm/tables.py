@@ -223,12 +223,40 @@ class Table(dict):
 
         return cls(files)
 
-    def updated( self ):
+    def updated( self, parallelize = False ):
         '''
         Return an updated version of this table, checking again all the
         properties of the files within it.
+
+        :param parallelize: number of processes allowed to parallelize the \
+        synchronization of all the proxies. By default it is set to 0, so no \
+        parallelization  is done.
+        :type parallelize: int
+        :returns: updated version of the table.
+        :rtype: Table
         '''
-        output = [f.updated() for f in self.values()]
+        if parallelize:
+
+            handler = JobHandler()
+
+            for f in self.values():
+                handler.put(f)
+
+            func = lambda f, q: q.put(f.updated())
+
+            queue = multiprocessing.Queue()
+
+            for i in range(parallelize):
+                Worker(handler, func, args=(queue,))
+
+            handler.process()
+
+            output = [queue.get() for _ in range(len(self))]
+
+            queue.close()
+        else:
+            output = [f.updated() for f in self.values()]
+
         return self.__class__(output)
 
     def write( self, path ):
