@@ -403,7 +403,7 @@ def update( table, nproc, regex ):
         for f in maintain:
             t[f.name] = f
 
-        t.write(table)
+        t.write(table.path)
 
     else:
         t.updated(parallelize=nproc).write(table.path)
