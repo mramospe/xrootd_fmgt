@@ -51,7 +51,7 @@ setup(
     long_description = open('README.rst').read(),
 
     # Keywords to search for the package
-    keywords = 'physics hep statistics plotting',
+    keywords = 'physics hep file management',
 
     # Find all the packages in this directory
     packages = find_packages(),
