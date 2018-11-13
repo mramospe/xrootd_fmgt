@@ -84,7 +84,7 @@ An example of such module would be
    table = mgr.available_table()
 
    if __name__ == '__main__':
-       mgr.update(modifiers={'ssh-usernames': {'host.com': 'username'}})
+       mgr.update(modifiers={'ssh_usernames': {'host.com': 'username'}})
 
 so if we put this in a file called "data.py", we can access it via
 :code:`import data` and then :code:`data.table` would allow us to

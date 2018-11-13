@@ -451,7 +451,7 @@ class SSHPath(RemotePath):
         Return an instance of this class after applying modifications.
         The input dictionary "modifiers" might contain information about the
         user-name for the host in the stored path.
-        This information must be provided on a key called "ssh-usernames",
+        This information must be provided on a key called "ssh_usernames",
         containing the user-name to use for each host (although only one will
         be appliable for a given :class:`hep_rfm.SSHPath` instance).
         In case the path has already one user-name defined, it will be
@@ -467,13 +467,13 @@ class SSHPath(RemotePath):
 
         path = self.path
 
-        if 'ssh-usernames' in modifiers:
+        if 'ssh_usernames' in modifiers:
 
             uh, _ = self.split_path()
 
             _, h = uh.split('@')
 
-            for host, uname in modifiers['ssh-usernames'].items():
+            for host, uname in modifiers['ssh_usernames'].items():
 
                 if host == h:
                     path = uname + path[path.find('@'):]

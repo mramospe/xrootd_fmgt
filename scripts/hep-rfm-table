@@ -503,7 +503,7 @@ if __name__ == '__main__':
     parser_synchronize.add_argument('--modifiers', type=json.loads, default='{}',
                                     help='Modifiers for the paths. It must be given as a dictionary. '\
                                     'For example, considering an ssh server: '\
-                                    '\{"ssh-usernames": {"hostname_1": "username_1", "hostname_2": "username_2"}\'.')
+                                    '\{"ssh_usernames": {"hostname_1": "username_1", "hostname_2": "username_2"}\'.')
     # update
     parser_update.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to update')

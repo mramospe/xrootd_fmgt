@@ -227,11 +227,11 @@ def test_sshpath():
     p = hep_rfm.SSHPath.join_path('user@my-site', 'path/to/file.txt')
     assert p == 'user@my-site:path/to/file.txt'
 
-    pp = pp.with_modifiers({'ssh-usernames': {'my-site': 'other.user'}})
+    pp = pp.with_modifiers({'ssh_usernames': {'my-site': 'other.user'}})
     assert pp.path == 'other.user@my-site:path/to/file.txt'
 
     pp = hep_rfm.protocol_path('@my-site:path/to/file.txt', 'ssh')
-    pp = pp.with_modifiers({'ssh-usernames': {'my-site': 'user'}})
+    pp = pp.with_modifiers({'ssh_usernames': {'my-site': 'user'}})
     assert pp.path == 'user@my-site:path/to/file.txt'
 
     pp = hep_rfm.protocol_path('@my-site:path/to/file.txt', 'ssh')
