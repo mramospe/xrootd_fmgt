@@ -49,7 +49,7 @@ from there.
    >>> table = mgr.available_table()
    >>> table.keys()
    ['file1', 'file2', 'file3', 'file4', 'file5', 'file6']
-   >>> table['file1'].local_path()
+   >>> hep_rfm.available_working_path(table['file1'])
    /home/user/rfm/files/file1.txt
 
 The advantage of using the :class:`hep_rfm.Manager` instance, is that
