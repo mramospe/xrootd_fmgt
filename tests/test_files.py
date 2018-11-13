@@ -44,7 +44,7 @@ def test_fileinfo():
         proxy = hep_rfm.FileInfo.from_name_and_path('dummy', f.name)
 
         assert proxy.name == 'dummy'
-        assert proxy.path == f.name
+        assert proxy.protocol_path.path == f.name
 
 
 def test_filemarksbase():

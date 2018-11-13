@@ -3,6 +3,7 @@ Tools and function to do parallelization of jobs.
 '''
 
 # Python
+import logging
 import multiprocessing as mp
 from queue import Empty
 
@@ -41,6 +42,8 @@ class JobHandler(object):
 
         self._queue   = mp.JoinableQueue()
         self._workers = []
+        self._flock   = mp.Lock()
+        self._failed  = mp.Value('i', 0)
 
     def add_worker( self, worker ):
         '''
@@ -56,6 +59,13 @@ class JobHandler(object):
         Get an object from the queue. This function does not block.
         '''
         return self._queue.get_nowait()
+
+    def notify_failed( self ):
+        '''
+        Notify the handler that a job has failed.
+        '''
+        with self._flock:
+            self._failed.value += 1
 
     def put( self, el ):
         '''
@@ -74,13 +84,66 @@ class JobHandler(object):
 
     def process( self ):
         '''
-        Wait until all jobs are completed and no elements are found in the \
+        Wait until all jobs are completed and no elements are found in the
         queue.
+
+        :raises RuntimeError: if any of the workers fails on execution.
         '''
+        self._failed.value = 0
         for w in self._workers:
             w.start()
         self._queue.close()
         self._queue.join()
+
+        if self._failed.value != 0:
+            raise RuntimeError('{} jobs processed with errors'.format(self._failed.value))
+
+
+class Registry(object):
+
+    def __init__( self ):
+        '''
+        Define a registry of objects, where the operation of setting the objects
+        is thread-safe.
+        '''
+        super(Registry, self).__init__()
+
+        self._lock     = mp.Lock()
+        self._registry = {}
+
+    def __contains__( self, key ):
+        '''
+        Check whether the given key is registered.
+
+        :param key: key object.
+        :type key: hashable object.
+        :returns: whether the key is registered.
+        :rtype: bool
+        '''
+        return key in self._registry
+
+    def __getitem__( self, key ):
+        '''
+        Get an item from the registry.
+
+        :param key: key object.
+        :type key: hashable object
+        :returns: value object.
+        :rtype: object
+        '''
+        return self._registry[key]
+
+    def __setitem__( self, key, value ):
+        '''
+        Set an item, locking the access.
+
+        :param key: key object.
+        :type key: hashable object
+        :param value: value object.
+        :type value: object
+        '''
+        with self._lock:
+            self._registry[key] = value
 
 
 class Worker(object):
@@ -123,12 +186,22 @@ class Worker(object):
             except Empty:
                 break
 
-            self._func(obj, *args, **kwargs)
+            try:
+                self._func(obj, *args, **kwargs)
 
-            self._handler.task_done()
+            except Exception as e:
+
+                logging.getLogger(__name__).error(str(e))
+
+                self._handler.notify_failed()
+
+            finally:
+                self._handler.task_done()
 
     def start( self ):
         '''
         Start processing.
+        Any error raised on execution will be displayed using the related
+        logger object, and handled by the :class:`JobHandler`.
         '''
         self._process.start()

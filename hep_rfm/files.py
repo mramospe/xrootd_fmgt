@@ -28,7 +28,7 @@ Base class representing an object storing the time-stamp and file ID of a file.
 '''
 
 # Class to store the information of a file
-FileInfoBase = namedtuple('FileInfoBase', ['name', 'path', 'marks'])
+FileInfoBase = namedtuple('FileInfoBase', ['name', 'protocol_path', 'marks'])
 FileInfoBase.__new__.__doc__ = '''
 Base class for an object storing the information about a file.
 '''
@@ -48,14 +48,16 @@ for c in (FileMarksBase, FileInfoBase):
 
 class FileInfo(FileInfoBase):
 
-    def __new__( cls, name, path, marks = None ):
+    __fields__ = ('name', 'path', 'pid', 'tmstp', 'fid')
+
+    def __new__( cls, name, protocol_path, marks = None ):
         '''
         Object to store the information about a file.
 
         :param name: name of the file.
         :type name: str
-        :param path: path to the file.
-        :type path: str
+        :param protocol_path: path to the file.
+        :type protocol_path: ProtocolPath
         :param marks: time-stamp and file ID.
         :type marks: FileMarks
 
@@ -64,23 +66,52 @@ class FileInfo(FileInfoBase):
         if marks is None:
             marks = FileMarks()
 
-        fi = super(FileInfo, cls).__new__(cls, name, path, marks)
+        fi = super(FileInfo, cls).__new__(cls, name, protocol_path, marks)
 
         return fi
+
+    def field( self, fi ):
+        '''
+        Get the value of field "fi", that can be any of
+        ('name', 'path', 'pid', 'tmstp', 'fid')
+
+        :param fi: name of the field.
+        :type fi: str
+        :returns: value of the field.
+        :rtype: str or float
+        :raises ValueError: if the field name is not recognized.
+        '''
+        if fi in ('name',):
+            obj = self
+        elif fi in ('path', 'pid'):
+            obj = self.protocol_path
+        elif fi in ('tmstp', 'fid'):
+            obj = self.marks
+        else:
+            raise ValueError('Unrecognized field "{}". Choose between {}.'.format(self.__fields__))
+
+        return getattr(obj, fi)
 
     @classmethod
     def from_stream_line( cls, line ):
         '''
         Build the class from a line read from a table file.
-        '''
-        name, path, tmstp, fid = line.split()
 
-        return cls(name, path, FileMarks(float(tmstp), fid))
+        :param line: line to read.
+        :type line: str
+        :returns: :class:`FileInfo` instance.
+        :rtype: FileInfo
+        '''
+        name, path, pid, tmstp, fid = line.split()
+
+        pp = protocols.protocol_path(path, pid)
+
+        return cls(name, pp, FileMarks(float(tmstp), fid))
 
     @classmethod
-    def from_name_and_path( cls, name, path ):
+    def from_name_and_path( cls, name, path, protocol = None ):
         '''
-        Build a from the file at the given path.
+        Build from a name and a path to the file.
         The path must point to a local file or, in case of being a
         remote path, its path must correspond to a local file.
 
@@ -88,18 +119,20 @@ class FileInfo(FileInfoBase):
         :type name: str
         :param path: path to the file.
         :type path: str
+        :type protocol: str
+        :returns: protocol associated to the given path.
         :returns: built :class:`FileInfo` instance.
         :rtype: FileInfo
         :raises: ValueError: if failed to extract a valid path from that given.
         '''
-        p = protocols.available_local_path(path)
+        pp = protocols.protocol_path(path, protocol)
 
-        if p is None:
+        if protocols.is_remote(pp):
             raise ValueError('Unable to extract a local path from "{}"'.format(path))
 
-        marks = FileMarks.from_path(p)
+        marks = FileMarks.from_local_path(pp.path)
 
-        return cls(name, path, marks)
+        return cls(name, pp, marks)
 
     def info( self ):
         '''
@@ -108,7 +141,7 @@ class FileInfo(FileInfoBase):
         :returns: tuple with the information of this class
         :rtype: tuple(str, str, str, str)
         '''
-        return (self.name, self.path, self.marks.tmstp, self.marks.fid)
+        return (self.name, self.protocol_path.path, self.protocol_path.pid, self.marks.tmstp, self.marks.fid)
 
     def is_bare( self ):
         '''
@@ -118,29 +151,6 @@ class FileInfo(FileInfoBase):
         :rtype: bool
         '''
         return self.marks.tmstp == __default_tmstp__ and self.marks.fid == __default_fid__
-
-    def local_path( self ):
-        '''
-        Return the actual path in the local system, removing the information
-        of the remote.
-        If this is a bare file, None is returned.
-        In the opposite case, an exception is raised if the file is not found
-        in the associated path.
-
-        :returns: path in the local system.
-        :rtype: str or None
-        :raises RuntimeError: if this is a non-bare file, and no file is found \
-        in the associated path.
-        '''
-        if self.is_bare():
-            return None
-
-        p = protocols.available_local_path(self.path)
-
-        if p is None:
-            raise RuntimeError('Unable to retrieve a valid path to a file from "{}"'.format(self.path))
-
-        return p
 
     def newer_than( self, other ):
         '''
@@ -162,14 +172,17 @@ class FileInfo(FileInfoBase):
         :returns: updated version of this file.
         :rtype: FileInfo
         '''
-        p = self.local_path()
+        if protocols.is_remote(self.protocol_path):
+            _, path = self.protocol_path.split_path()
+        else:
+            path = self.protocol_path.path
 
-        if p is not None:
-            marks = FileMarks.from_path(p)
+        if os.path.isfile(path):
+            marks = FileMarks.from_local_path(path)
         else:
             marks = self.marks
 
-        return FileInfo(self.name, self.path, marks)
+        return FileInfo(self.name, self.protocol_path, marks)
 
 
 class FileMarks(FileMarksBase):
@@ -188,9 +201,9 @@ class FileMarks(FileMarksBase):
         return super(FileMarks, cls).__new__(cls, tmstp, fid)
 
     @classmethod
-    def from_path( cls, path ):
+    def from_local_path( cls, path ):
         '''
-        Build the class from a path to a file.
+        Build the class from a local path to a file.
 
         :param path: path to the file.
         :type path: str

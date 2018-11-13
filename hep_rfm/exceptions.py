@@ -6,7 +6,38 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 
-__all__ = ['ProcessError', 'CopyFileError', 'MakeDirsError']
+__all__ = ['AbstractMethodError', 'ProcessError', 'CopyFileError', 'MakeDirsError']
+
+
+class AbstractMethodError(Exception):
+
+    def __init__( self ):
+        '''
+        Define an error for base classes with abstract methods.
+        '''
+        super(AbstractMethodError, self).__init__('Attempt to call abstract class method')
+
+
+class MustOverrideError(Exception):
+
+    def __init__( self, cls, parent, method ):
+        '''
+        Define an error to be raised when a class must override a method and it
+        does not.
+
+        :param cls: class that must override the method.
+        :type cls: class
+        :param parent: parent class where it must inherit from.
+        :type parent: class
+        :param method: method that must be overriding.
+        :type method: method
+        '''
+        cn = cls.__name__
+        mn = method.__name__
+        pn = parent.__name__
+        msg = 'Class "{}" must override method "{}" from class "{}"'.format(cn, mn, pn)
+
+        super(MustOverrideError, self).__init__(msg)
 
 
 class ProcessError(RuntimeError):

@@ -34,27 +34,32 @@ class Manager(object):
 
         super(Manager, self).__init__()
 
-    def add_table( self, path ):
+    def add_table( self, path, protocol = None ):
         '''
         Add a new table to the list of tables.
+        The path is automatically transformed into the corresponding
+        :class:`ProtocolPath` instance.
 
         :param path: path to the new table.
         :type path: str
         '''
-        self.tables.append(path)
+        pp = protocols.protocol_path(path, protocol)
 
-    def available_table( self, use_xrd = False ):
+        self.tables.append(pp)
+
+    def available_table( self, allow_protocols = None ):
         '''
         Get the path to the first available table.
+        The behavior is similar to that of :class:`hep_rfm.available_path`.
 
-        :param use_xrd: whether to use the xrootd protocol if needed.
-        :type use_xrd: bool
+        :param allow_protocols: possible protocols to consider.
+        :type allow_protocols: container(str)
         :returns: path to the first available table.
         :rtype: str
         '''
-        return protocols.available_path(self.tables, use_xrd)
+        return protocols.available_path(self.tables, allow_protocols)
 
-    def update( self, parallelize = False, server_spec = None ):
+    def update( self, parallelize = False, wdir = None, modifiers = None ):
         '''
         Update the different tables registered within this manager.
 
@@ -62,14 +67,19 @@ class Manager(object):
         synchronization of all the proxies. By default it is set to 0, so no \
         parallelization  is done.
         :type parallelize: int
-        :param server_spec: specification of user for each SSH server. Must \
-        be specified as a dictionary, where the keys are the hosts and the \
-        values are the user names.
-        :type server_spec: dict
+        :param wdir: where to create the temporary directory. The option \
+        is passed to :class:`tempfile.TemporaryDirectory` as "dir".
+        :type wdir: str
+        :param modifiers: information to modify the path of this class. For \
+        more information on its structure, see the definition of \
+        :func:`hep_rfm.ProtocolPath.with_modifiers` for each protocol.
+        :type modifiers: dict
         :raises RuntimeError: if a file is missing for any of the tables.
 
         .. seealso:: :class:`hep_rfm.Table`, :func:`hep_rfm.copy_file`
         '''
+        kwargs = {'wdir': wdir, 'modifiers': modifiers}
+
         #
         # Determine the files to update
         #
@@ -85,9 +95,10 @@ class Manager(object):
         tmp = tempfile.TemporaryDirectory()
         for i, n in enumerate(self.tables):
 
-            fpath = os.path.join(tmp.name, 'table_{}.txt'.format(i))
+            fpath = protocols.LocalPath(
+                os.path.join(tmp.name, 'table_{}.txt'.format(i)))
 
-            core.copy_file(n, fpath, server_spec=server_spec)
+            core.copy_file(n, fpath, **kwargs)
 
             tu = TableUpdater(n, fpath)
 
@@ -115,7 +126,7 @@ class Manager(object):
 
                     name_error = True
 
-                    logging.getLogger(__name__).error('Table in "{}" does not have file "{}"'.format(tu.path, name))
+                    logging.getLogger(__name__).error('Table in "{}" does not have file "{}"'.format(tu.protocol_path.path, name))
 
         if name_error:
             raise RuntimeError('Missing files in some tables')
@@ -132,44 +143,46 @@ class Manager(object):
             u.update_table()
 
         #
-        # Synchronize the files
+        # Synchronize files and tables.
         #
-        inputs = []
+        sync_files, sync_tables = [], []
 
         # Get the list of sources/targets to process from the update tables
         for u in update_tables:
 
-            inputs += u.changes()
+            sync_files += u.changes()
 
             if u.needs_update():
-                inputs.append((u.tmp_path, u.path))
+                sync_tables.append((u.tmp_path, u.path))
 
-        if len(inputs):
+        if len(sync_files):
             logging.getLogger(__name__).info('Starting to synchronize files')
         else:
             logging.getLogger(__name__).info('All files are up to date')
 
-        kwargs = {'server_spec': server_spec}
-
+        # Do not swap "sync_files" and "sync_tables". First we must modify the
+        # files and, in the last step, update the information in the tables.
         if parallelize:
-
-            lock = multiprocessing.Lock()
-
-            handler = JobHandler()
-
-            for i in inputs:
-                handler.put(i)
 
             func = lambda obj, **kwargs: core.copy_file(*obj, **kwargs)
 
-            kwargs['loglock'] = lock
+            for lst in (sync_files, sync_tables):
 
-            for i in range(parallelize):
-                Worker(handler, func, kwargs=kwargs)
+                lock = multiprocessing.Lock()
 
-            handler.process()
+                handler = JobHandler()
+
+                for i in lst:
+                    handler.put(i)
+
+                kwargs['loglock'] = lock
+
+                for i in range(parallelize):
+                    Worker(handler, func, kwargs=kwargs)
+
+                handler.process()
         else:
-            for i in inputs:
+            for i in sync_files + sync_tables:
                 core.copy_file(*i, **kwargs)
 
 
@@ -192,7 +205,7 @@ class Table(dict):
     @classmethod
     def read( cls, path ):
         '''
-        Build a table from the information in the file at the given path.
+        Build a table from the information in the file at the given local path.
 
         :param path: path to the text file storing the table.
         :type path: str
@@ -210,17 +223,46 @@ class Table(dict):
 
         return cls(files)
 
-    def updated( self ):
+    def updated( self, parallelize = False ):
         '''
         Return an updated version of this table, checking again all the
         properties of the files within it.
+
+        :param parallelize: number of processes allowed to parallelize the \
+        synchronization of all the proxies. By default it is set to 0, so no \
+        parallelization  is done.
+        :type parallelize: int
+        :returns: updated version of the table.
+        :rtype: Table
         '''
-        output = [f.updated() for f in self.values()]
+        if parallelize:
+
+            handler = JobHandler()
+
+            for f in self.values():
+                handler.put(f)
+
+            func = lambda f, q: q.put(f.updated())
+
+            queue = multiprocessing.Queue()
+
+            for i in range(parallelize):
+                Worker(handler, func, args=(queue,))
+
+            handler.process()
+
+            output = [queue.get() for _ in range(len(self))]
+
+            queue.close()
+        else:
+            output = [f.updated() for f in self.values()]
+
         return self.__class__(output)
 
     def write( self, path ):
         '''
         Write this table in the following location.
+        Must be a local path.
 
         :param path: where to write this table to.
         :type path: str
@@ -257,7 +299,7 @@ class TableUpdater(object):
 
         self.path     = path
         self.tmp_path = tmp_path
-        self.table    = Table.read(tmp_path)
+        self.table    = Table.read(tmp_path.path)
         self._changes = []
 
     def changes( self ):
@@ -267,7 +309,7 @@ class TableUpdater(object):
         :returns: changes to apply (input and output paths).
         :rtype: list(tuple(str, str))
         '''
-        return list(map(lambda t: (t[0].path, t[1].path), self._changes))
+        return list(map(lambda t: (t[0].protocol_path, t[1].protocol_path), self._changes))
 
     def check_changed( self, f ):
         '''
@@ -295,6 +337,6 @@ class TableUpdater(object):
         '''
         for src, tgt in self._changes:
 
-            self.table[tgt.name] = FileInfo(tgt.name, tgt.path, src.marks)
+            self.table[tgt.name] = FileInfo(tgt.name, tgt.protocol_path, src.marks)
 
-        self.table.write(self.tmp_path)
+        self.table.write(self.tmp_path.path)
