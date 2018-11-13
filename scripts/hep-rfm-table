@@ -252,40 +252,46 @@ def create( table ):
 
 
 @decorate_access_mode
-def display( table, regex ):
+def display( table, fields, regex ):
     '''
-    Display the contents of the table at the given path
+    Display the contents of the table at the given path.
+    One can select the fields to show.
+    The names of the files will always be displayed.
     '''
     t = hep_rfm.Table.read(table.path)
 
     if len(t) == 0:
-        logging.getLogger(__name__).info('No entries found in "{}"'.format(table.path))
+        logging.getLogger(__name__).info('No entries found')
         return
 
-    mn = max(len('name'), max(len(f.name) for f in t.values()))
-    mp = max(len('path'), max(len(f.protocol_path.path) for f in t.values()))
-    mi = max(len('path'), max(len(f.protocol_path.pid) for f in t.values()))
-    mt = max(len('tmstp'), max(len(str(f.marks.tmstp)) for f in t.values()))
-    mf = max(len('fid'), max(len(f.marks.fid) for f in t.values()))
+    # The field 'name' is always displayed
+    fields = list(fields)
+    if 'name' not in fields:
+        fields.insert(0, 'name')
 
-    frmt = '{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}\t{:<{}}'
-
-    to_string = lambda name, path, pid, tmstp, fid: frmt.format(name, mn, path, mp, pid, mi, tmstp, mt, fid, mf)
-
+    # Get the files to show
     if regex:
         m = re.compile(regex)
 
-    lines = []
-    for k, f in sorted(t.items()):
-        if not regex or m.match(k):
-            lines.append(to_string(f.name, f.protocol_path.path, f.protocol_path.pid, f.marks.tmstp, f.marks.fid))
+    lines = tuple(
+        tuple(str(f.field(fi)) for fi in fields)
+        for k, f in sorted(t.items()) if not regex or m.match(k)
+        )
 
+    frmt = '\t'.join(
+        '{{:<{}}}'.format(max(len(fi), max(len(v) for v in values)))
+        for fi, values in zip(fields, zip(*lines))
+        )
+
+    # Display the information
     if len(lines) != 0:
         logging.getLogger(__name__).info('Contents of table "{}"'.format(table.path))
-        logging.getLogger(__name__).info(to_string('name', 'path', 'pid', 'tmstp', 'fid'))
+        logging.getLogger(__name__).info(frmt.format(*fields))
 
         for l in lines:
-            logging.getLogger(__name__).info(l)
+            logging.getLogger(__name__).info(frmt.format(*l))
+    else:
+        logging.getLogger(__name__).info('No entries found matching regular expression "{}"'.format(regex))
 
 
 @decorate_access_mode
@@ -374,19 +380,8 @@ def replicate( table, location, reference, refpath, refpid, collisions, remote )
     trgtb.write(table.path)
 
 
-def synchronize( tables, nproc, wdir, modifiers ):
-    '''
-    Synchronize a set of tables.
-    '''
-    mgr = hep_rfm.Manager()
-    for t in tables:
-        mgr.add_table(t)
-
-    mgr.update(parallelize=nproc, wdir=wdir, modifiers=modifiers)
-
-
 @decorate_access_mode
-def update( table, regex ):
+def update( table, nproc, regex ):
     '''
     Update the table located in the given path. One can select the files
     to update using a regular expression.
@@ -404,14 +399,14 @@ def update( table, regex ):
             else:
                 maintain.append(f)
 
-        t = hep_rfm.Table(to_update).updated()
+        t = hep_rfm.Table(to_update).updated(parallelize=nproc)
         for f in maintain:
             t[f.name] = f
 
         t.write(table)
 
     else:
-        t.updated().write(table.path)
+        t.updated(parallelize=nproc).write(table.path)
 
 
 if __name__ == '__main__':
@@ -441,7 +436,6 @@ if __name__ == '__main__':
     parser_display      = add_mode(subparsers, display)
     parser_remove       = add_mode(subparsers, remove)
     parser_replicate    = add_mode(subparsers, replicate)
-    parser_synchronize  = add_mode(subparsers, synchronize)
     parser_update       = add_mode(subparsers, update)
 
     # For most of the modes we work with only one table, and must be
@@ -477,6 +471,9 @@ if __name__ == '__main__':
     # display
     parser_display.add_argument('--regex', type=str, default=None,
                                 help='Regular expression to filter the files to show')
+    parser_display.add_argument('--fields', nargs='+', default=hep_rfm.FileInfo.__fields__,
+                                help='Fields to display')
+
     # remove
     parser_remove.add_argument('--files', nargs='+', default=[],
                                help='Names of the files to remove')
@@ -494,16 +491,6 @@ if __name__ == '__main__':
     parser_replicate.add_argument('--collisions', default='raise',
                                   choices=('raise', 'replace', 'omit'),
                                   help='Whether to replace the paths to the files with colliding names')
-    # synchronize
-    parser_synchronize.add_argument('tables', nargs='*',
-                                    help='Path to the tables to synchronize')
-    parser_synchronize.add_argument('--wdir', type=str, default=None,
-                                    help='Directory to put temporary files. Typically used when one is working '\
-                                        'with different protocols and files are very large.')
-    parser_synchronize.add_argument('--modifiers', type=json.loads, default='{}',
-                                    help='Modifiers for the paths. It must be given as a dictionary. '\
-                                    'For example, considering an ssh server: '\
-                                    '\{"ssh_usernames": {"hostname_1": "username_1", "hostname_2": "username_2"}\'.')
     # update
     parser_update.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to update')
@@ -511,7 +498,7 @@ if __name__ == '__main__':
     #
     # Add arguments common to different parsers
     #
-    for p in (parser_add_massive, parser_add_from_dir, parser_synchronize):
+    for p in (parser_add_massive, parser_add_from_dir, parser_update):
         p.add_argument('--nproc', type=int, default=4, required=False,
                        help='Number of parallel process to invoke')
 
