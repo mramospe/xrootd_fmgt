@@ -1,0 +1,31 @@
+ProtocolPath
+============
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: ProtocolPath
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~ProtocolPath.path
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~ProtocolPath.copy
+      ~ProtocolPath.mkdirs
+      ~ProtocolPath.with_modifiers
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: path
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: copy
+   .. automethod:: mkdirs
+   .. automethod:: with_modifiers

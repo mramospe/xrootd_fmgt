@@ -4,24 +4,17 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Functions and classes &#8212; hep_rfm 0.0.0.dev2 documentation</title>
+    <title>Functions and classes &#8212; hep_rfm 0.0.0.dev3 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.0.0.dev2',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="copy_file" href="api/hep_rfm.copy_file.html" />
@@ -32,13 +25,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <div class="section" id="functions-and-classes">
@@ -53,23 +47,32 @@ of the <strong>hep_rfm</strong> package.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;loglock,&nbsp;server_spec])</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;wdir,&nbsp;loglock,&nbsp;…])</td>
 <td>Main function to copy a file from a source to a target.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.make_directories.html#hep_rfm.make_directories" title="hep_rfm.make_directories"><code class="xref py py-obj docutils literal"><span class="pre">make_directories</span></code></a>(target)</td>
-<td>Make the directories for the given target in case they do not exist already.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash" title="hep_rfm.rfm_hash"><code class="xref py py-obj docutils literal"><span class="pre">rfm_hash</span></code></a>(path)</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash" title="hep_rfm.rfm_hash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rfm_hash</span></code></a>(path)</td>
 <td>Use the SHA512 hash function to get the file ID of the file in the given path.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal"><span class="pre">is_remote</span></code></a>(path)</td>
-<td>Check whether the given path points to a remote file.</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.available_path.html#hep_rfm.available_path" title="hep_rfm.available_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_path</span></code></a>(paths[,&nbsp;allow_protocols])</td>
+<td>Return the first available path from a list of paths.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_ssh.html#hep_rfm.is_ssh" title="hep_rfm.is_ssh"><code class="xref py py-obj docutils literal"><span class="pre">is_ssh</span></code></a>(path)</td>
-<td>Return whether the standard ssh protocol must be used.</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.available_working_path.html#hep_rfm.available_working_path" title="hep_rfm.available_working_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_working_path</span></code></a>(path[,&nbsp;allow_protocols])</td>
+<td>If an accessible path can be resolved from “path”, it returns it.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_xrootd.html#hep_rfm.is_xrootd" title="hep_rfm.is_xrootd"><code class="xref py py-obj docutils literal"><span class="pre">is_xrootd</span></code></a>(path)</td>
-<td>Return whether the path is related to the xrootd protocol.</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_remote</span></code></a>(path)</td>
+<td>Return whether the given protocol path belongs to a remote protocol or not.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.process.html#hep_rfm.process" title="hep_rfm.process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process</span></code></a>(*args)</td>
+<td>Create a subprocess object where the output from “stdout” and “stderr” is redirected to subprocess.PIPE.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.protocol_path.html#hep_rfm.protocol_path" title="hep_rfm.protocol_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">protocol_path</span></code></a>(path[,&nbsp;protocol])</td>
+<td>Return a instantiated protocol using the given path and protocol ID.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.register_protocol.html#hep_rfm.register_protocol" title="hep_rfm.register_protocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_protocol</span></code></a>(name)</td>
+<td>Decorator to register a protocol with the given name.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.remote_protocol.html#hep_rfm.remote_protocol" title="hep_rfm.remote_protocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_protocol</span></code></a>(a,&nbsp;b)</td>
+<td>Determine the protocol to use given two paths to files.</td>
 </tr>
 </tbody>
 </table>
@@ -82,31 +85,49 @@ of the <strong>hep_rfm</strong> package.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.ProcessError.html#hep_rfm.ProcessError" title="hep_rfm.ProcessError"><code class="xref py py-obj docutils literal"><span class="pre">ProcessError</span></code></a>(msg,&nbsp;stderr)</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.AbstractMethodError.html#hep_rfm.AbstractMethodError" title="hep_rfm.AbstractMethodError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMethodError</span></code></a>()</td>
+<td>Define an error for base classes with abstract methods.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.ProcessError.html#hep_rfm.ProcessError" title="hep_rfm.ProcessError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessError</span></code></a>(msg,&nbsp;stderr)</td>
 <td>Define an error to be raised when a subprocess call fails.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.CopyFileError.html#hep_rfm.CopyFileError" title="hep_rfm.CopyFileError"><code class="xref py py-obj docutils literal"><span class="pre">CopyFileError</span></code></a>(ipath,&nbsp;opath,&nbsp;stderr)</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.CopyFileError.html#hep_rfm.CopyFileError" title="hep_rfm.CopyFileError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyFileError</span></code></a>(ipath,&nbsp;opath,&nbsp;stderr)</td>
 <td>Define an error to be raised when copying a file.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.MakeDirsError.html#hep_rfm.MakeDirsError" title="hep_rfm.MakeDirsError"><code class="xref py py-obj docutils literal"><span class="pre">MakeDirsError</span></code></a>(target,&nbsp;stderr)</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.MakeDirsError.html#hep_rfm.MakeDirsError" title="hep_rfm.MakeDirsError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MakeDirsError</span></code></a>(target,&nbsp;stderr)</td>
 <td>Error to be displayed when failing making directories.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileInfoBase.html#hep_rfm.FileInfoBase" title="hep_rfm.FileInfoBase"><code class="xref py py-obj docutils literal"><span class="pre">FileInfoBase</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileInfoBase.html#hep_rfm.FileInfoBase" title="hep_rfm.FileInfoBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInfoBase</span></code></a></td>
 <td>Base class for an object storing the information about a file.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileInfo.html#hep_rfm.FileInfo" title="hep_rfm.FileInfo"><code class="xref py py-obj docutils literal"><span class="pre">FileInfo</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileInfo.html#hep_rfm.FileInfo" title="hep_rfm.FileInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInfo</span></code></a></td>
 <td>Object to store the information about a file.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileMarksBase.html#hep_rfm.FileMarksBase" title="hep_rfm.FileMarksBase"><code class="xref py py-obj docutils literal"><span class="pre">FileMarksBase</span></code></a></td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileMarksBase.html#hep_rfm.FileMarksBase" title="hep_rfm.FileMarksBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileMarksBase</span></code></a></td>
 <td>Base class representing an object storing the time-stamp and file ID of a file.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileMarks.html#hep_rfm.FileMarks" title="hep_rfm.FileMarks"><code class="xref py py-obj docutils literal"><span class="pre">FileMarks</span></code></a></td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileMarks.html#hep_rfm.FileMarks" title="hep_rfm.FileMarks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileMarks</span></code></a></td>
 <td>Represent an object storing the time-stamp and file ID of a file.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-obj docutils literal"><span class="pre">Table</span></code></a>(files)</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProtocolPath</span></code></a>(path[,&nbsp;path_checker])</td>
+<td>Base class to represent a protocol to manage a path to a file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.LocalPath.html#hep_rfm.LocalPath" title="hep_rfm.LocalPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LocalPath</span></code></a>(path)</td>
+<td>Represent a path to a local file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.RemotePath.html#hep_rfm.RemotePath" title="hep_rfm.RemotePath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RemotePath</span></code></a>(path[,&nbsp;path_checker])</td>
+<td>Represent a remote path.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath" title="hep_rfm.SSHPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SSHPath</span></code></a>(path)</td>
+<td>Represent a path to be handled using SSH.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath" title="hep_rfm.XRootDPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XRootDPath</span></code></a>(path)</td>
+<td>Represent a path to be handled using XROOTD protocol.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Table</span></code></a>(files)</td>
 <td>Create a table storing the information about files.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-obj docutils literal"><span class="pre">Manager</span></code></a>()</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manager</span></code></a>()</td>
 <td>Represent a class to store tables in different local/remote hosts, being able to do updates among them.</td>
 </tr>
 </tbody>
@@ -114,16 +135,13 @@ of the <strong>hep_rfm</strong> package.</p>
 </div>
 <div class="section" id="class-inheritance-diagram">
 <h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<img src="_images/inheritance-63e31e2073f1305d84effcf2dd12eed69322a2b4.png" alt="Inheritance diagram of hep_rfm.exceptions.ProcessError, hep_rfm.exceptions.CopyFileError, hep_rfm.exceptions.MakeDirsError, hep_rfm.files.FileInfoBase, hep_rfm.files.FileInfo, hep_rfm.files.FileMarksBase, hep_rfm.files.FileMarks, hep_rfm.tables.Table, hep_rfm.tables.Manager" usemap="#inheritanceab0f15a176" class="inheritance"/>
-<map id="inheritanceab0f15a176" name="inheritanceab0f15a176">
-<area shape="rect" id="node4" title="FileInfoBase(name, path, marks)" alt="" coords="13,153,110,179"/>
-<area shape="rect" id="node6" title="FileMarksBase(tmstp, fid)" alt="" coords="5,104,117,129"/>
-</map>
+<div class="graphviz"><img src="_images/inheritance-9a89c7510257187cfaa18eb625c62839de1d07eb.png" alt="Inheritance diagram of hep_rfm.exceptions.AbstractMethodError, hep_rfm.exceptions.ProcessError, hep_rfm.exceptions.CopyFileError, hep_rfm.exceptions.MakeDirsError, hep_rfm.files.FileInfoBase, hep_rfm.files.FileInfo, hep_rfm.files.FileMarksBase, hep_rfm.files.FileMarks, hep_rfm.protocols.ProtocolPath, hep_rfm.protocols.LocalPath, hep_rfm.protocols.RemotePath, hep_rfm.protocols.SSHPath, hep_rfm.protocols.XRootDPath, hep_rfm.tables.Table, hep_rfm.tables.Manager" class="inheritance graphviz" /></div>
 </div>
 </div>
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -159,14 +177,24 @@ of the <strong>hep_rfm</strong> package.</p>
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -175,8 +203,8 @@ of the <strong>hep_rfm</strong> package.</p>
       &copy;2017, Miguel Ramos Pernas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
       |
       <a href="_sources/functions-and-classes.rst.txt"

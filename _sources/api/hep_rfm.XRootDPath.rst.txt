@@ -1,0 +1,33 @@
+XRootDPath
+==========
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: XRootDPath
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~XRootDPath.pid
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~XRootDPath.copy
+      ~XRootDPath.join_path
+      ~XRootDPath.mkdirs
+      ~XRootDPath.split_path
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: pid
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: copy
+   .. automethod:: join_path
+   .. automethod:: mkdirs
+   .. automethod:: split_path

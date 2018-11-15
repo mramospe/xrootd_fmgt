@@ -1,0 +1,268 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ProtocolPath &#8212; hep_rfm 0.0.0.dev3 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="LocalPath" href="hep_rfm.LocalPath.html" />
+    <link rel="prev" title="FileMarks" href="hep_rfm.FileMarks.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="protocolpath">
+<h1>ProtocolPath<a class="headerlink" href="#protocolpath" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="hep_rfm.ProtocolPath">
+<em class="property">class </em><code class="descclassname">hep_rfm.</code><code class="descname">ProtocolPath</code><span class="sig-paren">(</span><em>path</em>, <em>path_checker=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/protocols.html#ProtocolPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.ProtocolPath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Base class to represent a protocol to manage a path to a file.
+The protocol IDs are defined at runtime, using
+<code class="xref py py-func docutils literal notranslate"><span class="pre">ProtocolPath.register_protocol()</span></code>.
+These IDs are saved in the registered classes on the attribute
+“pid”.
+It is very important not to ovewrite this value, since it would
+lead to undefined behaviour.
+The protocols are saved on a dictionary, where the keys are the
+protocol IDs.
+This is an abstract class, and any class inheriting from it must
+override the following methods:
+1. <a class="reference internal" href="#hep_rfm.ProtocolPath.copy" title="hep_rfm.ProtocolPath.copy"><code class="xref py py-func docutils literal notranslate"><span class="pre">ProtocolPath.copy()</span></code></a>
+2. <a class="reference internal" href="#hep_rfm.ProtocolPath.mkdirs" title="hep_rfm.ProtocolPath.mkdirs"><code class="xref py py-func docutils literal notranslate"><span class="pre">ProtocolPath.mkdirs()</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – path to save, pointing to a file.</li>
+<li><strong>path_checker</strong> (<em>function</em>) – possible function that checks the the given path         actually corresponds to the protocol. It must take a path as argument         and return a bool.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.7)"><strong>ValueError</strong></a> – if the path does not satisfy the requirements         from “path_checker”.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.ProtocolPath.path" title="hep_rfm.ProtocolPath.path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">path</span></code></a></td>
+<td>Return the associated path to the file.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Methods Summary</p>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.ProtocolPath.copy" title="hep_rfm.ProtocolPath.copy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy</span></code></a>(source,&nbsp;target)</td>
+<td>Copy the source file to the target using this protocol.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="#hep_rfm.ProtocolPath.mkdirs" title="hep_rfm.ProtocolPath.mkdirs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mkdirs</span></code></a>()</td>
+<td>Make directories to the file path within this protocol.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.ProtocolPath.with_modifiers" title="hep_rfm.ProtocolPath.with_modifiers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_modifiers</span></code></a>([modifiers])</td>
+<td>Return an instance of this class after applying modifications.</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes Documentation</p>
+<dl class="attribute">
+<dt id="hep_rfm.ProtocolPath.path">
+<code class="descname">path</code><a class="headerlink" href="#hep_rfm.ProtocolPath.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the associated path to the file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">associated path.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p class="rubric">Methods Documentation</p>
+<dl class="staticmethod">
+<dt id="hep_rfm.ProtocolPath.copy">
+<em class="property">static </em><code class="descname">copy</code><span class="sig-paren">(</span><em>source</em>, <em>target</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/protocols.html#ProtocolPath.copy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.ProtocolPath.copy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy the source file to the target using this protocol.
+The target must be accessible.
+It must return a <a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.Popen" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">subprocess.Popen</span></code></a> object.
+In this case, this is an abstract method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>source</strong> (<a class="reference internal" href="#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath"><em>ProtocolPath</em></a>) – source file to copy.</li>
+<li><strong>target</strong> (<a class="reference internal" href="#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath"><em>ProtocolPath</em></a>) – path where to copy the file to.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">running process copying the file in the current location         to the target.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.Popen" title="(in Python v3.7)">subprocess.Popen</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hep_rfm.ProtocolPath.mkdirs">
+<code class="descname">mkdirs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/protocols.html#ProtocolPath.mkdirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.ProtocolPath.mkdirs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make directories to the file path within this protocol.
+It must return a <a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.Popen" title="(in Python v3.7)"><code class="xref py py-class docutils literal notranslate"><span class="pre">subprocess.Popen</span></code></a> object.
+In this case, this is an abstract method.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">running process to make the necessary directories to the         target.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/subprocess.html#subprocess.Popen" title="(in Python v3.7)">subprocess.Popen</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hep_rfm.ProtocolPath.with_modifiers">
+<code class="descname">with_modifiers</code><span class="sig-paren">(</span><em>modifiers=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/protocols.html#ProtocolPath.with_modifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.ProtocolPath.with_modifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an instance of this class after applying modifications.
+The input dictionary can contain information not understood for a given
+<a class="reference internal" href="#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">hep_rfm.ProtocolPath</span></code></a>.
+By default the same class, with no modifications, is returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>modifiers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – information to modify the path of this class.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">modified instance if a modification is applied. Otherwise         same instance.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath">ProtocolPath</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">hep_rfm</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../functions-and-classes.html">Functions and classes</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#functions">Functions</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../functions-and-classes.html#classes">Classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../functions-and-classes.html#class-inheritance-diagram">Class Inheritance Diagram</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="../functions-and-classes.html">Functions and classes</a><ul>
+      <li>Previous: <a href="hep_rfm.FileMarks.html" title="previous chapter">FileMarks</a></li>
+      <li>Next: <a href="hep_rfm.LocalPath.html" title="next chapter">LocalPath</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2017, Miguel Ramos Pernas.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/hep_rfm.ProtocolPath.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,29 @@
+LocalPath
+=========
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: LocalPath
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~LocalPath.pid
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~LocalPath.copy
+      ~LocalPath.mkdirs
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: pid
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: copy
+   .. automethod:: mkdirs

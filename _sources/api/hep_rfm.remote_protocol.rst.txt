@@ -1,0 +1,6 @@
+remote_protocol
+===============
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: remote_protocol

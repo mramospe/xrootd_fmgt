@@ -1,0 +1,6 @@
+protocol_path
+=============
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: protocol_path

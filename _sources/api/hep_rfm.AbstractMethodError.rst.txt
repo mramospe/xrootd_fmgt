@@ -1,0 +1,6 @@
+AbstractMethodError
+===================
+
+.. currentmodule:: hep_rfm
+
+.. autoexception:: AbstractMethodError

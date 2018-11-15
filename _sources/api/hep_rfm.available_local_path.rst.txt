@@ -1,0 +1,6 @@
+available_local_path
+====================
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: available_local_path

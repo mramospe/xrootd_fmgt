@@ -5,24 +5,17 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Index &#8212; hep_rfm 0.0.0.dev2 documentation</title>
+    <title>Index &#8212; hep_rfm 0.0.0.dev3 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.0.0.dev2',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" />
    
@@ -31,13 +24,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
 
@@ -49,22 +43,32 @@
  | <a href="#F"><strong>F</strong></a>
  | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
+ | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
  | <a href="#U"><strong>U</strong></a>
  | <a href="#W"><strong>W</strong></a>
+ | <a href="#X"><strong>X</strong></a>
  
 </div>
 <h2 id="A">A</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.AbstractMethodError.html#hep_rfm.AbstractMethodError">AbstractMethodError</a>
+</li>
       <li><a href="api/hep_rfm.Manager.html#hep_rfm.Manager.add_table">add_table() (hep_rfm.Manager method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.available_path.html#hep_rfm.available_path">available_path() (in module hep_rfm)</a>
+</li>
       <li><a href="api/hep_rfm.Manager.html#hep_rfm.Manager.available_table">available_table() (hep_rfm.Manager method)</a>
+</li>
+      <li><a href="api/hep_rfm.available_working_path.html#hep_rfm.available_working_path">available_working_path() (in module hep_rfm)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -72,10 +76,20 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/hep_rfm.copy_file.html#hep_rfm.copy_file">copy_file() (in module hep_rfm)</a>
+      <li><a href="api/hep_rfm.LocalPath.html#hep_rfm.LocalPath.copy">copy() (hep_rfm.LocalPath method)</a>
+
+      <ul>
+        <li><a href="api/hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath.copy">(hep_rfm.ProtocolPath static method)</a>
 </li>
+        <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath.copy">(hep_rfm.SSHPath method)</a>
+</li>
+        <li><a href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath.copy">(hep_rfm.XRootDPath method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.copy_file.html#hep_rfm.copy_file">copy_file() (in module hep_rfm)</a>
+</li>
       <li><a href="api/hep_rfm.CopyFileError.html#hep_rfm.CopyFileError">CopyFileError</a>
 </li>
   </ul></td>
@@ -111,10 +125,26 @@
       <li><a href="api/hep_rfm.is_remote.html#hep_rfm.is_remote">is_remote() (in module hep_rfm)</a>
 </li>
   </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/hep_rfm.is_ssh.html#hep_rfm.is_ssh">is_ssh() (in module hep_rfm)</a>
+      <li><a href="api/hep_rfm.RemotePath.html#hep_rfm.RemotePath.join_path">join_path() (hep_rfm.RemotePath static method)</a>
+
+      <ul>
+        <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath.join_path">(hep_rfm.SSHPath static method)</a>
 </li>
-      <li><a href="api/hep_rfm.is_xrootd.html#hep_rfm.is_xrootd">is_xrootd() (in module hep_rfm)</a>
+        <li><a href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath.join_path">(hep_rfm.XRootDPath static method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="L">L</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.LocalPath.html#hep_rfm.LocalPath">LocalPath (class in hep_rfm)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -122,21 +152,45 @@
 <h2 id="M">M</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="api/hep_rfm.make_directories.html#hep_rfm.make_directories">make_directories() (in module hep_rfm)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hep_rfm.MakeDirsError.html#hep_rfm.MakeDirsError">MakeDirsError</a>
 </li>
       <li><a href="api/hep_rfm.Manager.html#hep_rfm.Manager">Manager (class in hep_rfm)</a>
 </li>
+      <li><a href="api/hep_rfm.LocalPath.html#hep_rfm.LocalPath.mkdirs">mkdirs() (hep_rfm.LocalPath method)</a>
+
+      <ul>
+        <li><a href="api/hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath.mkdirs">(hep_rfm.ProtocolPath method)</a>
+</li>
+        <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath.mkdirs">(hep_rfm.SSHPath method)</a>
+</li>
+        <li><a href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath.mkdirs">(hep_rfm.XRootDPath method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="P">P</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath.path">path (hep_rfm.ProtocolPath attribute)</a>
+</li>
+      <li><a href="api/hep_rfm.LocalPath.html#hep_rfm.LocalPath.pid">pid (hep_rfm.LocalPath attribute)</a>
+
+      <ul>
+        <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath.pid">(hep_rfm.SSHPath attribute)</a>
+</li>
+        <li><a href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath.pid">(hep_rfm.XRootDPath attribute)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.process.html#hep_rfm.process">process() (in module hep_rfm)</a>
+</li>
       <li><a href="api/hep_rfm.ProcessError.html#hep_rfm.ProcessError">ProcessError</a>
+</li>
+      <li><a href="api/hep_rfm.protocol_path.html#hep_rfm.protocol_path">protocol_path() (in module hep_rfm)</a>
+</li>
+      <li><a href="api/hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath">ProtocolPath (class in hep_rfm)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -146,9 +200,35 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hep_rfm.Table.html#hep_rfm.Table.read">read() (hep_rfm.Table class method)</a>
 </li>
+      <li><a href="api/hep_rfm.register_protocol.html#hep_rfm.register_protocol">register_protocol() (in module hep_rfm)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.remote_protocol.html#hep_rfm.remote_protocol">remote_protocol() (in module hep_rfm)</a>
+</li>
+      <li><a href="api/hep_rfm.RemotePath.html#hep_rfm.RemotePath">RemotePath (class in hep_rfm)</a>
+</li>
       <li><a href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash">rfm_hash() (in module hep_rfm)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath.specify_server">specify_server() (hep_rfm.SSHPath method)</a>
+</li>
+      <li><a href="api/hep_rfm.RemotePath.html#hep_rfm.RemotePath.split_path">split_path() (hep_rfm.RemotePath method)</a>
+
+      <ul>
+        <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath.split_path">(hep_rfm.SSHPath method)</a>
+</li>
+        <li><a href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath.split_path">(hep_rfm.XRootDPath method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath">SSHPath (class in hep_rfm)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -176,7 +256,23 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath.with_modifiers">with_modifiers() (hep_rfm.ProtocolPath method)</a>
+
+      <ul>
+        <li><a href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath.with_modifiers">(hep_rfm.SSHPath method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="api/hep_rfm.Table.html#hep_rfm.Table.write">write() (hep_rfm.Table method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="X">X</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath">XRootDPath (class in hep_rfm)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -184,6 +280,7 @@
 
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -212,14 +309,24 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -228,8 +335,8 @@
       &copy;2017, Miguel Ramos Pernas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

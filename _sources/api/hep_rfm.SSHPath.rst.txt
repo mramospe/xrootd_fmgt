@@ -1,0 +1,37 @@
+SSHPath
+=======
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: SSHPath
+   :show-inheritance:
+
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~SSHPath.pid
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~SSHPath.copy
+      ~SSHPath.join_path
+      ~SSHPath.mkdirs
+      ~SSHPath.specify_server
+      ~SSHPath.split_path
+      ~SSHPath.with_modifiers
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: pid
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: copy
+   .. automethod:: join_path
+   .. automethod:: mkdirs
+   .. automethod:: specify_server
+   .. automethod:: split_path
+   .. automethod:: with_modifiers

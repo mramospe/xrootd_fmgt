@@ -1,0 +1,6 @@
+register_protocol
+=================
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: register_protocol

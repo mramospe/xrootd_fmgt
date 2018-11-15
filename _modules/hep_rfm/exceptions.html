@@ -4,24 +4,17 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>hep_rfm.exceptions &#8212; hep_rfm 0.0.0.dev2 documentation</title>
+    <title>hep_rfm.exceptions &#8212; hep_rfm 0.0.0.dev3 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '../../',
-        VERSION:     '0.0.0.dev2',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
    
@@ -30,13 +23,14 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
 
-  </head>
-  <body>
+  </head><body>
   
 
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
+          
+
           <div class="body" role="main">
             
   <h1>Source code for hep_rfm.exceptions</h1><div class="highlight"><pre>
@@ -48,7 +42,38 @@
 <span class="n">__email__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ProcessError&#39;</span><span class="p">,</span> <span class="s1">&#39;CopyFileError&#39;</span><span class="p">,</span> <span class="s1">&#39;MakeDirsError&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;AbstractMethodError&#39;</span><span class="p">,</span> <span class="s1">&#39;ProcessError&#39;</span><span class="p">,</span> <span class="s1">&#39;CopyFileError&#39;</span><span class="p">,</span> <span class="s1">&#39;MakeDirsError&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="AbstractMethodError"><a class="viewcode-back" href="../../api/hep_rfm.AbstractMethodError.html#hep_rfm.AbstractMethodError">[docs]</a><span class="k">class</span> <span class="nc">AbstractMethodError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Define an error for base classes with abstract methods.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractMethodError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="s1">&#39;Attempt to call abstract class method&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">class</span> <span class="nc">MustOverrideError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">method</span> <span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Define an error to be raised when a class must override a method and it</span>
+<span class="sd">        does not.</span>
+
+<span class="sd">        :param cls: class that must override the method.</span>
+<span class="sd">        :type cls: class</span>
+<span class="sd">        :param parent: parent class where it must inherit from.</span>
+<span class="sd">        :type parent: class</span>
+<span class="sd">        :param method: method that must be overriding.</span>
+<span class="sd">        :type method: method</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">cn</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">mn</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">pn</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Class &quot;</span><span class="si">{}</span><span class="s1">&quot; must override method &quot;</span><span class="si">{}</span><span class="s1">&quot; from class &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cn</span><span class="p">,</span> <span class="n">mn</span><span class="p">,</span> <span class="n">pn</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">MustOverrideError</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ProcessError"><a class="viewcode-back" href="../../api/hep_rfm.ProcessError.html#hep_rfm.ProcessError">[docs]</a><span class="k">class</span> <span class="nc">ProcessError</span><span class="p">(</span><span class="ne">RuntimeError</span><span class="p">):</span>
@@ -103,6 +128,7 @@
 </pre></div>
 
           </div>
+          
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -133,14 +159,24 @@
 </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="../../search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
         </div>
       </div>
       <div class="clearer"></div>
@@ -149,8 +185,8 @@
       &copy;2017, Miguel Ramos Pernas.
       
       |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.6.6</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.10</a>
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
       
     </div>
 

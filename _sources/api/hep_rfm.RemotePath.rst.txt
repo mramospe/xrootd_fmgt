@@ -1,0 +1,19 @@
+RemotePath
+==========
+
+.. currentmodule:: hep_rfm
+
+.. autoclass:: RemotePath
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~RemotePath.join_path
+      ~RemotePath.split_path
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: join_path
+   .. automethod:: split_path

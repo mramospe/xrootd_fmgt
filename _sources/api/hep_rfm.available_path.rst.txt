@@ -1,0 +1,6 @@
+available_path
+==============
+
+.. currentmodule:: hep_rfm
+
+.. autofunction:: available_path
