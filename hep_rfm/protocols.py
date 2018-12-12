@@ -596,7 +596,7 @@ class XRootDPath(RemotePath):
         return self.__class__(self.path)
 
 
-def available_working_path( path, allow_protocols = None ):
+def available_working_path( path, modifiers = None, allow_protocols = None ):
     '''
     If an accessible path can be resolved from "path", it returns it.
     Return None otherwise.
@@ -606,11 +606,16 @@ def available_working_path( path, allow_protocols = None ):
 
     :param path: path to process.
     :type path: ProtocolPath
+    :param modifiers: modifiers to be applied in the set of paths.
+    :type modifiers: dict
     :param allow_protocols: possible protocols to consider.
     :type allow_protocols: container(str)
     :returns: local path.
     :rtype: str or None
     '''
+    if modifiers is not None:
+        path = path.with_modifiers(modifiers)
+
     if allow_protocols is not None:
         if path.pid in allow_protocols:
             return path.path
@@ -630,9 +635,11 @@ def available_working_path( path, allow_protocols = None ):
     return None
 
 
-def available_path( paths, allow_protocols = None ):
+def available_path( paths, modifiers = None, allow_protocols = None ):
     '''
     Return the first available path from a list of paths.
+    If a local path results after applying "modifiers" to any of the
+    given paths, then this is returned (as a local path).
     If any of the paths in "paths" is remote, then "allow_protocols" permits
     the user to make this function return a path if it belongs to one of the
     given protocols, that must be specified as a container of strings.
@@ -640,11 +647,15 @@ def available_path( paths, allow_protocols = None ):
 
     :param paths: list of paths to process.
     :type paths: collection(ProtocolPath)
+    :param modifiers: modifiers to be applied in the set of paths.
+    :type modifiers: dict
     :param allow_protocols: possible protocols to consider.
     :type allow_protocols: container(str)
     :returns: first available path found.
     :rtype: str
     :raises RuntimeError: if it fails to find an available path.
+
+    .. seealso:: :func:`available_working_path`
 
     .. warning::
        If the path to a file on a remote site matches that of a local file,
@@ -655,7 +666,7 @@ def available_path( paths, allow_protocols = None ):
     '''
     for path in paths:
 
-        p = available_working_path(path, allow_protocols)
+        p = available_working_path(path, modifiers, allow_protocols)
 
         if p is not None:
             return p

@@ -36,8 +36,15 @@ def test_available_path( tmpdir ):
     p = hep_rfm.available_path(paths, allow_protocols=('xrootd',))
     assert p == xr
 
+    # Test exceptions
     with pytest.raises(RuntimeError):
         hep_rfm.available_path(paths[:-1])
+
+    # Test the function with modifiers
+    host = socket.gethostname()
+    remote_path = hep_rfm.protocol_path('user@{}:{}'.format(host, lp), 'ssh')
+    p = hep_rfm.available_path([remote_path], modifiers={'ssh_hosts': [host]})
+    assert p == lp
 
 
 def test_available_working_path( tmpdir ):
