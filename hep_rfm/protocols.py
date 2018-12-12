@@ -451,11 +451,16 @@ class SSHPath(RemotePath):
         Return an instance of this class after applying modifications.
         The input dictionary "modifiers" might contain information about the
         user-name for the host in the stored path.
-        This information must be provided on a key called "ssh_usernames",
-        containing the user-name to use for each host (although only one will
-        be appliable for a given :class:`hep_rfm.SSHPath` instance).
-        In case the path has already one user-name defined, it will be
-        overwritten.
+        The allowed keys for this dictionary are:
+
+        - "ssh_hosts": list containing the hosts accessible from the place
+        where the operation is being done. If the path stored in this class
+        has a host that coincides with any of those here specified, it will
+        return a :class:`hep_rfm.LocalPath` instance.
+        - "ssh_usernames": dictionary containing the user-name to use for each
+        host (although only one will be appliable for a given
+        :class:`hep_rfm.SSHPath` instance). In case the path has already one
+        user-name defined, it will be overwritten.
 
         :param modifiers: information to modify the path of this class.
         :type modifiers: dict
@@ -467,17 +472,22 @@ class SSHPath(RemotePath):
 
         path = self.path
 
-        if 'ssh_usernames' in modifiers:
+        if modifiers:
 
-            uh, _ = self.split_path()
+            uh, p = self.split_path()
 
             _, h = uh.split('@')
 
-            for host, uname in modifiers['ssh_usernames'].items():
+            if 'ssh_hosts' in modifiers:
+                for host in modifiers['ssh_hosts']:
+                    if host == h:
+                        return LocalPath(p)
 
-                if host == h:
-                    path = uname + path[path.find('@'):]
-                    break
+            if 'ssh_usernames' in modifiers:
+                for host, uname in modifiers['ssh_usernames'].items():
+                    if host == h:
+                        path = uname + path[path.find('@'):]
+                        break
 
         if path.startswith('@'):
             raise RuntimeError('User name must be specified for "{}"'.format(self))
@@ -553,6 +563,37 @@ class XRootDPath(RemotePath):
         '''
         rp = self.path.find('//', 7)
         return self.path[7:rp], self.path[rp + 1:]
+
+    def with_modifiers( self, modifiers = None ):
+        '''
+        Return an instance of this class after applying modifications.
+        The input dictionary "modifiers" might contain information about the
+        user-name for the host in the stored path.
+        The allowed keys for this dictionary are:
+
+        - "xrootd_servers": list containing the XRootD servers accessible from
+        the place where the operation is being done. If the path stored in this
+        class has a host that coincides with any of those here specified, it
+        will return a :class:`hep_rfm.LocalPath` instance.
+
+        :param modifiers: information to modify the path of this class.
+        :type modifiers: dict
+        :returns: modified instance if a modification is applied. Otherwise \
+        same instance.
+        :rtype: ProtocolPath
+        '''
+        modifiers = modifiers if modifiers is not None else {}
+
+        if modifiers:
+
+            h, p = self.split_path()
+
+            if 'xrootd_servers' in modifiers:
+                for server in modifiers['xrootd_servers']:
+                    if server == h:
+                        return LocalPath(p)
+
+        return self.__class__(self.path)
 
 
 def available_working_path( path, allow_protocols = None ):

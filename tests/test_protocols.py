@@ -8,6 +8,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 # Python
 import os
 import pytest
+import socket
 
 # Custom
 import hep_rfm
@@ -234,6 +235,12 @@ def test_sshpath():
     pp = pp.with_modifiers({'ssh_usernames': {'my-site': 'user'}})
     assert pp.path == 'user@my-site:path/to/file.txt'
 
+    host = socket.gethostname()
+
+    pp = hep_rfm.protocol_path('user@{}:path/to/file.txt'.format(host), 'ssh')
+    pp = pp.with_modifiers({'ssh_hosts': [host]})
+    assert pp.path == 'path/to/file.txt'
+
     pp = hep_rfm.protocol_path('@my-site:path/to/file.txt', 'ssh')
     with pytest.raises(RuntimeError):
         pp.with_modifiers()
@@ -249,6 +256,10 @@ def test_xrootdpath():
 
     s, p = pp.split_path()
     assert s == 'my-site' and p == '/path/to/file'
+
+    pp = hep_rfm.protocol_path('root://my-site//path/to/file', 'xrootd')
+    pp = pp.with_modifiers({'xrootd_servers': ['my-site']})
+    assert pp.path == '/path/to/file'
 
     with pytest.raises(ValueError):
         hep_rfm.protocol_path('/local/file.txt', 'xrootd')
