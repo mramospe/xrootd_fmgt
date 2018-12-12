@@ -47,17 +47,21 @@ class Manager(object):
 
         self.tables.append(pp)
 
-    def available_table( self, allow_protocols = None ):
+    def available_table( self, modifiers = None, allow_protocols = None ):
         '''
         Get the path to the first available table.
         The behavior is similar to that of :class:`hep_rfm.available_path`.
 
+        :param modifiers: modifiers to be applied in the set of paths.
+        :type modifiers: dict
         :param allow_protocols: possible protocols to consider.
         :type allow_protocols: container(str)
         :returns: path to the first available table.
         :rtype: str
+
+        .. seealso:: :func:`available_path`
         '''
-        return protocols.available_path(self.tables, allow_protocols)
+        return protocols.available_path(self.tables, modifiers, allow_protocols)
 
     def update( self, parallelize = False, wdir = None, modifiers = None ):
         '''
