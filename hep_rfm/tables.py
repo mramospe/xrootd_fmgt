@@ -8,10 +8,12 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 # Local
 from hep_rfm import core
 from hep_rfm import protocols
+from hep_rfm.version import __version__
 from hep_rfm.files import FileInfo
 from hep_rfm.parallel import JobHandler, Worker
 
 # Python
+import json
 import logging
 import multiprocessing
 import os
@@ -192,16 +194,24 @@ class Manager(object):
 
 class Table(dict):
 
-    def __init__( self, files ):
+    def __init__( self, files = None, description = '', version = __version__ ):
         '''
         Create a table storing the information about files.
 
         :param files: files to store in the table.
         :type files: collection(FileInfo)
+        :param description: string to explain the contents of the table.
+        :type description: str
 
         .. seealso:: :class:`hep_rfm.Manager`, :func:`hep_rfm.copy_file`
         '''
         super(Table, self).__init__()
+
+        if files is None:
+            files = []
+
+        self.description = description
+        self.version     = version
 
         for f in files:
             self[f.name] = f
@@ -216,16 +226,24 @@ class Table(dict):
         :returns: built table.
         :rtype: Table
         '''
-        files = []
         with open(path, 'rt') as fi:
 
-            for l in fi:
+            data = fi.read()
 
-                fp = FileInfo.from_stream_line(l)
+            if data:
+                dct = json.loads(data)
+            else:
+                dct = {}
 
-                files.append(fp)
+            core.parse_fields(['description', 'files', 'version'], dct, required=['files'])
 
-        return cls(files)
+            description = dct.get('description', '')
+
+            version = dct.get('version', '')
+
+            files = [FileInfo.from_fields(**fs) for fs in dct.get('files', {}).values()]
+
+        return cls(files, description=description, version=version)
 
     def updated( self, parallelize = False ):
         '''
@@ -271,17 +289,13 @@ class Table(dict):
         :param path: where to write this table to.
         :type path: str
         '''
-        with open(path, 'wt') as fo:
-            for _, f in sorted(self.items()):
-
-                info = f.info()
-
-                frmt = '{}'
-                for i in range(len(info) - 1):
-                    frmt += '\t{}'
-                frmt += '\n'
-
-                fo.write(frmt.format(*info))
+        dct = {
+            'version'     : __version__,
+            'description' : self.description,
+            'files'       : {n: f.info() for n, f in sorted(self.items())},
+        }
+        with open(path, 'wt') as f:
+            f.write(json.dumps(dct, indent=4, sort_keys=True))
 
 
 class TableUpdater(object):

@@ -12,6 +12,7 @@ import os
 import subprocess
 
 # Local
+from hep_rfm import core
 from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
 from hep_rfm.parallel import Registry
 
@@ -712,13 +713,30 @@ def protocol_path( path, protocol = None ):
     :returns: protocol associated to the given path.
     :rtype: ProtocolPath
     '''
-    if protocol == None:
+    if protocol is None:
         return LocalPath(path)
     else:
         if protocol in ProtocolPath.__protocols__:
             return ProtocolPath.__protocols__[protocol](path)
         else:
             raise LookupError('Protocol with name "{}" is not registered or unknown'.format(protocol))
+
+
+def protocol_path_from_fields( **fields ):
+    '''
+    Return an instantiated protocol from a set of fields, which
+    might or not coincide with those in the class constructor.
+
+    :param fields: fields to process.
+    :type fields: dict
+    :returns: protocol associated to the given path.
+    :rtype: ProtocolPath
+
+    .. seealso:: :func:`hep_rfm.protocol_path`
+    '''
+    core.parse_fields(['path', 'pid'], fields)
+
+    return protocol_path(fields['path'], fields['pid'])
 
 
 def remote_protocol( a, b ):
