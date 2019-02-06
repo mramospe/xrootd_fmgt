@@ -14,6 +14,7 @@ from hep_rfm.version import __version__
 from hep_rfm.parallel import JobHandler, Worker
 
 # Python
+import datetime
 import json
 import logging
 import multiprocessing
@@ -195,7 +196,7 @@ class Manager(object):
 
 class Table(dict):
 
-    def __init__( self, files = None, description = '', version = __version__ ):
+    def __init__( self, files = None, description = '', last_update = None, version = __version__ ):
         '''
         Create a table storing the information about files.
 
@@ -203,12 +204,16 @@ class Table(dict):
         :type files: dict(str, FileInfo)
         :param description: string to explain the contents of the table.
         :type description: str
+        :param last_update: date and time of the last update of the table.
+        :type last_update: str
         :param version: version of this package used to create the table.
         :type version: str
 
         .. note:: For tables built from a file, the version corresponds to that
         of the hep_rfm package used to create them, although the structure
-        corresponds to that of the current.
+        corresponds to that of the current. The information of the last update
+        is set to None for just created tables, and it is set only for tables
+        read from files.
 
         .. warning:: If a dictionary of files is provided in "files", then
         it is necessary for each key to be equal to the name of its related
@@ -219,9 +224,10 @@ class Table(dict):
         super(Table, self).__init__(files or {})
 
         self.description = description
+        self.last_update = last_update
         self.version     = version
 
-    @construct_from_fields(['description', 'files', 'version'], required=['files'])
+    @construct_from_fields(['description', 'files', 'last_update', 'version'], required=['files'])
     def from_fields( cls, **fields ):
         '''
         Build the class from a set of fields, which might or not
@@ -235,7 +241,7 @@ class Table(dict):
         return cls(**fields)
 
     @classmethod
-    def from_files( cls, files, description = None, version = __version__ ):
+    def from_files( cls, files, description = '', last_update = None, version = __version__ ):
         '''
         Build the class from a list of :class:`hep_rfm.FileInfo` instances.
         The names of the files are used as keys for the table.
@@ -244,10 +250,12 @@ class Table(dict):
         :type files: collection(FileInfo)
         :param description: string to explain the contents of the table.
         :type description: str
+        :param last_update: date and time of the last update of the table.
+        :type last_update: str
         :param version: version of this package used to create the table.
         :type version: str
         '''
-        return cls({f.name: f for f in files}, description, version)
+        return cls({f.name: f for f in files}, description, last_update, version)
 
     @classmethod
     def read( cls, path ):
@@ -308,7 +316,7 @@ class Table(dict):
         else:
             ufiles = tuple(self[f].updated() for f in files)
 
-        return self.__class__.from_files(ufiles, self.description, self.version)
+        return self.__class__.from_files(ufiles, self.description, self.last_update, self.version)
 
     def write( self, path ):
         '''
@@ -322,6 +330,7 @@ class Table(dict):
         dct = {
             'version'     : __version__,
             'description' : self.description,
+            'last_update' : str(datetime.datetime.now()),
             'files'       : {n: f.info() for n, f in sorted(self.items())},
         }
         with open(path, 'wt') as f:
