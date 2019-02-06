@@ -200,22 +200,26 @@ class Table(dict):
         Create a table storing the information about files.
 
         :param files: files to store in the table.
-        :type files: collection(FileInfo)
+        :type files: dict(str, FileInfo)
         :param description: string to explain the contents of the table.
         :type description: str
+        :param version: version of this package used to create the table.
+        :type version: str
+
+        .. note:: For tables built from a file, the version corresponds to that
+        of the hep_rfm package used to create them, although the structure
+        corresponds to that of the current.
+
+        .. warning:: If a dictionary of files is provided in "files", then
+        it is necessary for each key to be equal to the name of its related
+        file.
 
         .. seealso:: :class:`hep_rfm.Manager`, :func:`hep_rfm.copy_file`
         '''
-        super(Table, self).__init__()
-
-        if files is None:
-            files = []
+        super(Table, self).__init__(files or {})
 
         self.description = description
         self.version     = version
-
-        for f in files:
-            self[f.name] = f
 
     @construct_from_fields(['description', 'files', 'version'], required=['files'])
     def from_fields( cls, **fields ):
@@ -229,6 +233,21 @@ class Table(dict):
         :rtype: Table
         '''
         return cls(**fields)
+
+    @classmethod
+    def from_files( cls, files, description = None, version = __version__ ):
+        '''
+        Build the class from a list of :class:`hep_rfm.FileInfo` instances.
+        The names of the files are used as keys for the table.
+
+        :param files: files to store in the table.
+        :type files: collection(FileInfo)
+        :param description: string to explain the contents of the table.
+        :type description: str
+        :param version: version of this package used to create the table.
+        :type version: str
+        '''
+        return cls({f.name: f for f in files}, description, version)
 
     @classmethod
     def read( cls, path ):
@@ -249,11 +268,11 @@ class Table(dict):
             else:
                 fields = {}
 
-            fields['files'] = [FileInfo.from_fields(**fs) for fs in fields.get('files', {}).values()]
+            fields['files'] = {n: FileInfo.from_fields(**fs) for n, fs in fields.get('files', {}).items()}
 
         return cls.from_fields(**fields)
 
-    def updated( self, parallelize = False ):
+    def updated( self, files = None, parallelize = False ):
         '''
         Return an updated version of this table, checking again all the
         properties of the files within it.
@@ -265,12 +284,14 @@ class Table(dict):
         :returns: updated version of the table.
         :rtype: Table
         '''
+        files = tuple(files or self.keys())
+
         if parallelize:
 
             handler = JobHandler()
 
-            for f in self.values():
-                handler.put(f)
+            for f in files:
+                handler.put(self[f])
 
             func = lambda f, q: q.put(f.updated())
 
@@ -281,18 +302,19 @@ class Table(dict):
 
             handler.process()
 
-            output = [queue.get() for _ in range(len(self))]
+            ufiles = tuple(queue.get() for _ in range(len(files)))
 
             queue.close()
         else:
-            output = [f.updated() for f in self.values()]
+            ufiles = tuple(self[f].updated() for f in files)
 
-        return self.__class__(output)
+        return self.__class__.from_files(ufiles, self.description, self.version)
 
     def write( self, path ):
         '''
         Write this table in the following location.
         Must be a local path.
+        The current version of the package will be used.
 
         :param path: where to write this table to.
         :type path: str

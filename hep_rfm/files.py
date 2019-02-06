@@ -214,11 +214,7 @@ class FileMarks(FileMarksBase):
         :returns: :class:`FileMarks` instance.
         :rtype: FileMarks
         '''
-        tmstp = float(fields['tmstp'])
-
-        fid = fields['fid']
-
-        return cls(tmstp, fid)
+        return cls(**fields)
 
     @classmethod
     def from_local_path( cls, path ):

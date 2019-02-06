@@ -350,19 +350,7 @@ def update( table, nproc, regex ):
 
         m = re.compile(regex)
 
-        to_update, maintain = [], []
-        for n, f in t.items():
-            if m.match(n):
-                to_update.append(f)
-            else:
-                maintain.append(f)
-
-        t = hep_rfm.Table(to_update).updated(parallelize=nproc)
-        for f in maintain:
-            t[f.name] = f
-
-        t.write(table.path)
-
+        t.updated(files=filter(m.match, t), parallelize=nproc).write(table.path)
     else:
         t.updated(parallelize=nproc).write(table.path)
 

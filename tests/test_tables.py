@@ -22,7 +22,7 @@ def test_table():
         p1 = hep_rfm.FileInfo.from_name_and_path('f1', f1.name)
         p2 = hep_rfm.FileInfo.from_name_and_path('f2', f2.name)
 
-        table = hep_rfm.Table([p1, p2])
+        table = hep_rfm.Table.from_files([p1, p2])
 
         ut = table.updated()
         for k in ut:
@@ -58,7 +58,7 @@ def test_manager():
 
         table1_path = hep_rfm.protocol_path(os.path.join(d1, 'table.txt'))
 
-        hep_rfm.Table([f11, f12]).write(table1_path.path)
+        hep_rfm.Table.from_files([f11, f12]).write(table1_path.path)
 
         # Define the files for the second directory
         path21 = hep_rfm.protocol_path(os.path.join(d2, 'file1.txt'))
@@ -69,7 +69,7 @@ def test_manager():
 
         table2_path = hep_rfm.protocol_path(os.path.join(d2, 'table.txt'))
 
-        hep_rfm.Table([f21, f22]).write(table2_path.path)
+        hep_rfm.Table.from_files([f21, f22]).write(table2_path.path)
 
         # Create the manager, with the path to the two tables
         mgr = hep_rfm.Manager()
