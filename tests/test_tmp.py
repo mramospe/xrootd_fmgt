@@ -6,7 +6,7 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import pytest
+import os
 
 # Local
 import hep_rfm
@@ -17,7 +17,7 @@ def test_table_conversion( tmpdir ):
     '''
     Test the conversion of the old table schema to the new table schema.
     '''
-    source = 'tmp/old_style_table.db'
+    source = os.path.join(os.path.dirname(__file__), 'tmp/old_style_table.db')
     target = tmpdir.join('new_style_table.db')
 
     test_scripts.process('hep-rfm-old-table-to-new {} {}'.format(source, target))
