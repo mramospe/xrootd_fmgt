@@ -12,31 +12,35 @@ import pytest
 import hep_rfm
 
 
-def test_check_fields():
+def test_parse_fields():
     '''
-    Test the "check_fields" function.
+    Test the "parse_fields" function.
     '''
     fields = ['p1', 'p2']
 
+    defaults = {'p1': 1, 'p2': 2}
+
     # Check default behaviour
-    hep_rfm.fields.check_fields(fields, fields)
+    hep_rfm.fields.parse_fields(defaults, fields)
+
+    defaults.pop('p2')
 
     # Test with only one field required
-    hep_rfm.fields.check_fields(fields, ['p1'], required=['p1'])
+    hep_rfm.fields.parse_fields(defaults, fields, required=['p1'])
 
     # Test errors
     with pytest.raises(ValueError):
-        hep_rfm.fields.check_fields(fields, ['p1'])
+        hep_rfm.fields.parse_fields(defaults, fields)
 
     with pytest.raises(ValueError):
-        hep_rfm.fields.check_fields(fields, ['p1'], required=['p2'])
+        hep_rfm.fields.parse_fields(defaults, fields, required=['p2'])
 
 
-def test_check_function_fields():
+def test_function_with_fields():
     '''
-    Test the "check_function_fields" decorator.
+    Test the "function_with_fields" decorator.
     '''
-    @hep_rfm.fields.check_function_fields(['p1', 'p2'])
+    @hep_rfm.fields.function_with_fields(['p1', 'p2'])
     def function( p1, p2 ):
         ''' Function expecting two arguments '''
         pass

@@ -12,7 +12,7 @@ import os
 import subprocess
 
 # Local
-from hep_rfm.fields import check_function_fields
+from hep_rfm.fields import function_with_fields
 from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
 from hep_rfm.parallel import Registry
 
@@ -722,7 +722,7 @@ def protocol_path( path, protocol = None ):
             raise LookupError('Protocol with name "{}" is not registered or unknown'.format(protocol))
 
 
-@check_function_fields(['path', 'pid'])
+@function_with_fields(['path', 'pid'])
 def protocol_path_from_fields( **fields ):
     '''
     Return an instantiated protocol from a set of fields, which

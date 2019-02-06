@@ -8,7 +8,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 # Local
 from hep_rfm import protocols
 from hep_rfm.core import copy_file
-from hep_rfm.fields import check_fields
+from hep_rfm.fields import construct_from_fields
 from hep_rfm.files import FileInfo
 from hep_rfm.version import __version__
 from hep_rfm.parallel import JobHandler, Worker
@@ -217,6 +217,19 @@ class Table(dict):
         for f in files:
             self[f.name] = f
 
+    @construct_from_fields(['description', 'files', 'version'], required=['files'])
+    def from_fields( cls, **fields ):
+        '''
+        Build the class from a set of fields, which might or not
+        coincide with those in the class constructor.
+
+        :param fields: dictionary of fields to process.
+        :type fields: dict
+        :returns: built table.
+        :rtype: Table
+        '''
+        return cls(**fields)
+
     @classmethod
     def read( cls, path ):
         '''
@@ -232,19 +245,13 @@ class Table(dict):
             data = fi.read()
 
             if data:
-                dct = json.loads(data)
+                fields = json.loads(data)
             else:
-                dct = {}
+                fields = {}
 
-            check_fields(['description', 'files', 'version'], dct, required=['files'])
+            fields['files'] = [FileInfo.from_fields(**fs) for fs in fields.get('files', {}).values()]
 
-            description = dct.get('description', '')
-
-            version = dct.get('version', '')
-
-            files = [FileInfo.from_fields(**fs) for fs in dct.get('files', {}).values()]
-
-        return cls(files, description=description, version=version)
+        return cls.from_fields(**fields)
 
     def updated( self, parallelize = False ):
         '''
