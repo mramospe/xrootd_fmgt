@@ -212,12 +212,12 @@ def display( table, fields, regex ):
 
     logger.info('Running "{}" from {} {}'.format(os.path.basename(__file__), hep_rfm.__name__, hep_rfm.__version__))
 
+    logger.info('- Table created with {} {}'.format(hep_rfm.__name__, t.version))
+
     if t.description:
         logger.info('- Description:\n' + t.description)
 
     logger.info('- Last update: {}'.format(t.last_update))
-
-    logger.info('- Table created with {} {}'.format(hep_rfm.__name__, t.version))
 
     logger.info('- Contents:')
 
