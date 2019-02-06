@@ -8,6 +8,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 # Local
 from hep_rfm import core
 from hep_rfm import protocols
+from hep_rfm.fields import construct_from_fields
 
 # Python
 import os
@@ -92,7 +93,7 @@ class FileInfo(FileInfoBase):
 
         return getattr(obj, fi)
 
-    @classmethod
+    @construct_from_fields(['name', 'protocol_path', 'marks'])
     def from_fields( cls, **fields ):
         '''
         Build the class from a set of fields, which might or not
@@ -103,8 +104,6 @@ class FileInfo(FileInfoBase):
         :returns: :class:`FileInfo` instance.
         :rtype: FileInfo
         '''
-        core.parse_fields(cls._fields, fields)
-
         pp = protocols.protocol_path_from_fields(**fields['protocol_path'])
         mk = FileMarks.from_fields(**fields['marks'])
 
@@ -204,7 +203,7 @@ class FileMarks(FileMarksBase):
         '''
         return super(FileMarks, cls).__new__(cls, tmstp, fid)
 
-    @classmethod
+    @construct_from_fields(['tmstp', 'fid'])
     def from_fields( cls, **fields ):
         '''
         Build the class from a set of fields, which might or not
@@ -215,8 +214,6 @@ class FileMarks(FileMarksBase):
         :returns: :class:`FileMarks` instance.
         :rtype: FileMarks
         '''
-        core.parse_fields(['tmstp', 'fid'], fields)
-
         tmstp = float(fields['tmstp'])
 
         fid = fields['fid']

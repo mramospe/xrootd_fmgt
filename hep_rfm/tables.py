@@ -6,10 +6,11 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Local
-from hep_rfm import core
 from hep_rfm import protocols
-from hep_rfm.version import __version__
+from hep_rfm.core import copy_file
+from hep_rfm.fields import check_fields
 from hep_rfm.files import FileInfo
+from hep_rfm.version import __version__
 from hep_rfm.parallel import JobHandler, Worker
 
 # Python
@@ -104,7 +105,7 @@ class Manager(object):
             fpath = protocols.LocalPath(
                 os.path.join(tmp.name, 'table_{}.txt'.format(i)))
 
-            core.copy_file(n, fpath, **kwargs)
+            copy_file(n, fpath, **kwargs)
 
             tu = TableUpdater(n, fpath)
 
@@ -170,7 +171,7 @@ class Manager(object):
         # files and, in the last step, update the information in the tables.
         if parallelize:
 
-            func = lambda obj, **kwargs: core.copy_file(*obj, **kwargs)
+            func = lambda obj, **kwargs: copy_file(*obj, **kwargs)
 
             for lst in (sync_files, sync_tables):
 
@@ -189,7 +190,7 @@ class Manager(object):
                 handler.process()
         else:
             for i in sync_files + sync_tables:
-                core.copy_file(*i, **kwargs)
+                copy_file(*i, **kwargs)
 
 
 class Table(dict):
@@ -235,7 +236,7 @@ class Table(dict):
             else:
                 dct = {}
 
-            core.parse_fields(['description', 'files', 'version'], dct, required=['files'])
+            check_fields(['description', 'files', 'version'], dct, required=['files'])
 
             description = dct.get('description', '')
 
