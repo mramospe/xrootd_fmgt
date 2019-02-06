@@ -1,4 +1,0 @@
-file0	/path/to/file0.txt local	0	none
-file1	/path/to/file1.txt local	0	none
-file2	@host:/path/to/file2.txt	ssh	0	none
-file3	root://my-site//file3.txt	xrootd	0	none

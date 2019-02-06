@@ -17,8 +17,14 @@ def test_table_conversion( tmpdir ):
     '''
     Test the conversion of the old table schema to the new table schema.
     '''
-    source = os.path.join(os.path.dirname(__file__), 'tmp/old_style_table.db')
+    source = tmpdir.join('old_style_table.db')
     target = tmpdir.join('new_style_table.db')
+
+    with open(source, 'wt') as f:
+        f.write('file0 /path/to/file0.txt        local  0 none\n')
+        f.write('file1 /path/to/file1.txt        local  0 none\n')
+        f.write('file2 @host:/path/to/file2.txt  ssh    0 none\n')
+        f.write('file3 root://my-site//file3.txt xrootd 0 none\n')
 
     test_scripts.process('hep-rfm-old-table-to-new {} {}'.format(source, target))
 
