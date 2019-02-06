@@ -13,7 +13,7 @@ import tempfile
 import hep_rfm
 
 
-def test_table():
+def test_table( tmpdir ):
     '''
     Test function for the "Table" class.
     '''
@@ -28,69 +28,68 @@ def test_table():
         for k in ut:
             assert ut[k] == table[k]
 
-    with tempfile.TemporaryDirectory() as d:
+    path = hep_rfm.protocol_path(tmpdir.join('table.txt').strpath)
 
-        path = hep_rfm.protocol_path(os.path.join(d, 'table.txt'))
+    table.write(path.path)
 
-        table.write(path.path)
+    read_table = hep_rfm.Table.read(path.path)
 
-        read_table = hep_rfm.Table.read(path.path)
-
-        for k in table:
-            assert table[k] == read_table[k]
+    for k in table:
+        assert table[k] == read_table[k]
 
 
-def test_manager():
+def test_manager( tmpdir ):
     '''
     Test function for the "Manager" class.
     '''
-    with tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+    d1 = tmpdir.mkdir('d1')
+    d2 = tmpdir.mkdir('d2')
 
-        # Create two files in the first directory, together with a table
-        path11 = os.path.join(d1, 'file1.txt')
-        path12 = os.path.join(d1, 'file2.txt')
+    # Create two files in the first directory, together with a table
+    path11 = os.path.join(d1.strpath, 'file1.txt')
+    path12 = os.path.join(d1.strpath, 'file2.txt')
 
-        for p in (path11, path12):
-            open(p, 'w')
+    for p in (path11, path12):
+        open(p, 'w')
 
-        f11 = hep_rfm.FileInfo.from_name_and_path('f1', path11)
-        f12 = hep_rfm.FileInfo.from_name_and_path('f2', path12)
+    f11 = hep_rfm.FileInfo.from_name_and_path('f1', path11)
+    f12 = hep_rfm.FileInfo.from_name_and_path('f2', path12)
 
-        table1_path = hep_rfm.protocol_path(os.path.join(d1, 'table.txt'))
+    table1_path = hep_rfm.protocol_path(os.path.join(d1.strpath, 'table.txt'))
 
-        hep_rfm.Table.from_files([f11, f12]).write(table1_path.path)
+    hep_rfm.Table.from_files([f11, f12]).write(table1_path.path)
 
-        # Define the files for the second directory
-        path21 = hep_rfm.protocol_path(os.path.join(d2, 'file1.txt'))
-        path22 = hep_rfm.protocol_path(os.path.join(d2, 'file2.txt'))
+    # Define the files for the second directory
+    path21 = hep_rfm.protocol_path(os.path.join(d2.strpath, 'file1.txt'))
+    path22 = hep_rfm.protocol_path(os.path.join(d2.strpath, 'file2.txt'))
 
-        f21 = hep_rfm.FileInfo('f1', path21)
-        f22 = hep_rfm.FileInfo('f2', path22)
+    f21 = hep_rfm.FileInfo('f1', path21)
+    f22 = hep_rfm.FileInfo('f2', path22)
 
-        table2_path = hep_rfm.protocol_path(os.path.join(d2, 'table.txt'))
+    table2_path = hep_rfm.protocol_path(os.path.join(d2.strpath, 'table.txt'))
 
-        hep_rfm.Table.from_files([f21, f22]).write(table2_path.path)
+    hep_rfm.Table.from_files([f21, f22]).write(table2_path.path)
 
-        # Create the manager, with the path to the two tables
-        mgr = hep_rfm.Manager()
-        mgr.add_table(table1_path.path)
-        mgr.add_table(table2_path.path)
-        mgr.update()
+    # Create the manager, with the path to the two tables
+    mgr = hep_rfm.Manager()
+    mgr.add_table(table1_path.path)
+    mgr.add_table(table2_path.path)
+    mgr.update()
 
-        # Now the file IDs of both tables must coincide
-        t1 = hep_rfm.Table.read(table1_path.path)
-        t2 = hep_rfm.Table.read(table2_path.path)
+    # Now the file IDs of both tables must coincide
+    t1 = hep_rfm.Table.read(table1_path.path)
+    t2 = hep_rfm.Table.read(table2_path.path)
 
-        for k in t1:
-            # Only the name and file IDs must coincide
-            f1, f2 = t1[k], t2[k]
+    for k in t1:
+        # Only the name and file IDs must coincide
+        f1, f2 = t1[k], t2[k]
 
-            assert f1.name == k
-            assert f1.name == f2.name
-            assert f1.marks.fid == f2.marks.fid
+        assert f1.name == k
+        assert f1.name == f2.name
+        assert f1.marks.fid == f2.marks.fid
 
-        # It should return the first one
-        t = hep_rfm.Table.read(mgr.available_table())
+    # It should return the first one
+    t = hep_rfm.Table.read(mgr.available_table())
 
-        assert 'f1' in t
-        assert 'f2' in t
+    assert 'f1' in t
+    assert 'f2' in t
