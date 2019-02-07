@@ -173,6 +173,7 @@ def test_hep_rfm_table_general( tmpdir, table_path, files ):
         'hep-rfm-table update {}'.format(table_path),
         'hep-rfm-table remove {} --files {} {}'.format(table_path, 'file1', 'file2'),
         'hep-rfm-table remove {} --regex {}'.format(table_path, 'file(3|4)'),
+        'hep-rfm-table update_data_fields {} --description {}'.format(table_path, 'Table'),
         'hep-rfm-table display {}'.format(table_path),
         )
 

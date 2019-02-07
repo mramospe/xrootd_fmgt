@@ -6,12 +6,16 @@ __author__ = ['Miguel Ramos Pernas']
 __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Local
-from hep_rfm import core
 from hep_rfm import protocols
+from hep_rfm.core import copy_file
+from hep_rfm.fields import construct_from_fields
 from hep_rfm.files import FileInfo
+from hep_rfm.version import __version__
 from hep_rfm.parallel import JobHandler, Worker
 
 # Python
+import datetime
+import json
 import logging
 import multiprocessing
 import os
@@ -102,7 +106,7 @@ class Manager(object):
             fpath = protocols.LocalPath(
                 os.path.join(tmp.name, 'table_{}.txt'.format(i)))
 
-            core.copy_file(n, fpath, **kwargs)
+            copy_file(n, fpath, **kwargs)
 
             tu = TableUpdater(n, fpath)
 
@@ -168,7 +172,7 @@ class Manager(object):
         # files and, in the last step, update the information in the tables.
         if parallelize:
 
-            func = lambda obj, **kwargs: core.copy_file(*obj, **kwargs)
+            func = lambda obj, **kwargs: copy_file(*obj, **kwargs)
 
             for lst in (sync_files, sync_tables):
 
@@ -187,24 +191,80 @@ class Manager(object):
                 handler.process()
         else:
             for i in sync_files + sync_tables:
-                core.copy_file(*i, **kwargs)
+                copy_file(*i, **kwargs)
 
 
 class Table(dict):
 
-    def __init__( self, files ):
+    def __init__( self, files = None, description = '', last_update = None, version = None ):
         '''
         Create a table storing the information about files.
 
         :param files: files to store in the table.
-        :type files: collection(FileInfo)
+        :type files: dict(str, FileInfo)
+        :param description: string to explain the contents of the table.
+        :type description: str
+        :param last_update: date and time of the last update of the table.
+        :type last_update: str
+        :param version: version of this package used to create the table.
+        :type version: str
+
+        :ivar description: string with a description of the values contained \
+        in the table.
+        :ivar last_update: data and time of the last update done to the \
+        table. The value is only filled for tables read from a file. If the \
+        table is created from scratch, then it is set to None.
+        :ivar version: version of the package used to create the table. The \
+        value is only filled for tables read from a file. If the table is \
+        created from scratch, then it is set to None.
+
+        .. note:: For tables built from a file, the version corresponds to that
+           of the hep_rfm package used to create them, although the structure
+           corresponds to that of the current. The information of the last update
+           is set to None for just created tables, and it is set only for tables
+           read from files.
+
+        .. warning:: If a dictionary of files is provided in "files", then
+           it is necessary for each key to be equal to the name of its related
+           file.
 
         .. seealso:: :class:`hep_rfm.Manager`, :func:`hep_rfm.copy_file`
         '''
-        super(Table, self).__init__()
+        super(Table, self).__init__(files or {})
 
-        for f in files:
-            self[f.name] = f
+        self.description = description
+        self.last_update = last_update
+        self.version     = version
+
+    @construct_from_fields(['description', 'files', 'last_update', 'version'], required=['files'])
+    def from_fields( cls, **fields ):
+        '''
+        Build the class from a set of fields, which might or not
+        coincide with those in the class constructor.
+
+        :param fields: dictionary of fields to process.
+        :type fields: dict
+        :returns: built table.
+        :rtype: Table
+        '''
+        return cls(**fields)
+
+    @classmethod
+    def from_files( cls, files, description = '', last_update = None, version = None ):
+        '''
+        Build the class from a list of :class:`hep_rfm.FileInfo` instances.
+        The names of the files are used as keys for the table.
+
+        :param files: files to store in the table.
+        :type files: collection(FileInfo)
+        :param description: string to explain the contents of the table.
+        :type description: str
+        :param last_update: date and time of the last update of the table.
+        :type last_update: str
+        :param version: version of this package used to create the table.
+        :type version: str
+        '''
+        return cls({f.name: f for f in files}, description, last_update, version)
 
     @classmethod
     def read( cls, path ):
@@ -216,18 +276,20 @@ class Table(dict):
         :returns: built table.
         :rtype: Table
         '''
-        files = []
         with open(path, 'rt') as fi:
 
-            for l in fi:
+            data = fi.read()
 
-                fp = FileInfo.from_stream_line(l)
+            if data:
+                fields = json.loads(data)
+            else:
+                fields = {}
 
-                files.append(fp)
+            fields['files'] = {n: FileInfo.from_fields(**fs) for n, fs in fields.get('files', {}).items()}
 
-        return cls(files)
+        return cls.from_fields(**fields)
 
-    def updated( self, parallelize = False ):
+    def updated( self, files = None, parallelize = False ):
         '''
         Return an updated version of this table, checking again all the
         properties of the files within it.
@@ -239,12 +301,14 @@ class Table(dict):
         :returns: updated version of the table.
         :rtype: Table
         '''
+        files = tuple(files or self.keys())
+
         if parallelize:
 
             handler = JobHandler()
 
-            for f in self.values():
-                handler.put(f)
+            for f in files:
+                handler.put(self[f])
 
             func = lambda f, q: q.put(f.updated())
 
@@ -255,33 +319,31 @@ class Table(dict):
 
             handler.process()
 
-            output = [queue.get() for _ in range(len(self))]
+            ufiles = tuple(queue.get() for _ in range(len(files)))
 
             queue.close()
         else:
-            output = [f.updated() for f in self.values()]
+            ufiles = tuple(self[f].updated() for f in files)
 
-        return self.__class__(output)
+        return self.__class__.from_files(ufiles, self.description, self.last_update, self.version)
 
     def write( self, path ):
         '''
         Write this table in the following location.
         Must be a local path.
+        The current version of the package will be used.
 
         :param path: where to write this table to.
         :type path: str
         '''
-        with open(path, 'wt') as fo:
-            for _, f in sorted(self.items()):
-
-                info = f.info()
-
-                frmt = '{}'
-                for i in range(len(info) - 1):
-                    frmt += '\t{}'
-                frmt += '\n'
-
-                fo.write(frmt.format(*info))
+        dct = {
+            'version'     : __version__,
+            'description' : self.description,
+            'last_update' : str(datetime.datetime.now()),
+            'files'       : {n: f.info() for n, f in sorted(self.items())},
+        }
+        with open(path, 'wt') as f:
+            f.write(json.dumps(dct, indent=4, sort_keys=True))
 
 
 class TableUpdater(object):

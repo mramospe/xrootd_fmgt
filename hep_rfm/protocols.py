@@ -12,6 +12,7 @@ import os
 import subprocess
 
 # Local
+from hep_rfm.fields import function_with_fields
 from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
 from hep_rfm.parallel import Registry
 
@@ -452,7 +453,6 @@ class SSHPath(RemotePath):
         The input dictionary "modifiers" might contain information about the
         user-name for the host in the stored path.
         The allowed keys for this dictionary are:
-
         - "ssh_hosts": list containing the hosts accessible from the place
         where the operation is being done. If the path stored in this class
         has a host that coincides with any of those here specified, it will
@@ -570,7 +570,6 @@ class XRootDPath(RemotePath):
         The input dictionary "modifiers" might contain information about the
         user-name for the host in the stored path.
         The allowed keys for this dictionary are:
-
         - "xrootd_servers": list containing the XRootD servers accessible from
         the place where the operation is being done. If the path stored in this
         class has a host that coincides with any of those here specified, it
@@ -712,13 +711,29 @@ def protocol_path( path, protocol = None ):
     :returns: protocol associated to the given path.
     :rtype: ProtocolPath
     '''
-    if protocol == None:
+    if protocol is None:
         return LocalPath(path)
     else:
         if protocol in ProtocolPath.__protocols__:
             return ProtocolPath.__protocols__[protocol](path)
         else:
             raise LookupError('Protocol with name "{}" is not registered or unknown'.format(protocol))
+
+
+@function_with_fields(['path', 'pid'])
+def protocol_path_from_fields( **fields ):
+    '''
+    Return an instantiated protocol from a set of fields, which
+    might or not coincide with those in the class constructor.
+
+    :param fields: fields to process.
+    :type fields: dict
+    :returns: protocol associated to the given path.
+    :rtype: ProtocolPath
+
+    .. seealso:: :func:`hep_rfm.protocol_path`
+    '''
+    return protocol_path(fields['path'], fields['pid'])
 
 
 def remote_protocol( a, b ):

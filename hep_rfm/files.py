@@ -8,6 +8,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 # Local
 from hep_rfm import core
 from hep_rfm import protocols
+from hep_rfm.fields import construct_from_fields
 
 # Python
 import os
@@ -48,7 +49,7 @@ for c in (FileMarksBase, FileInfoBase):
 
 class FileInfo(FileInfoBase):
 
-    __fields__ = ('name', 'path', 'pid', 'tmstp', 'fid')
+    __direct_access_fields__ = ('name', 'path', 'pid', 'tmstp', 'fid')
 
     def __new__( cls, name, protocol_path, marks = None ):
         '''
@@ -88,25 +89,25 @@ class FileInfo(FileInfoBase):
         elif fi in ('tmstp', 'fid'):
             obj = self.marks
         else:
-            raise ValueError('Unrecognized field "{}". Choose between {}.'.format(self.__fields__))
+            raise ValueError('Unrecognized field "{}". Choose between {}.'.format(self.__direct_access_fields__))
 
         return getattr(obj, fi)
 
-    @classmethod
-    def from_stream_line( cls, line ):
+    @construct_from_fields(['name', 'protocol_path', 'marks'])
+    def from_fields( cls, **fields ):
         '''
-        Build the class from a line read from a table file.
+        Build the class from a set of fields, which might or not
+        coincide with those in the class constructor.
 
-        :param line: line to read.
-        :type line: str
+        :param fields: dictionary of fields to process.
+        :type fields: dict
         :returns: :class:`FileInfo` instance.
         :rtype: FileInfo
         '''
-        name, path, pid, tmstp, fid = line.split()
+        pp = protocols.protocol_path_from_fields(**fields['protocol_path'])
+        mk = FileMarks.from_fields(**fields['marks'])
 
-        pp = protocols.protocol_path(path, pid)
-
-        return cls(name, pp, FileMarks(float(tmstp), fid))
+        return cls(fields['name'], pp, mk)
 
     @classmethod
     def from_name_and_path( cls, name, path, protocol = None ):
@@ -141,7 +142,9 @@ class FileInfo(FileInfoBase):
         :returns: tuple with the information of this class
         :rtype: tuple(str, str, str, str)
         '''
-        return (self.name, self.protocol_path.path, self.protocol_path.pid, self.marks.tmstp, self.marks.fid)
+        pp = {'path': self.protocol_path.path, 'pid': self.protocol_path.pid}
+        mk = {'tmstp': self.marks.tmstp, 'fid': self.marks.fid}
+        return {'name': self.name, 'protocol_path': pp, 'marks': mk}
 
     def is_bare( self ):
         '''
@@ -199,6 +202,19 @@ class FileMarks(FileMarksBase):
         .. seealso:: :class:`hep_rfm.FileInfo`
         '''
         return super(FileMarks, cls).__new__(cls, tmstp, fid)
+
+    @construct_from_fields(['tmstp', 'fid'])
+    def from_fields( cls, **fields ):
+        '''
+        Build the class from a set of fields, which might or not
+        coincide with those in the class constructor.
+
+        :param fields: dictionary of fields to process.
+        :type fields: dict
+        :returns: :class:`FileMarks` instance.
+        :rtype: FileMarks
+        '''
+        return cls(**fields)
 
     @classmethod
     def from_local_path( cls, path ):

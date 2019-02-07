@@ -14,22 +14,19 @@ import tempfile
 import hep_rfm
 
 
-def test_copy_file():
+def test_copy_file( tmpdir ):
     '''
     Tests for the "copy_file" function.
     '''
-    with tempfile.TemporaryDirectory() as td:
+    p1 = tmpdir.join('file1.txt')
+    p2 = tmpdir.join('file2.txt')
 
-        p1 = os.path.join(td, 'file1.txt')
-        p2 = os.path.join(td, 'file2.txt')
+    p1.write('something')
 
-        with open(p1, 'wt') as f1:
-            f1.write('something')
+    pp1 = hep_rfm.protocol_path(p1.strpath)
+    pp2 = hep_rfm.protocol_path(p2.strpath)
 
-        pp1 = hep_rfm.protocol_path(p1)
-        pp2 = hep_rfm.protocol_path(p2)
-
-        hep_rfm.copy_file(pp1, pp2, wdir=td)
+    hep_rfm.copy_file(pp1, pp2, wdir=tmpdir.strpath)
 
     source = hep_rfm.protocol_path('non-existing-source')
     target = hep_rfm.protocol_path('non-existing-target')
