@@ -453,7 +453,6 @@ class SSHPath(RemotePath):
         The input dictionary "modifiers" might contain information about the
         user-name for the host in the stored path.
         The allowed keys for this dictionary are:
-
         - "ssh_hosts": list containing the hosts accessible from the place
         where the operation is being done. If the path stored in this class
         has a host that coincides with any of those here specified, it will
@@ -571,7 +570,6 @@ class XRootDPath(RemotePath):
         The input dictionary "modifiers" might contain information about the
         user-name for the host in the stored path.
         The allowed keys for this dictionary are:
-
         - "xrootd_servers": list containing the XRootD servers accessible from
         the place where the operation is being done. If the path stored in this
         class has a host that coincides with any of those here specified, it

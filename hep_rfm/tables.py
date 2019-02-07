@@ -196,7 +196,7 @@ class Manager(object):
 
 class Table(dict):
 
-    def __init__( self, files = None, description = '', last_update = None, version = __version__ ):
+    def __init__( self, files = None, description = '', last_update = None, version = None ):
         '''
         Create a table storing the information about files.
 
@@ -209,15 +209,24 @@ class Table(dict):
         :param version: version of this package used to create the table.
         :type version: str
 
+        :ivar description: string with a description of the values contained \
+        in the table.
+        :ivar last_update: data and time of the last update done to the \
+        table. The value is only filled for tables read from a file. If the \
+        table is created from scratch, then it is set to None.
+        :ivar version: version of the package used to create the table. The \
+        value is only filled for tables read from a file. If the table is \
+        created from scratch, then it is set to None.
+
         .. note:: For tables built from a file, the version corresponds to that
-        of the hep_rfm package used to create them, although the structure
-        corresponds to that of the current. The information of the last update
-        is set to None for just created tables, and it is set only for tables
-        read from files.
+           of the hep_rfm package used to create them, although the structure
+           corresponds to that of the current. The information of the last update
+           is set to None for just created tables, and it is set only for tables
+           read from files.
 
         .. warning:: If a dictionary of files is provided in "files", then
-        it is necessary for each key to be equal to the name of its related
-        file.
+           it is necessary for each key to be equal to the name of its related
+           file.
 
         .. seealso:: :class:`hep_rfm.Manager`, :func:`hep_rfm.copy_file`
         '''
@@ -241,7 +250,7 @@ class Table(dict):
         return cls(**fields)
 
     @classmethod
-    def from_files( cls, files, description = '', last_update = None, version = __version__ ):
+    def from_files( cls, files, description = '', last_update = None, version = None ):
         '''
         Build the class from a list of :class:`hep_rfm.FileInfo` instances.
         The names of the files are used as keys for the table.

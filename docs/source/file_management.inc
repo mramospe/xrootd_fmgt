@@ -12,7 +12,7 @@ In the local host we can do it by writing
 
    >>> import hep_rfm
    >>> table = hep_rfm.Table.read('/home/user/rfm/table.db')
-   >>> sorted(table.keys())
+   >>> list(sorted(table.keys()))
    ['file1', 'file2', 'file3', 'file4', 'file5', 'file6']
    >>> table['file1']
    FileInfo(name='file1', protocol_path=LocalPath(path='/home/user/rfm/files/file1.txt'), marks=FileMarks(tmstp=1540986365.8954208, fid='202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b'))
@@ -47,7 +47,7 @@ from there.
 .. code-block:: python
 
    >>> table = mgr.available_table()
-   >>> table.keys()
+   >>> list(sorted(table.keys()))
    ['file1', 'file2', 'file3', 'file4', 'file5', 'file6']
    >>> hep_rfm.available_working_path(table['file1'])
    /home/user/rfm/files/file1.txt
