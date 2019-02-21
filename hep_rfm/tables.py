@@ -20,6 +20,7 @@ import logging
 import multiprocessing
 import os
 import tempfile
+import warnings
 
 
 __all__ = ['Table', 'Manager']
@@ -334,7 +335,7 @@ class Table(dict):
 
         return self.__class__.from_files(ufiles, self.description, self.last_update, self.version)
 
-    def write( self, path ):
+    def write( self, path, backup = False ):
         '''
         Write this table in the following location.
         Must be a local path.
@@ -342,6 +343,13 @@ class Table(dict):
 
         :param path: where to write this table to.
         :type path: str
+        :param backup: if a table in "path" already exists and this \
+        argument is set to True, then the previous file is renamed \
+        to <filename>.backup before modifying it. If it is set to \
+        a string, then that is used as file name to write the backup.
+        :type backup: bool or str
+        :raises IOError: if the output path exists and it does not correspond \
+        to a file.
         '''
         dct = {
             'version'     : __version__,
@@ -349,6 +357,21 @@ class Table(dict):
             'last_update' : str(datetime.datetime.now()),
             'files'       : {n: f.info() for n, f in sorted(self.items())},
         }
+
+        if os.path.exists(path) and not os.path.isfile(path):
+            raise IOError('Attempt to write a table to an existing path not corresponding to a file.')
+
+        if backup:
+            if not os.path.exists(path):
+                warnings.warn('No previous table is present in the given path; backup has not been generated', Warning)
+            else:
+                if backup is True:
+                    backup_name = path + '.backup'
+                else:
+                    backup_name = backup
+
+                os.rename(path, backup_name)
+
         with open(path, 'wt') as f:
             f.write(json.dumps(dct, indent=4, sort_keys=True))
 

@@ -7,6 +7,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
 import os
+import pytest
 import tempfile
 
 # Local
@@ -53,6 +54,21 @@ def test_table( tmpdir ):
 
     for k in table:
         assert table[k] == read_table[k]
+
+    # Test generating a backup of a table
+    table.write(path.path, backup=True)
+    assert os.path.isfile(path.path + '.backup')
+    backup_filename = os.path.join(os.path.dirname(path.path), 'backup')
+    table.write(path.path, backup=backup_filename)
+    assert os.path.isfile(backup_filename)
+
+    # Test warnings
+    with pytest.warns(Warning):
+        table.write(tmpdir.join('other_path.tb'), backup=True)
+
+    # Test errors raised
+    with pytest.raises(IOError):
+        table.write(tmpdir.mkdir('other'))
 
 
 def test_manager( tmpdir ):
