@@ -37,8 +37,9 @@ def test_table( tmpdir ):
 
     # Test that the "updated" method updates the required files while
     # keeping the status of the others.
-    with open(f2.strpath, 'at') as s:
-        s.write('second line\n')
+    for f in (f1, f2):
+        with open(f.strpath, 'at') as s:
+            s.write('second line\n')
 
     ut = table.updated(files=['f2'])
 
