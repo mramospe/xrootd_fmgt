@@ -64,11 +64,11 @@ def test_table( tmpdir ):
 
     # Test warnings
     with pytest.warns(Warning):
-        table.write(tmpdir.join('other_path.tb'), backup=True)
+        table.write(tmpdir.join('other_path.tb').strpath, backup=True)
 
     # Test errors raised
     with pytest.raises(IOError):
-        table.write(tmpdir.mkdir('other'))
+        table.write(tmpdir.mkdir('other').strpath)
 
 
 def test_manager( tmpdir ):
