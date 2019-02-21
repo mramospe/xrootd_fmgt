@@ -17,17 +17,34 @@ def test_table( tmpdir ):
     '''
     Test function for the "Table" class.
     '''
-    with tempfile.NamedTemporaryFile() as f1, tempfile.NamedTemporaryFile() as f2:
+    # Test the construction of a table
+    f1 = tmpdir.join('f1.txt')
+    f2 = tmpdir.join('f2.txt')
 
-        p1 = hep_rfm.FileInfo.from_name_and_path('f1', f1.name)
-        p2 = hep_rfm.FileInfo.from_name_and_path('f2', f2.name)
+    for f in (f1, f2):
+        with open(f.strpath, 'wt') as s:
+            s.write('first line\n')
 
-        table = hep_rfm.Table.from_files([p1, p2])
+    p1 = hep_rfm.FileInfo.from_name_and_path('f1', f1.strpath)
+    p2 = hep_rfm.FileInfo.from_name_and_path('f2', f2.strpath)
 
-        ut = table.updated()
-        for k in ut:
-            assert ut[k] == table[k]
+    table = hep_rfm.Table.from_files([p1, p2])
 
+    ut = table.updated()
+    for k in ut:
+        assert ut[k] == table[k]
+
+    # Test that the "updated" method updates the required files while
+    # keeping the status of the others.
+    with open(f2.strpath, 'at') as s:
+        s.write('second line\n')
+
+    ut = table.updated(files=['f2'])
+
+    assert ut['f1'] == p1
+    assert ut['f2'] != p2
+
+    # Test that a written table is then correctly read
     path = hep_rfm.protocol_path(tmpdir.join('table.txt').strpath)
 
     table.write(path.path)

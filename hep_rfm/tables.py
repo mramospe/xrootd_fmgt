@@ -294,6 +294,10 @@ class Table(dict):
         Return an updated version of this table, checking again all the
         properties of the files within it.
 
+        :param files: files to update within the table. The returned table \
+        will contain the same entries as the parent, but with the files \
+        specified in "files" updated.
+        :type files: collection(str)
         :param parallelize: number of processes allowed to parallelize the \
         synchronization of all the proxies. By default it is set to 0, so no \
         parallelization  is done.
@@ -324,6 +328,9 @@ class Table(dict):
             queue.close()
         else:
             ufiles = tuple(self[f].updated() for f in files)
+
+        # We must add the rest of the files in case "files" is provided
+        ufiles += tuple(self[f] for f in set(self.keys()).difference(files))
 
         return self.__class__.from_files(ufiles, self.description, self.last_update, self.version)
 
