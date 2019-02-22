@@ -178,7 +178,7 @@ def test_hep_rfm_table_general( tmpdir, table_path, files ):
         'hep-rfm-table update-data-fields {} --description {}'.format(table_path, 'Table'),
         'hep-rfm-table display {}'.format(table_path),
         'hep-rfm-table add {} {} {} --backup'.format(table_path, 'file3', files['file3']),
-        'hep-rfm-table add {} {} {} --backup-name {}'.format(table_path, 'file4', files['file4'], backup),
+        'hep-rfm-table add {} {} {} --backup-path {}'.format(table_path, 'file4', files['file4'], backup),
         'hep-rfm-table remove {} --regex {}'.format(table_path, 'file(1|2|3|4)'),
         )
 

@@ -479,13 +479,16 @@ if __name__ == '__main__':
               parser_update,
               parser_update_data_fields):
         p.add_argument('--backup', action='store_true',
-                       help='Whether to create backup file to for the '\
-                       'previous table.')
-        p.add_argument('--backup-name', type=str, default=None,
-                       help='If no name is provided but --backup is added '\
-                       'as an argument, the name of the backup table will '\
-                       'be <file name>.backup, where the name of the previous '\
-                       'table will be used.')
+                       help='Whether to create a backup file for the '\
+                       'previous table. If it is added as an argument, '\
+                       'the name of the backup table will be '\
+                       '<file name>.backup, where the name of the previous '\
+                       'table will be used. To modify the path to the '\
+                       'backup file, use the --backup-path argument.')
+        p.add_argument('--backup-path', type=str, default=None,
+                       help='Possible path to a backup file to be created. It '\
+                       'is not necessary to add "backup" as an argument if '\
+                       'the former is provided.')
 
     # Parse the arguments and call the function
     args = parser.parse_args()
@@ -494,8 +497,8 @@ if __name__ == '__main__':
 
     # If a backup name is provided, it is passed to the calling function
     # as "backup"
-    if 'backup_name' in dct:
-        n = dct.pop('backup_name')
+    if 'backup_path' in dct:
+        n = dct.pop('backup_path')
         if n is not None:
             dct['backup'] = n
 
