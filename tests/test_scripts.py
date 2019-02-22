@@ -99,7 +99,7 @@ def with_table_filled( func ):
         '''
         Internal wrapper.
         '''
-        process('hep-rfm-table add_from_dir {} {}'.format(table_path, tmpdir))
+        process('hep-rfm-table add-from-dir {} {}'.format(table_path, tmpdir))
 
         func(tmpdir, table_path, files)
 
@@ -142,7 +142,7 @@ def test_hep_rfm_table_from_dir( tmpdir, table_path, files ):
     directory.
     '''
     # Add files in directory filtering by regular expression
-    process('hep-rfm-table add_from_dir {} {} --regex .*.txt$'.format(table_path, tmpdir))
+    process('hep-rfm-table add-from-dir {} {} --regex .*.txt$'.format(table_path, tmpdir))
 
     table = hep_rfm.Table.read(table_path.strpath)
 
@@ -153,7 +153,7 @@ def test_hep_rfm_table_from_dir( tmpdir, table_path, files ):
     assert len(table) == 7
 
     # Add all files in the sub-directory
-    process('hep-rfm-table add_from_dir {} {}'.format(table_path, tmpdir.join('subdir')))
+    process('hep-rfm-table add-from-dir {} {}'.format(table_path, tmpdir.join('subdir')))
 
     table = hep_rfm.Table.read(table_path.strpath)
 
@@ -171,11 +171,11 @@ def test_hep_rfm_table_general( tmpdir, table_path, files ):
         'hep-rfm-table create {}'.format(table_path),
         'hep-rfm-table add {} {} {}'.format(table_path, 'file1', files['file1']),
         'hep-rfm-table add {} {} {} --bare'.format(table_path, 'file2', files['file2']),
-        'hep-rfm-table add_massive {} {} {}'.format(table_path, files['file3'], files['file4']),
+        'hep-rfm-table add-massive {} {} {}'.format(table_path, files['file3'], files['file4']),
         'hep-rfm-table update {}'.format(table_path),
         'hep-rfm-table remove {} --files {} {}'.format(table_path, 'file1', 'file2'),
         'hep-rfm-table remove {} --regex {}'.format(table_path, 'file(3|4)'),
-        'hep-rfm-table update_data_fields {} --description {}'.format(table_path, 'Table'),
+        'hep-rfm-table update-data-fields {} --description {}'.format(table_path, 'Table'),
         'hep-rfm-table display {}'.format(table_path),
         'hep-rfm-table add {} {} {} --backup'.format(table_path, 'file3', files['file3']),
         'hep-rfm-table add {} {} {} --backup-name {}'.format(table_path, 'file4', files['file4'], backup),
