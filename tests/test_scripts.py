@@ -165,6 +165,8 @@ def test_hep_rfm_table_general( tmpdir, table_path, files ):
     '''
     Test basic modes of the "hep-rfm-table" script.
     '''
+    backup = tmpdir.join('table.backup').strpath
+
     cmds = (
         'hep-rfm-table create {}'.format(table_path),
         'hep-rfm-table add {} {} {}'.format(table_path, 'file1', files['file1']),
@@ -175,10 +177,16 @@ def test_hep_rfm_table_general( tmpdir, table_path, files ):
         'hep-rfm-table remove {} --regex {}'.format(table_path, 'file(3|4)'),
         'hep-rfm-table update_data_fields {} --description {}'.format(table_path, 'Table'),
         'hep-rfm-table display {}'.format(table_path),
+        'hep-rfm-table add {} {} {} --backup'.format(table_path, 'file3', files['file3']),
+        'hep-rfm-table add {} {} {} --backup-name {}'.format(table_path, 'file4', files['file4'], backup),
+        'hep-rfm-table remove {} --regex {}'.format(table_path, 'file(1|2|3|4)'),
         )
 
     for c in cmds:
         p = process(c)
+
+    assert os.path.isfile(table_path.strpath + '.backup')
+    assert os.path.isfile(backup)
 
     table = hep_rfm.Table.read(table_path.strpath)
 
