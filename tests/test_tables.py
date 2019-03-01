@@ -7,6 +7,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
 import os
+import pytest
 import tempfile
 
 # Local
@@ -36,8 +37,9 @@ def test_table( tmpdir ):
 
     # Test that the "updated" method updates the required files while
     # keeping the status of the others.
-    with open(f2.strpath, 'at') as s:
-        s.write('second line\n')
+    for f in (f1, f2):
+        with open(f.strpath, 'at') as s:
+            s.write('second line\n')
 
     ut = table.updated(files=['f2'])
 
@@ -53,6 +55,21 @@ def test_table( tmpdir ):
 
     for k in table:
         assert table[k] == read_table[k]
+
+    # Test generating a backup of a table
+    table.write(path.path, backup=True)
+    assert os.path.isfile(path.path + '.backup')
+    backup_filename = os.path.join(os.path.dirname(path.path), 'backup')
+    table.write(path.path, backup=backup_filename)
+    assert os.path.isfile(backup_filename)
+
+    # Test warnings
+    with pytest.warns(Warning):
+        table.write(tmpdir.join('other_path.tb').strpath, backup=True)
+
+    # Test errors raised
+    with pytest.raises(IOError):
+        table.write(tmpdir.mkdir('other').strpath)
 
 
 def test_manager( tmpdir ):

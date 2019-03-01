@@ -98,7 +98,7 @@ def decorate_multitable_mode( mode ):
 
 
 @decorate_table_mode
-def add( table, name, path, bare, remote ):
+def add( table, name, path, bare, remote, backup ):
     '''
     Add a new file to the table in the given path
     '''
@@ -114,11 +114,11 @@ def add( table, name, path, bare, remote ):
 
     t[f.name] = f
 
-    t.write(table.path)
+    t.write(table.path, backup=backup)
 
 
 @decorate_table_mode
-def add_massive( table, files, nproc, remote, bare ):
+def add_massive( table, files, nproc, remote, bare, backup ):
     '''
     Add a list of files to the given table.
     The name of the files will be used as name for the table index.
@@ -161,7 +161,7 @@ def add_massive( table, files, nproc, remote, bare ):
 
     queue.close()
 
-    t.write(table.path)
+    t.write(table.path, backup=backup)
 
 
 def add_from_dir( directory, regex, **kwargs ):
@@ -202,7 +202,7 @@ def create( table, description ):
 
 
 @decorate_table_mode
-def display( table, fields, regex ):
+def display( table, fields, regex, full_fid ):
     '''
     Display the contents of the table at the given path.
     One can select the fields to show.
@@ -234,8 +234,19 @@ def display( table, fields, regex ):
     if regex:
         m = re.compile(regex)
 
+    def get_field( file_proxy, field ):
+        '''
+        Get a field from a FileProxy instance, modifying it
+        according to values in the parent scope.
+        '''
+        value = file_proxy.field(field)
+        if field == 'fid' and not full_fid:
+            # Show only the first 30 elements
+            value = value[:30] + '...'
+        return str(value)
+
     lines = tuple(
-        tuple(str(f.field(fi)) for fi in fields)
+        tuple(get_field(f, fi) for fi in fields)
         for k, f in sorted(t.items()) if not regex or m.match(k)
         )
 
@@ -255,7 +266,7 @@ def display( table, fields, regex ):
 
 
 @decorate_table_mode
-def remove( table, files, regex ):
+def remove( table, files, regex, backup ):
     '''
     Remove the given entries from the table.
     One can provide both a set of file names and a regular expression.
@@ -271,11 +282,11 @@ def remove( table, files, regex ):
             if c.match(e):
                 t.pop(e)
 
-    t.write(table.path)
+    t.write(table.path, backup=backup)
 
 
 @decorate_multitable_mode
-def replicate( table, location, reference, refpath, refpid, collisions, remote ):
+def replicate( table, location, reference, refpath, refpid, collisions, remote, backup ):
     '''
     Reproduce the structure of sub-directories of the files stored on a
     reference table into another one, creating bare entries for all of them.
@@ -337,11 +348,11 @@ def replicate( table, location, reference, refpath, refpid, collisions, remote )
         raise RuntimeError('Colliding names in tables. See policy in "--collisions" argument.')
         return
 
-    trgtb.write(table.path)
+    trgtb.write(table.path, backup=backup)
 
 
 @decorate_table_mode
-def update( table, nproc, regex ):
+def update( table, nproc, regex, backup ):
     '''
     Update the table located in the given path. One can select the files
     to update using a regular expression.
@@ -352,13 +363,13 @@ def update( table, nproc, regex ):
 
         m = re.compile(regex)
 
-        t.updated(files=filter(m.match, t), parallelize=nproc).write(table.path)
+        t.updated(files=filter(m.match, t), parallelize=nproc).write(table.path, backup=backup)
     else:
-        t.updated(parallelize=nproc).write(table.path)
+        t.updated(parallelize=nproc).write(table.path, backup=backup)
 
 
 @decorate_table_mode
-def update_data_fields( table, **kwargs ):
+def update_data_fields( table, backup, **kwargs ):
     '''
     Change the data fields of the given table.
     '''
@@ -367,7 +378,7 @@ def update_data_fields( table, **kwargs ):
     for k, v in kwargs.items():
         setattr(t, k, v)
 
-    t.write(table.path)
+    t.write(table.path, backup)
 
 
 if __name__ == '__main__':
@@ -380,7 +391,7 @@ if __name__ == '__main__':
         '''
         Add a new mode to a parser.
         '''
-        s = subparsers.add_parser(func.__name__, help=func.__doc__)
+        s = subparsers.add_parser(func.__name__.replace('_', '-'), help=func.__doc__)
         s.set_defaults(func=func)
         return s
 
@@ -400,21 +411,8 @@ if __name__ == '__main__':
     parser_update             = add_mode(subparsers, update)
     parser_update_data_fields = add_mode(subparsers, update_data_fields)
 
-    # For most of the modes we work with only one table, and must be
-    # the first argument.
-    for p in (
-            parser_add,
-            parser_add_massive,
-            parser_add_from_dir,
-            parser_create,
-            parser_display,
-            parser_remove,
-            parser_replicate,
-            parser_update,
-            parser_update_data_fields,
-            ):
-        p.add_argument('table', type=str,
-                       help='Path to the table file')
+    for p in subparsers.choices.values():
+        p.add_argument('table', type=str, help='Path to the table file')
 
     # Modes to modify the data fields of the table
     for p in (parser_create, parser_update_data_fields):
@@ -441,6 +439,8 @@ if __name__ == '__main__':
                                 help='Regular expression to filter the files to show')
     parser_display.add_argument('--fields', nargs='+', default=hep_rfm.FileInfo.__direct_access_fields__,
                                 help='Fields to display')
+    parser_display.add_argument('--full-fid', action='store_true',
+                                help='Whether to show the full file ID or not')
 
     # remove
     parser_remove.add_argument('--files', nargs='+', default=[],
@@ -484,9 +484,35 @@ if __name__ == '__main__':
                        'when having multiple tables, for those '\
                        'which need to be updated.')
 
+    for p in (parser_add,
+              parser_add_massive,
+              parser_add_from_dir,
+              parser_remove,
+              parser_replicate,
+              parser_update,
+              parser_update_data_fields):
+        p.add_argument('--backup', action='store_true',
+                       help='Whether to create a backup file for the '\
+                       'previous table. If it is added as an argument, '\
+                       'the name of the backup table will be '\
+                       '<file name>.backup, where the name of the previous '\
+                       'table will be used. To modify the path to the '\
+                       'backup file, use the --backup-path argument.')
+        p.add_argument('--backup-path', type=str, default=None,
+                       help='Possible path to a backup file to be created. It '\
+                       'is not necessary to add "backup" as an argument if '\
+                       'the former is provided.')
+
     # Parse the arguments and call the function
     args = parser.parse_args()
     dct  = dict(vars(args))
     dct.pop('func')
+
+    # If a backup name is provided, it is passed to the calling function
+    # as "backup"
+    if 'backup_path' in dct:
+        n = dct.pop('backup_path')
+        if n is not None:
+            dct['backup'] = n
 
     args.func(**dct)
