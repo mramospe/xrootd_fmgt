@@ -202,7 +202,7 @@ def create( table, description ):
 
 
 @decorate_table_mode
-def display( table, fields, regex ):
+def display( table, fields, regex, full_fid ):
     '''
     Display the contents of the table at the given path.
     One can select the fields to show.
@@ -234,8 +234,19 @@ def display( table, fields, regex ):
     if regex:
         m = re.compile(regex)
 
+    def get_field( file_proxy, field ):
+        '''
+        Get a field from a FileProxy instance, modifying it
+        according to values in the parent scope.
+        '''
+        value = file_proxy.field(field)
+        if field == 'fid' and not full_fid:
+            # Show only the first 30 elements
+            value = value[:30] + '...'
+        return str(value)
+
     lines = tuple(
-        tuple(str(f.field(fi)) for fi in fields)
+        tuple(get_field(f, fi) for fi in fields)
         for k, f in sorted(t.items()) if not regex or m.match(k)
         )
 
@@ -428,6 +439,8 @@ if __name__ == '__main__':
                                 help='Regular expression to filter the files to show')
     parser_display.add_argument('--fields', nargs='+', default=hep_rfm.FileInfo.__direct_access_fields__,
                                 help='Fields to display')
+    parser_display.add_argument('--full-fid', action='store_true',
+                                help='Whether to show the full file ID or not')
 
     # remove
     parser_remove.add_argument('--files', nargs='+', default=[],
