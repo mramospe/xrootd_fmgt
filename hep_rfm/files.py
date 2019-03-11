@@ -51,7 +51,7 @@ class FileInfo(FileInfoBase):
 
     __direct_access_fields__ = ('name', 'path', 'pid', 'tmstp', 'fid')
 
-    def __new__( cls, name, protocol_path, marks = None ):
+    def __new__( cls, name, protocol_path, marks=None ):
         '''
         Object to store the information about a file.
 
@@ -110,7 +110,7 @@ class FileInfo(FileInfoBase):
         return cls(fields['name'], pp, mk)
 
     @classmethod
-    def from_name_and_path( cls, name, path, protocol = None ):
+    def from_name_and_path( cls, name, path, protocol=None ):
         '''
         Build from a name and a path to the file.
         The path must point to a local file or, in case of being a
@@ -168,29 +168,28 @@ class FileInfo(FileInfoBase):
 
         return False
 
-    def updated( self ):
+    def updated( self, modifiers=None ):
         '''
         Return the updated version of this file.
 
+        :param modifiers: information to modify the path of this class.
+        :type modifiers: dict
         :returns: updated version of this file.
         :rtype: FileInfo
         '''
-        if protocols.is_remote(self.protocol_path):
-            _, path = self.protocol_path.split_path()
-        else:
-            path = self.protocol_path.path
+        p = self.protocol_path.with_modifiers(modifiers)
 
-        if os.path.isfile(path):
-            marks = FileMarks.from_local_path(path)
+        if os.path.isfile(p.path):
+            marks = FileMarks.from_local_path(p.path)
         else:
-            marks = self.marks
+            raise RuntimeError('Unable to resolve "{}" to a LocalPath; can not update file information'.format(self.protocol_path))
 
         return FileInfo(self.name, self.protocol_path, marks)
 
 
 class FileMarks(FileMarksBase):
 
-    def __new__( cls, tmstp = __default_tmstp__, fid = __default_fid__ ):
+    def __new__( cls, tmstp=__default_tmstp__, fid=__default_fid__ ):
         '''
         Represent an object storing the time-stamp and file ID of a file.
 

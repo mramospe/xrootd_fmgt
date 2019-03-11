@@ -134,7 +134,7 @@ class ProtocolPath(object):
     # All protocols must have a protocol ID.
     __protocols__ = Registry()
 
-    def __init__( self, path, path_checker = None ):
+    def __init__( self, path, path_checker=None ):
         '''
         Base class to represent a protocol to manage a path to a file.
         The protocol IDs are defined at runtime, using
@@ -241,7 +241,7 @@ class ProtocolPath(object):
         '''
         return self._path
 
-    def with_modifiers( self, modifiers = None ):
+    def with_modifiers( self, modifiers=None ):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary can contain information not understood for a given
@@ -259,7 +259,7 @@ class ProtocolPath(object):
 
 class RemotePath(ProtocolPath):
 
-    def __init__( self, path, path_checker = None ):
+    def __init__( self, path, path_checker=None ):
         '''
         Represent a remote path.
         This is an abstract class, any class inheriting from it must override
@@ -396,7 +396,7 @@ class SSHPath(RemotePath):
 
         return process('ssh', '-X', server, 'mkdir', '-p', dpath)
 
-    def specify_server( self, server_spec = None ):
+    def specify_server( self, server_spec=None ):
         '''
         Process the given path and return a modified version of it adding
         the correct user name.
@@ -447,7 +447,7 @@ class SSHPath(RemotePath):
         '''
         return self.path.split(':')
 
-    def with_modifiers( self, modifiers = None ):
+    def with_modifiers( self, modifiers=None ):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary "modifiers" might contain information about the
@@ -564,7 +564,7 @@ class XRootDPath(RemotePath):
         rp = self.path.find('//', 7)
         return self.path[7:rp], self.path[rp + 1:]
 
-    def with_modifiers( self, modifiers = None ):
+    def with_modifiers( self, modifiers=None ):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary "modifiers" might contain information about the
@@ -595,7 +595,7 @@ class XRootDPath(RemotePath):
         return self.__class__(self.path)
 
 
-def available_working_path( path, modifiers = None, allow_protocols = None ):
+def available_working_path( path, modifiers=None, allow_protocols=None ):
     '''
     If an accessible path can be resolved from "path", it returns it.
     Return None otherwise.
@@ -634,7 +634,7 @@ def available_working_path( path, modifiers = None, allow_protocols = None ):
     return None
 
 
-def available_path( paths, modifiers = None, allow_protocols = None ):
+def available_path( paths, modifiers=None, allow_protocols=None ):
     '''
     Return the first available path from a list of paths.
     If a local path results after applying "modifiers" to any of the
@@ -698,7 +698,7 @@ def process( *args ):
     return subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
 
 
-def protocol_path( path, protocol = None ):
+def protocol_path( path, protocol=None ):
     '''
     Return a instantiated protocol using the given path and protocol ID.
     If None is provided for "protocol", then a :class:`LocalPath` will

@@ -352,7 +352,7 @@ def replicate( table, location, reference, refpath, refpid, collisions, remote, 
 
 
 @decorate_table_mode
-def update( table, nproc, regex, backup ):
+def update( table, modifiers, nproc, regex, backup ):
     '''
     Update the table located in the given path. One can select the files
     to update using a regular expression.
@@ -363,9 +363,9 @@ def update( table, nproc, regex, backup ):
 
         m = re.compile(regex)
 
-        t.updated(files=filter(m.match, t), parallelize=nproc).write(table.path, backup=backup)
+        t.updated(files=filter(m.match, t), modifiers=modifiers, parallelize=nproc).write(table.path, backup=backup)
     else:
-        t.updated(parallelize=nproc).write(table.path, backup=backup)
+        t.updated(modifiers=modifiers, parallelize=nproc).write(table.path, backup=backup)
 
 
 @decorate_table_mode
@@ -462,6 +462,18 @@ if __name__ == '__main__':
     # update
     parser_update.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to update')
+    parser_update.add_argument('--ssh-hosts', nargs='*',
+                               help='Possible name(s) of the local host(s) where '\
+                               'the script is currently running. Needed if any '\
+                               'of the entries in the table uses the SSH protocol.')
+    parser_update.add_argument('--xrootd-servers', nargs='*',
+                               help='Possible name(s) of the XROOTD servers where '\
+                               'the script is currently running. Needed if any '\
+                               'of the entries to update uses the XROOTD '\
+                               'protocol.')
+
+    # Definition of the modifiers that are allowed to be used with this script
+    allowed_modifiers = ['ssh_hosts', 'xrootd_servers']
 
     #
     # Add arguments common to different parsers
@@ -514,5 +526,11 @@ if __name__ == '__main__':
         n = dct.pop('backup_path')
         if n is not None:
             dct['backup'] = n
+
+    # Change the format of the modifiers (if any) in the configuration
+    # dictionary
+    modifiers = {m: dct.pop(m) for m in allowed_modifiers if m in dct}
+    if modifiers:
+        dct['modifiers'] = modifiers
 
     args.func(**dct)

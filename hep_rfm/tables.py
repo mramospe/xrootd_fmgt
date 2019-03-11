@@ -39,7 +39,7 @@ class Manager(object):
 
         super(Manager, self).__init__()
 
-    def add_table( self, path, protocol = None ):
+    def add_table( self, path, protocol=None ):
         '''
         Add a new table to the list of tables.
         The path is automatically transformed into the corresponding
@@ -52,7 +52,7 @@ class Manager(object):
 
         self.tables.append(pp)
 
-    def available_table( self, modifiers = None, allow_protocols = None ):
+    def available_table( self, modifiers=None, allow_protocols=None ):
         '''
         Get the path to the first available table.
         The behavior is similar to that of :class:`hep_rfm.available_path`.
@@ -68,7 +68,7 @@ class Manager(object):
         '''
         return protocols.available_path(self.tables, modifiers, allow_protocols)
 
-    def update( self, parallelize = False, wdir = None, modifiers = None ):
+    def update( self, parallelize=False, wdir=None, modifiers=None ):
         '''
         Update the different tables registered within this manager.
 
@@ -197,7 +197,7 @@ class Manager(object):
 
 class Table(dict):
 
-    def __init__( self, files = None, description = '', last_update = None, version = None ):
+    def __init__( self, files=None, description='', last_update=None, version=None ):
         '''
         Create a table storing the information about files.
 
@@ -251,7 +251,7 @@ class Table(dict):
         return cls(**fields)
 
     @classmethod
-    def from_files( cls, files, description = '', last_update = None, version = None ):
+    def from_files( cls, files, description='', last_update=None, version=None ):
         '''
         Build the class from a list of :class:`hep_rfm.FileInfo` instances.
         The names of the files are used as keys for the table.
@@ -290,7 +290,7 @@ class Table(dict):
 
         return cls.from_fields(**fields)
 
-    def updated( self, files = None, parallelize = False ):
+    def updated( self, files=None, modifiers=None, parallelize=False ):
         '''
         Return an updated version of this table, checking again all the
         properties of the files within it.
@@ -299,6 +299,8 @@ class Table(dict):
         will contain the same entries as the parent, but with the files \
         specified in "files" updated.
         :type files: collection(str)
+        :param modifiers: information to modify the path of this class.
+        :type modifiers: dict
         :param parallelize: number of processes allowed to parallelize the \
         synchronization of all the proxies. By default it is set to 0, so no \
         parallelization  is done.
@@ -315,7 +317,7 @@ class Table(dict):
             for f in files:
                 handler.put(self[f])
 
-            func = lambda f, q: q.put(f.updated())
+            func = lambda f, q: q.put(f.updated(modifiers=modifiers))
 
             queue = multiprocessing.Queue()
 
@@ -328,14 +330,14 @@ class Table(dict):
 
             queue.close()
         else:
-            ufiles = tuple(self[f].updated() for f in files)
+            ufiles = tuple(self[f].updated(modifiers=modifiers) for f in files)
 
         # We must add the rest of the files in case "files" is provided
         ufiles += tuple(self[f] for f in set(self.keys()).difference(files))
 
         return self.__class__.from_files(ufiles, self.description, self.last_update, self.version)
 
-    def write( self, path, backup = False ):
+    def write( self, path, backup=False ):
         '''
         Write this table in the following location.
         Must be a local path.
