@@ -10,6 +10,7 @@ __email__  = ['miguel.ramos.pernas@cern.ch']
 
 # Python
 import argparse
+import datetime
 import functools
 import json
 import logging
@@ -202,7 +203,7 @@ def create( table, description ):
 
 
 @decorate_table_mode
-def display( table, fields, regex, full_fid ):
+def display( table, fields, regex, full_fid, tmstp ):
     '''
     Display the contents of the table at the given path.
     One can select the fields to show.
@@ -240,9 +241,13 @@ def display( table, fields, regex, full_fid ):
         according to values in the parent scope.
         '''
         value = file_proxy.field(field)
-        if field == 'fid' and not full_fid:
-            # Show only the first 30 elements
-            value = value[:30] + '...'
+        if field == 'fid':
+            if not full_fid:
+                # Show only the first 30 elements
+                value = value[:30] + '...'
+        elif field == 'tmstp':
+            if not tmstp:
+                value = datetime.datetime.fromtimestamp(value)
         return str(value)
 
     lines = tuple(
@@ -441,6 +446,8 @@ if __name__ == '__main__':
                                 help='Fields to display')
     parser_display.add_argument('--full-fid', action='store_true',
                                 help='Whether to show the full file ID or not')
+    parser_display.add_argument('--tmstp', action='store_true',
+                                help='Show the timestamp of the files instead of the date and time')
 
     # remove
     parser_remove.add_argument('--files', nargs='+', default=[],
