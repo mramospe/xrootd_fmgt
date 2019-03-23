@@ -42,7 +42,6 @@ class JobHandler(object):
 
         self._queue   = mp.JoinableQueue()
         self._workers = []
-        self._flock   = mp.Lock()
         self._failed  = mp.Value('i', 0)
 
     def add_worker( self, worker ):
@@ -64,7 +63,7 @@ class JobHandler(object):
         '''
         Notify the handler that a job has failed.
         '''
-        with self._flock:
+        with self._failed.get_lock():
             self._failed.value += 1
 
     def put( self, el ):

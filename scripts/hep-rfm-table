@@ -469,11 +469,11 @@ if __name__ == '__main__':
     # update
     parser_update.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to update')
-    parser_update.add_argument('--ssh-hosts', nargs='*',
+    parser_update.add_argument('--ssh-hosts', nargs='*', default=[],
                                help='Possible name(s) of the local host(s) where '\
                                'the script is currently running. Needed if any '\
                                'of the entries in the table uses the SSH protocol.')
-    parser_update.add_argument('--xrootd-servers', nargs='*',
+    parser_update.add_argument('--xrootd-servers', nargs='*', default=[],
                                help='Possible name(s) of the XROOTD servers where '\
                                'the script is currently running. Needed if any '\
                                'of the entries to update uses the XROOTD '\
