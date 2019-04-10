@@ -1,20 +1,20 @@
+import hep_rfm
+import tempfile
+import pytest
+import os
 '''
 Test functions for the "tables" module.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import os
-import pytest
-import tempfile
 
 # Local
-import hep_rfm
 
 
-def test_table( tmpdir ):
+def test_table(tmpdir):
     '''
     Test function for the "Table" class.
     '''
@@ -72,7 +72,7 @@ def test_table( tmpdir ):
         table.write(tmpdir.mkdir('other').strpath)
 
 
-def test_manager( tmpdir ):
+def test_manager(tmpdir):
     '''
     Test function for the "Manager" class.
     '''

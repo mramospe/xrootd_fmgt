@@ -19,9 +19,13 @@
 #
 # See: https://github.com/sphinx-doc/sphinx/issues/1711
 #
+import sys
+import os
+import hep_rfm
 import functools
 
-def no_op_wraps( func ):
+
+def no_op_wraps(func):
     '''
     Replaces functools.wraps in order to undo wrapping when generating
     Sphinx documentation. This must be done before "hep_rfm" is imported.
@@ -37,6 +41,7 @@ def no_op_wraps( func ):
 
     return wrapper
 
+
 functools.orig_wraps = functools.wraps
 functools.wraps = no_op_wraps
 
@@ -44,8 +49,6 @@ functools.wraps = no_op_wraps
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import hep_rfm
-import os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(hep_rfm.__file__)))
 
 
@@ -207,8 +210,6 @@ texinfo_documents = [
      author, 'hep_rfm', 'One line description of project.',
      'Miscellaneous'),
 ]
-
-
 
 
 # Example configuration for intersphinx: refer to the Python standard library.

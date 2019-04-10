@@ -1,15 +1,15 @@
+import hep_rfm
+import pytest
 '''
 Test functions for the "fields" module.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import pytest
 
 # Local
-import hep_rfm
 
 
 def test_parse_fields():
@@ -41,7 +41,7 @@ def test_function_with_fields():
     Test the "function_with_fields" decorator.
     '''
     @hep_rfm.fields.function_with_fields(['p1', 'p2'])
-    def function( p1, p2 ):
+    def function(p1, p2):
         ''' Function expecting two arguments '''
         pass
 
@@ -60,7 +60,7 @@ def test_construct_from_fields():
     class foo(object):
 
         @hep_rfm.fields.construct_from_fields(['p1', 'p2'])
-        def from_fields( cls, **fields ):
+        def from_fields(cls, **fields):
             ''' Build the class from fields '''
             pass
 

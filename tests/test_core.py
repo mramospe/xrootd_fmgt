@@ -1,20 +1,20 @@
+import hep_rfm
+import tempfile
+import pytest
+import os
 '''
 Test functions for the "core" module.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import os
-import pytest
-import tempfile
 
 # Custom
-import hep_rfm
 
 
-def test_copy_file( tmpdir ):
+def test_copy_file(tmpdir):
     '''
     Tests for the "copy_file" function.
     '''
@@ -37,7 +37,8 @@ def test_copy_file( tmpdir ):
     f = tempfile.NamedTemporaryFile()
 
     source = hep_rfm.protocol_path(f.name)
-    target = hep_rfm.protocol_path('no-user@no-server.com:/path/to/file', 'ssh')
+    target = hep_rfm.protocol_path(
+        'no-user@no-server.com:/path/to/file', 'ssh')
 
     with pytest.raises(hep_rfm.exceptions.MakeDirsError):
         hep_rfm.copy_file(source, target)

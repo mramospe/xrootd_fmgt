@@ -1,26 +1,26 @@
+import warnings
+import tempfile
+import os
+import multiprocessing
+import logging
+import json
+import datetime
+from hep_rfm.parallel import JobHandler, Worker
+from hep_rfm.version import __version__
+from hep_rfm.files import FileInfo
+from hep_rfm.fields import construct_from_fields
+from hep_rfm.core import copy_file
+from hep_rfm import protocols
 '''
 Object and functions to define and work with tables of files.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Local
-from hep_rfm import protocols
-from hep_rfm.core import copy_file
-from hep_rfm.fields import construct_from_fields
-from hep_rfm.files import FileInfo
-from hep_rfm.version import __version__
-from hep_rfm.parallel import JobHandler, Worker
 
 # Python
-import datetime
-import json
-import logging
-import multiprocessing
-import os
-import tempfile
-import warnings
 
 
 __all__ = ['Table', 'Manager']
@@ -28,7 +28,7 @@ __all__ = ['Table', 'Manager']
 
 class Manager(object):
 
-    def __init__( self ):
+    def __init__(self):
         '''
         Represent a class to store tables in different local/remote hosts, being
         able to do updates among them.
@@ -39,7 +39,7 @@ class Manager(object):
 
         super(Manager, self).__init__()
 
-    def add_table( self, path, protocol=None ):
+    def add_table(self, path, protocol=None):
         '''
         Add a new table to the list of tables.
         The path is automatically transformed into the corresponding
@@ -52,7 +52,7 @@ class Manager(object):
 
         self.tables.append(pp)
 
-    def available_table( self, modifiers=None, allow_protocols=None ):
+    def available_table(self, modifiers=None, allow_protocols=None):
         '''
         Get the path to the first available table.
         The behavior is similar to that of :class:`hep_rfm.available_path`.
@@ -68,7 +68,7 @@ class Manager(object):
         '''
         return protocols.available_path(self.tables, modifiers, allow_protocols)
 
-    def update( self, parallelize=False, wdir=None, modifiers=None ):
+    def update(self, parallelize=False, wdir=None, modifiers=None):
         '''
         Update the different tables registered within this manager.
 
@@ -99,7 +99,8 @@ class Manager(object):
         # Copy the tables to a temporary directory to work with them,
         # and get the names of all the files
 
-        logging.getLogger(__name__).info('Copying tables to a temporary directory')
+        logging.getLogger(__name__).info(
+            'Copying tables to a temporary directory')
 
         tmp = tempfile.TemporaryDirectory()
         for i, n in enumerate(self.tables):
@@ -117,7 +118,8 @@ class Manager(object):
 
         # Loop over the tables to get the more recent versions of the files
 
-        logging.getLogger(__name__).info('Determining most recent version of files')
+        logging.getLogger(__name__).info(
+            'Determining most recent version of files')
 
         more_recent = {}
 
@@ -135,7 +137,8 @@ class Manager(object):
 
                     name_error = True
 
-                    logging.getLogger(__name__).error('Table in "{}" does not have file "{}"'.format(tu.protocol_path.path, name))
+                    logging.getLogger(__name__).error(
+                        'Table in "{}" does not have file "{}"'.format(tu.protocol_path.path, name))
 
         if name_error:
             raise RuntimeError('Missing files in some tables')
@@ -197,7 +200,7 @@ class Manager(object):
 
 class Table(dict):
 
-    def __init__( self, files=None, description='', last_update=None, version=None ):
+    def __init__(self, files=None, description='', last_update=None, version=None):
         '''
         Create a table storing the information about files.
 
@@ -235,10 +238,10 @@ class Table(dict):
 
         self.description = description
         self.last_update = last_update
-        self.version     = version
+        self.version = version
 
     @construct_from_fields(['description', 'files', 'last_update', 'version'], required=['files'])
-    def from_fields( cls, **fields ):
+    def from_fields(cls, **fields):
         '''
         Build the class from a set of fields, which might or not
         coincide with those in the class constructor.
@@ -251,7 +254,7 @@ class Table(dict):
         return cls(**fields)
 
     @classmethod
-    def from_files( cls, files, description='', last_update=None, version=None ):
+    def from_files(cls, files, description='', last_update=None, version=None):
         '''
         Build the class from a list of :class:`hep_rfm.FileInfo` instances.
         The names of the files are used as keys for the table.
@@ -268,7 +271,7 @@ class Table(dict):
         return cls({f.name: f for f in files}, description, last_update, version)
 
     @classmethod
-    def read( cls, path ):
+    def read(cls, path):
         '''
         Build a table from the information in the file at the given local path.
 
@@ -286,11 +289,12 @@ class Table(dict):
             else:
                 fields = {}
 
-            fields['files'] = {n: FileInfo.from_fields(**fs) for n, fs in fields.get('files', {}).items()}
+            fields['files'] = {n: FileInfo.from_fields(
+                **fs) for n, fs in fields.get('files', {}).items()}
 
         return cls.from_fields(**fields)
 
-    def updated( self, files=None, modifiers=None, parallelize=False ):
+    def updated(self, files=None, modifiers=None, parallelize=False):
         '''
         Return an updated version of this table, checking again all the
         properties of the files within it.
@@ -317,7 +321,7 @@ class Table(dict):
             for f in files:
                 handler.put(self[f])
 
-            func = lambda f, q: q.put(f.updated(modifiers=modifiers))
+            def func(f, q): return q.put(f.updated(modifiers=modifiers))
 
             queue = multiprocessing.Queue()
 
@@ -337,7 +341,7 @@ class Table(dict):
 
         return self.__class__.from_files(ufiles, self.description, self.last_update, self.version)
 
-    def write( self, path, backup=False ):
+    def write(self, path, backup=False):
         '''
         Write this table in the following location.
         Must be a local path.
@@ -354,18 +358,20 @@ class Table(dict):
         to a file.
         '''
         dct = {
-            'version'     : __version__,
-            'description' : self.description,
-            'last_update' : str(datetime.datetime.now()),
-            'files'       : {n: f.info() for n, f in sorted(self.items())},
+            'version': __version__,
+            'description': self.description,
+            'last_update': str(datetime.datetime.now()),
+            'files': {n: f.info() for n, f in sorted(self.items())},
         }
 
         if os.path.exists(path) and not os.path.isfile(path):
-            raise IOError('Attempt to write a table to an existing path not corresponding to a file.')
+            raise IOError(
+                'Attempt to write a table to an existing path not corresponding to a file.')
 
         if backup:
             if not os.path.exists(path):
-                warnings.warn('No previous table is present in the given path; backup has not been generated', Warning)
+                warnings.warn(
+                    'No previous table is present in the given path; backup has not been generated', Warning)
             else:
                 if backup is True:
                     backup_name = path + '.backup'
@@ -380,7 +386,7 @@ class Table(dict):
 
 class TableUpdater(object):
 
-    def __init__( self, path, tmp_path ):
+    def __init__(self, path, tmp_path):
         '''
         Class to ease the procedure of updating tables.
 
@@ -395,12 +401,12 @@ class TableUpdater(object):
         '''
         super(TableUpdater, self).__init__()
 
-        self.path     = path
+        self.path = path
         self.tmp_path = tmp_path
-        self.table    = Table.read(tmp_path.path)
+        self.table = Table.read(tmp_path.path)
         self._changes = []
 
-    def changes( self ):
+    def changes(self):
         '''
         Returns the changes to apply.
 
@@ -409,7 +415,7 @@ class TableUpdater(object):
         '''
         return list(map(lambda t: (t[0].protocol_path, t[1].protocol_path), self._changes))
 
-    def check_changed( self, f ):
+    def check_changed(self, f):
         '''
         Determine if a content of the table needs to be updated.
 
@@ -420,7 +426,7 @@ class TableUpdater(object):
         if f.newer_than(sf):
             self._changes.append((f, sf))
 
-    def needs_update( self ):
+    def needs_update(self):
         '''
         Return whether the associated table needs to be updated.
 
@@ -429,12 +435,13 @@ class TableUpdater(object):
         '''
         return (self._changes != [])
 
-    def update_table( self ):
+    def update_table(self):
         '''
         Update the table stored within this class.
         '''
         for src, tgt in self._changes:
 
-            self.table[tgt.name] = FileInfo(tgt.name, tgt.protocol_path, src.marks)
+            self.table[tgt.name] = FileInfo(
+                tgt.name, tgt.protocol_path, src.marks)
 
         self.table.write(self.tmp_path.path)

@@ -1,18 +1,18 @@
+from collections import namedtuple
+import os
+from hep_rfm.fields import construct_from_fields
+from hep_rfm import protocols
+from hep_rfm import core
 '''
 Define classes and functions to manage files and information about files.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Local
-from hep_rfm import core
-from hep_rfm import protocols
-from hep_rfm.fields import construct_from_fields
 
 # Python
-import os
-from collections import namedtuple
 
 
 __all__ = ['FileInfoBase', 'FileInfo', 'FileMarksBase', 'FileMarks']
@@ -20,7 +20,7 @@ __all__ = ['FileInfoBase', 'FileInfo', 'FileMarksBase', 'FileMarks']
 
 # Default names for the file marks
 __default_tmstp__ = 0
-__default_fid__   = 'none'
+__default_fid__ = 'none'
 
 # Store the time-stamp and a file ID
 FileMarksBase = namedtuple('FileMarksBase', ['tmstp', 'fid'])
@@ -51,7 +51,7 @@ class FileInfo(FileInfoBase):
 
     __direct_access_fields__ = ('name', 'path', 'pid', 'tmstp', 'fid')
 
-    def __new__( cls, name, protocol_path, marks=None ):
+    def __new__(cls, name, protocol_path, marks=None):
         '''
         Object to store the information about a file.
 
@@ -71,7 +71,7 @@ class FileInfo(FileInfoBase):
 
         return fi
 
-    def field( self, fi ):
+    def field(self, fi):
         '''
         Get the value of field "fi", that can be any of
         ('name', 'path', 'pid', 'tmstp', 'fid')
@@ -89,12 +89,13 @@ class FileInfo(FileInfoBase):
         elif fi in ('tmstp', 'fid'):
             obj = self.marks
         else:
-            raise ValueError('Unrecognized field "{}". Choose between {}.'.format(self.__direct_access_fields__))
+            raise ValueError('Unrecognized field "{}". Choose between {}.'.format(
+                self.__direct_access_fields__))
 
         return getattr(obj, fi)
 
     @construct_from_fields(['name', 'protocol_path', 'marks'])
-    def from_fields( cls, **fields ):
+    def from_fields(cls, **fields):
         '''
         Build the class from a set of fields, which might or not
         coincide with those in the class constructor.
@@ -110,7 +111,7 @@ class FileInfo(FileInfoBase):
         return cls(fields['name'], pp, mk)
 
     @classmethod
-    def from_name_and_path( cls, name, path, protocol=None ):
+    def from_name_and_path(cls, name, path, protocol=None):
         '''
         Build from a name and a path to the file.
         The path must point to a local file or, in case of being a
@@ -129,13 +130,14 @@ class FileInfo(FileInfoBase):
         pp = protocols.protocol_path(path, protocol)
 
         if protocols.is_remote(pp):
-            raise ValueError('Unable to extract a local path from "{}"'.format(path))
+            raise ValueError(
+                'Unable to extract a local path from "{}"'.format(path))
 
         marks = FileMarks.from_local_path(pp.path)
 
         return cls(name, pp, marks)
 
-    def info( self ):
+    def info(self):
         '''
         This method defines the way this class is saved to a file.
 
@@ -146,7 +148,7 @@ class FileInfo(FileInfoBase):
         mk = {'tmstp': self.marks.tmstp, 'fid': self.marks.fid}
         return {'name': self.name, 'protocol_path': pp, 'marks': mk}
 
-    def is_bare( self ):
+    def is_bare(self):
         '''
         Return whether this is a bare file.
 
@@ -155,7 +157,7 @@ class FileInfo(FileInfoBase):
         '''
         return self.marks.tmstp == __default_tmstp__ and self.marks.fid == __default_fid__
 
-    def newer_than( self, other ):
+    def newer_than(self, other):
         '''
         Return whether this object corresponds to a newer version than that
         given.
@@ -168,7 +170,7 @@ class FileInfo(FileInfoBase):
 
         return False
 
-    def updated( self, modifiers=None ):
+    def updated(self, modifiers=None):
         '''
         Return the updated version of this file.
 
@@ -182,14 +184,15 @@ class FileInfo(FileInfoBase):
         if os.path.isfile(p.path):
             marks = FileMarks.from_local_path(p.path)
         else:
-            raise RuntimeError('Unable to resolve "{}" to a LocalPath; can not update file information'.format(self.protocol_path))
+            raise RuntimeError(
+                'Unable to resolve "{}" to a LocalPath; can not update file information'.format(self.protocol_path))
 
         return FileInfo(self.name, self.protocol_path, marks)
 
 
 class FileMarks(FileMarksBase):
 
-    def __new__( cls, tmstp=__default_tmstp__, fid=__default_fid__ ):
+    def __new__(cls, tmstp=__default_tmstp__, fid=__default_fid__):
         '''
         Represent an object storing the time-stamp and file ID of a file.
 
@@ -203,7 +206,7 @@ class FileMarks(FileMarksBase):
         return super(FileMarks, cls).__new__(cls, tmstp, fid)
 
     @construct_from_fields(['tmstp', 'fid'])
-    def from_fields( cls, **fields ):
+    def from_fields(cls, **fields):
         '''
         Build the class from a set of fields, which might or not
         coincide with those in the class constructor.
@@ -216,7 +219,7 @@ class FileMarks(FileMarksBase):
         return cls(**fields)
 
     @classmethod
-    def from_local_path( cls, path ):
+    def from_local_path(cls, path):
         '''
         Build the class from a local path to a file.
 

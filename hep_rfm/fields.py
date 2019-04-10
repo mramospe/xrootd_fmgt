@@ -1,19 +1,19 @@
+import logging
+import functools
 '''
 Module to process fields in functions and class constructors.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import functools
-import logging
 
 
 __all__ = []
 
 
-def parse_fields( fields, expected, required = 'all' ):
+def parse_fields(fields, expected, required='all'):
     '''
     Process two sets of fields, one representing the expected and
     the other those to be used for building a class.
@@ -39,26 +39,29 @@ def parse_fields( fields, expected, required = 'all' ):
 
     for f in set(expected).difference(fields):
         if required == 'all' or f in required:
-            raise ValueError('Required field "{}" is not present; incompatible version'.format(f))
+            raise ValueError(
+                'Required field "{}" is not present; incompatible version'.format(f))
         else:
-            logging.getLogger(__name__).warning('Value for field "{}" not found; setting to default value'.format(f))
+            logging.getLogger(__name__).warning(
+                'Value for field "{}" not found; setting to default value'.format(f))
 
     for f in set(fields).difference(expected):
-        logging.getLogger(__name__).warning('Field "{}" not found; ignoring it'.format(f))
+        logging.getLogger(__name__).warning(
+            'Field "{}" not found; ignoring it'.format(f))
         fields.pop(f)
 
     return fields
 
 
-def construct_from_fields( expected, required = 'all' ):
+def construct_from_fields(expected, required='all'):
     '''
     Decorator for constructors where classes are built using fields.
     '''
-    def _wrapper( method ):
+    def _wrapper(method):
         ''' Wrapper around the method '''
         @classmethod
         @functools.wraps(method)
-        def __wrapper( *args, **fields ):
+        def __wrapper(*args, **fields):
             '''
             Check the fields.
             All keyword arguments are considered  as such.
@@ -69,14 +72,14 @@ def construct_from_fields( expected, required = 'all' ):
     return _wrapper
 
 
-def function_with_fields( expected, required = 'all' ):
+def function_with_fields(expected, required='all'):
     '''
     Decorator for functions returning classes which are built using fields.
     '''
-    def _wrapper( function ):
+    def _wrapper(function):
         ''' Wrapper around the function '''
         @functools.wraps(function)
-        def __wrapper( *args, **fields ):
+        def __wrapper(*args, **fields):
             '''
             Check the fields.
             All keyword arguments are considered  as such.

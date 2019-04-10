@@ -1,20 +1,20 @@
+from hep_rfm.parallel import Registry
+from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
+from hep_rfm.fields import function_with_fields
+import subprocess
+import os
+import logging
+import functools
 '''
 Define functions to manage protocols.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import functools
-import logging
-import os
-import subprocess
 
 # Local
-from hep_rfm.fields import function_with_fields
-from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
-from hep_rfm.parallel import Registry
 
 
 __all__ = [
@@ -30,10 +30,10 @@ __all__ = [
     'protocol_path',
     'register_protocol',
     'remote_protocol',
-    ]
+]
 
 
-def decorate_copy( method ):
+def decorate_copy(method):
     '''
     Decorator for the "copy" methods of the protocols.
 
@@ -44,7 +44,7 @@ def decorate_copy( method ):
     :rtype: function
     '''
     @functools.wraps(method)
-    def wrapper( source, target ):
+    def wrapper(source, target):
         '''
         Internal wrapper to copy the file to a target.
         '''
@@ -57,7 +57,7 @@ def decorate_copy( method ):
     return wrapper
 
 
-def decorate_mkdirs( method ):
+def decorate_mkdirs(method):
     '''
     Decorator for the "mkdirs" methods of the protocols.
 
@@ -68,7 +68,7 @@ def decorate_mkdirs( method ):
     :rtype: function
     '''
     @functools.wraps(method)
-    def wrapper( self ):
+    def wrapper(self):
         '''
         Internal wrapper to create the necessary directories to a target.
         '''
@@ -81,7 +81,7 @@ def decorate_mkdirs( method ):
     return wrapper
 
 
-def register_protocol( name ):
+def register_protocol(name):
     '''
     Decorator to register a protocol with the given name.
     The new protocol is stored in a dictionary in the :class:`ProtocolPath`
@@ -90,34 +90,36 @@ def register_protocol( name ):
     :returns: wrapper for the class.
     :rtype: function
     '''
-    def wrapper( protocol ):
+    def wrapper(protocol):
         '''
         Wrapper around the protocol constructor.
         '''
         if name in ProtocolPath.__protocols__:
-            raise ValueError('Protocol path with name "{}" already exists'.format(name))
+            raise ValueError(
+                'Protocol path with name "{}" already exists'.format(name))
 
         must_override = (
             (ProtocolPath, ProtocolPath.copy),
             (ProtocolPath, ProtocolPath.mkdirs),
-            )
+        )
 
         if issubclass(protocol, RemotePath):
             must_override += (
                 (RemotePath, RemotePath.join_path),
                 (RemotePath, RemotePath.split_path),
-                )
+            )
         elif issubclass(protocol, ProtocolPath):
             pass
         else:
-            raise RuntimeError('Attempt to register a protocol path that does not inherit from ProtocolPath')
+            raise RuntimeError(
+                'Attempt to register a protocol path that does not inherit from ProtocolPath')
 
         for c, m in must_override:
             if getattr(protocol, m.__name__) == m:
                 raise MustOverrideError(protocol, c, m)
 
         # Apply the decorators
-        protocol.copy   = decorate_copy(protocol.copy)
+        protocol.copy = decorate_copy(protocol.copy)
         protocol.mkdirs = decorate_mkdirs(protocol.mkdirs)
 
         # Add protocol to dictionary
@@ -134,7 +136,7 @@ class ProtocolPath(object):
     # All protocols must have a protocol ID.
     __protocols__ = Registry()
 
-    def __init__( self, path, path_checker=None ):
+    def __init__(self, path, path_checker=None):
         '''
         Base class to represent a protocol to manage a path to a file.
         The protocol IDs are defined at runtime, using
@@ -160,11 +162,12 @@ class ProtocolPath(object):
         from "path_checker".
         '''
         if path_checker is not None and not path_checker(path):
-            raise ValueError('Instance of protocol path "{}" can not be built from path "{}"'.format(self.__class__.__name__, path))
+            raise ValueError('Instance of protocol path "{}" can not be built from path "{}"'.format(
+                self.__class__.__name__, path))
 
         self._path = path
 
-    def __eq__( self, other ):
+    def __eq__(self, other):
         '''
         Two :class:`ProtocolPath` instances are considered equal if they have
         the same path.
@@ -174,7 +177,7 @@ class ProtocolPath(object):
         '''
         return self.path == other.path
 
-    def __neq__( self, other ):
+    def __neq__(self, other):
         '''
         Negation of the result from :func:`ProtocolPath.__eq__`.
 
@@ -183,7 +186,7 @@ class ProtocolPath(object):
         '''
         return not self.__eq__(other)
 
-    def __repr__( self ):
+    def __repr__(self):
         '''
         Representation of this object when printed.
 
@@ -192,7 +195,7 @@ class ProtocolPath(object):
         '''
         return self.__str__()
 
-    def __str__( self ):
+    def __str__(self):
         '''
         Representation as a string.
 
@@ -202,7 +205,7 @@ class ProtocolPath(object):
         return "{}(path='{}')".format(self.__class__.__name__, self.path)
 
     @staticmethod
-    def copy( source, target ):
+    def copy(source, target):
         '''
         Copy the source file to the target using this protocol.
         The target must be accessible.
@@ -219,7 +222,7 @@ class ProtocolPath(object):
         '''
         raise AbstractMethodError()
 
-    def mkdirs( self ):
+    def mkdirs(self):
         '''
         Make directories to the file path within this protocol.
         It must return a :class:`subprocess.Popen` object.
@@ -232,7 +235,7 @@ class ProtocolPath(object):
         raise AbstractMethodError()
 
     @property
-    def path( self ):
+    def path(self):
         '''
         Return the associated path to the file.
 
@@ -241,7 +244,7 @@ class ProtocolPath(object):
         '''
         return self._path
 
-    def with_modifiers( self, modifiers=None ):
+    def with_modifiers(self, modifiers=None):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary can contain information not understood for a given
@@ -259,7 +262,7 @@ class ProtocolPath(object):
 
 class RemotePath(ProtocolPath):
 
-    def __init__( self, path, path_checker=None ):
+    def __init__(self, path, path_checker=None):
         '''
         Represent a remote path.
         This is an abstract class, any class inheriting from it must override
@@ -281,7 +284,7 @@ class RemotePath(ProtocolPath):
         super(RemotePath, self).__init__(path, path_checker)
 
     @staticmethod
-    def join_path( prefix, path ):
+    def join_path(prefix, path):
         '''
         Policy to merge a prefix and a path in this protocol.
         In this case, this is an abstract method.
@@ -295,7 +298,7 @@ class RemotePath(ProtocolPath):
         '''
         raise AbstractMethodError()
 
-    def split_path( self ):
+    def split_path(self):
         '''
         Split the remote path in the server specifications and path in the
         server.
@@ -307,7 +310,7 @@ class RemotePath(ProtocolPath):
 @register_protocol('local')
 class LocalPath(ProtocolPath):
 
-    def __init__( self, path ):
+    def __init__(self, path):
         '''
         Represent a path to a local file.
 
@@ -317,7 +320,7 @@ class LocalPath(ProtocolPath):
         super(LocalPath, self).__init__(path)
 
     @staticmethod
-    def copy( source, target ):
+    def copy(source, target):
         '''
         Copy the source file to the target using this protocol.
         The target must be accessible.
@@ -330,7 +333,7 @@ class LocalPath(ProtocolPath):
         '''
         return process('cp', source.path, target.path)
 
-    def mkdirs( self ):
+    def mkdirs(self):
         '''
         Make directories to the file path within this protocol.
 
@@ -344,7 +347,7 @@ class LocalPath(ProtocolPath):
 @register_protocol('ssh')
 class SSHPath(RemotePath):
 
-    def __init__( self, path ):
+    def __init__(self, path):
         '''
         Represent a path to be handled using SSH.
 
@@ -357,7 +360,7 @@ class SSHPath(RemotePath):
         super(SSHPath, self).__init__(path, lambda p: ('@' in p))
 
     @staticmethod
-    def copy( source, target ):
+    def copy(source, target):
         '''
         Copy the source file to the target using this protocol.
         The target must be accessible.
@@ -371,7 +374,7 @@ class SSHPath(RemotePath):
         return process('scp', '-q', source.path, target.path)
 
     @staticmethod
-    def join_path( prefix, path ):
+    def join_path(prefix, path):
         '''
         Policy to merge a prefix and a path in this protocol.
 
@@ -384,7 +387,7 @@ class SSHPath(RemotePath):
         '''
         return prefix + ':' + path
 
-    def mkdirs( self ):
+    def mkdirs(self):
         '''
         Make directories to the file path within this protocol.
 
@@ -396,7 +399,7 @@ class SSHPath(RemotePath):
 
         return process('ssh', '-X', server, 'mkdir', '-p', dpath)
 
-    def specify_server( self, server_spec=None ):
+    def specify_server(self, server_spec=None):
         '''
         Process the given path and return a modified version of it adding
         the correct user name.
@@ -420,7 +423,8 @@ class SSHPath(RemotePath):
         l = path.find('@')
 
         if l == 0 and not server_spec:
-            raise RuntimeError('User name not specified for path "{}"'.format(self.path))
+            raise RuntimeError(
+                'User name not specified for path "{}"'.format(self.path))
 
         uh, _ = self.split_path()
 
@@ -433,11 +437,12 @@ class SSHPath(RemotePath):
                 break
 
         if path.startswith('@'):
-            raise RuntimeError('Unable to find a proper user name for path "{}"'.format(self.path))
+            raise RuntimeError(
+                'Unable to find a proper user name for path "{}"'.format(self.path))
 
         return self.__class__(path)
 
-    def split_path( self ):
+    def split_path(self):
         '''
         Split the remote path in the server specifications and path in the
         server.
@@ -447,7 +452,7 @@ class SSHPath(RemotePath):
         '''
         return self.path.split(':')
 
-    def with_modifiers( self, modifiers=None ):
+    def with_modifiers(self, modifiers=None):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary "modifiers" might contain information about the
@@ -490,7 +495,8 @@ class SSHPath(RemotePath):
                         break
 
         if path.startswith('@'):
-            raise RuntimeError('User name must be specified for "{}"'.format(self))
+            raise RuntimeError(
+                'User name must be specified for "{}"'.format(self))
 
         return self.__class__(path)
 
@@ -498,17 +504,18 @@ class SSHPath(RemotePath):
 @register_protocol('xrootd')
 class XRootDPath(RemotePath):
 
-    def __init__( self, path ):
+    def __init__(self, path):
         '''
         Represent a path to be handled using XROOTD protocol.
 
         :param path: path to save, pointing to a file.
         :type path: str
         '''
-        super(XRootDPath, self).__init__(path, lambda p: p.startswith('root://'))
+        super(XRootDPath, self).__init__(
+            path, lambda p: p.startswith('root://'))
 
     @staticmethod
-    def copy( source, target ):
+    def copy(source, target):
         '''
         Copy the source file to the target using this protocol.
         The target must be accessible.
@@ -522,7 +529,7 @@ class XRootDPath(RemotePath):
         return process('xrdcp', '-f', '-s', source.path, target.path)
 
     @staticmethod
-    def join_path( prefix, path ):
+    def join_path(prefix, path):
         '''
         Policy to merge a prefix and a path in this protocol.
 
@@ -541,7 +548,7 @@ class XRootDPath(RemotePath):
 
         return prefix + '//' + path
 
-    def mkdirs( self ):
+    def mkdirs(self):
         '''
         Make directories to the file path within this protocol.
 
@@ -553,7 +560,7 @@ class XRootDPath(RemotePath):
 
         return process('xrd', server, 'mkdir', dpath)
 
-    def split_path( self ):
+    def split_path(self):
         '''
         Split the remote path in the server specifications and path in the
         server.
@@ -564,7 +571,7 @@ class XRootDPath(RemotePath):
         rp = self.path.find('//', 7)
         return self.path[7:rp], self.path[rp + 1:]
 
-    def with_modifiers( self, modifiers=None ):
+    def with_modifiers(self, modifiers=None):
         '''
         Return an instance of this class after applying modifications.
         The input dictionary "modifiers" might contain information about the
@@ -595,7 +602,7 @@ class XRootDPath(RemotePath):
         return self.__class__(self.path)
 
 
-def available_working_path( path, modifiers=None, allow_protocols=None ):
+def available_working_path(path, modifiers=None, allow_protocols=None):
     '''
     If an accessible path can be resolved from "path", it returns it.
     Return None otherwise.
@@ -634,7 +641,7 @@ def available_working_path( path, modifiers=None, allow_protocols=None ):
     return None
 
 
-def available_path( paths, modifiers=None, allow_protocols=None ):
+def available_path(paths, modifiers=None, allow_protocols=None):
     '''
     Return the first available path from a list of paths.
     If a local path results after applying "modifiers" to any of the
@@ -673,7 +680,7 @@ def available_path( paths, modifiers=None, allow_protocols=None ):
     raise RuntimeError('Unable to find an available path')
 
 
-def is_remote( path ):
+def is_remote(path):
     '''
     Return whether the given protocol path belongs to a remote protocol or not.
 
@@ -685,7 +692,7 @@ def is_remote( path ):
     return issubclass(path.__class__, RemotePath)
 
 
-def process( *args ):
+def process(*args):
     '''
     Create a subprocess object where the output from "stdout" and "stderr"
     is redirected to subprocess.PIPE.
@@ -695,10 +702,10 @@ def process( *args ):
     :returns: subprocess applying the given commands.
     :rtype: subprocess.Popen
     '''
-    return subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE )
+    return subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 
-def protocol_path( path, protocol=None ):
+def protocol_path(path, protocol=None):
     '''
     Return a instantiated protocol using the given path and protocol ID.
     If None is provided for "protocol", then a :class:`LocalPath` will
@@ -717,11 +724,12 @@ def protocol_path( path, protocol=None ):
         if protocol in ProtocolPath.__protocols__:
             return ProtocolPath.__protocols__[protocol](path)
         else:
-            raise LookupError('Protocol with name "{}" is not registered or unknown'.format(protocol))
+            raise LookupError(
+                'Protocol with name "{}" is not registered or unknown'.format(protocol))
 
 
 @function_with_fields(['path', 'pid'])
-def protocol_path_from_fields( **fields ):
+def protocol_path_from_fields(**fields):
     '''
     Return an instantiated protocol from a set of fields, which
     might or not coincide with those in the class constructor.
@@ -736,7 +744,7 @@ def protocol_path_from_fields( **fields ):
     return protocol_path(fields['path'], fields['pid'])
 
 
-def remote_protocol( a, b ):
+def remote_protocol(a, b):
     '''
     Determine the protocol to use given two paths to files. Return None if
     the two protocols are not compatible.

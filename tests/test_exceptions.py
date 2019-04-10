@@ -1,15 +1,15 @@
+import hep_rfm
+import pytest
 '''
 Test functions for the "exceptions" module.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
 # Python
-import pytest
 
 # Local
-import hep_rfm
 
 
 def test_abstractmethoderror():
