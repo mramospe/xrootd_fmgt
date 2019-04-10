@@ -7,10 +7,10 @@ install:
   - pip install .
 # Check formatting
 script:
-  - $(autopep8 --diff $(find docs -regex ".*\.py"))
-  - $(autopep8 --diff $(find hep_rfm -regex ".*\.py"))
-  - $(autopep8 --diff $(find scripts -regex ".*\.py"))
-  - $(autopep8 --diff $(find tests -regex ".*\.py"))
+  - bin/check-format docs
+  - bin/check-format hep_rfm
+  - bin/check-format scripts
+  - bin/check-format tests
 # Command to run tests
 script:
   - pytest -v tests

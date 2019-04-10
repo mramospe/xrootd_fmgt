@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+#
+# Check the format of the files in the given directory. This script takes only
+# one argument, the directory to process. A recursive look-up will be done to
+# look for python files in the sub-directories and determine whether the files
+# have the correct format.
+#
+{
+    if [ "$#" -ne 1 ]; then
+	echo "Must simply provide the directory where to look for files"
+	exit 1
+    else
+	if [ -d $1 ]; then
+	    output=$(autopep8 --diff $(find $1 -regex ".*\.py"))
+	    if [ -z "$output" ]; then
+		exit 0
+	    else
+		echo "Files under $1 do not have the correct format. You can fix this executing >> autopep8 --in-place file1 file2 ..."
+		exit 1
+	    fi
+	else
+	    echo "No such directory: $1"
+	    exit 1
+	fi
+    fi
+}
