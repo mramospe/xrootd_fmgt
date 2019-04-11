@@ -43,7 +43,7 @@ class JobHandler(object):
 
         self._queue = mp.JoinableQueue()
         self._workers = []
-        self._failed  = mp.Value('i', 0)
+        self._failed = mp.Value('i', 0)
 
     def add_worker(self, worker):
         '''
