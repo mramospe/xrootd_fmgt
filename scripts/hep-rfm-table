@@ -5,29 +5,27 @@ When using remote paths, no check is done to determine whether it corresponds
 to the current host.
 '''
 
-__author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
-
-# Python
-import argparse
-import datetime
-import functools
-import json
-import logging
-import multiprocessing
-import os
-import re
-import subprocess
-import tempfile
-
-# Local
 import hep_rfm
+import tempfile
+import subprocess
+import re
+import os
+import multiprocessing
+import logging
+import json
+import functools
+import datetime
+import argparse
+
+__author__ = ['Miguel Ramos Pernas']
+__email__ = ['miguel.ramos.pernas@cern.ch']
+
 
 # Logger instance for the script
 logger = logging.getLogger(__name__)
 
 
-def _process_path( path, remote, bare = False ):
+def _process_path(path, remote, bare=False):
     '''
     Process the given path adding the remote if necessary.
     Check also that we can obtain a local path from it.
@@ -35,13 +33,15 @@ def _process_path( path, remote, bare = False ):
     local_path = os.path.abspath(path)
 
     if not os.path.isfile(local_path) and bare == False:
-        raise RuntimeError('Attempt to create a table entry with a file that is not present locally')
+        raise RuntimeError(
+            'Attempt to create a table entry with a file that is not present locally')
 
     if remote is not None:
 
         protocol, prefix = remote
 
-        p = hep_rfm.ProtocolPath.__protocols__[protocol].join_path(prefix, local_path)
+        p = hep_rfm.ProtocolPath.__protocols__[
+            protocol].join_path(prefix, local_path)
 
         pp = hep_rfm.protocol_path(p, protocol)
     else:
@@ -50,12 +50,12 @@ def _process_path( path, remote, bare = False ):
     return pp, local_path
 
 
-def decorate_table_mode( mode ):
+def decorate_table_mode(mode):
     '''
     Decorator for modes working with a single table.
     '''
     @functools.wraps(mode)
-    def _wrapper( **kwargs ):
+    def _wrapper(**kwargs):
         '''
         Transform the value in "table" to a protocol path.
         '''
@@ -66,24 +66,26 @@ def decorate_table_mode( mode ):
     return _wrapper
 
 
-def decorate_multitable_mode( mode ):
+def decorate_multitable_mode(mode):
     '''
     Decorator for modes where one table is updated using another as a reference.
     '''
     @functools.wraps(mode)
-    def _wrapper( **kwargs ):
+    def _wrapper(**kwargs):
         '''
         If the keywords "table" and/or "reference" refer to remote paths,
         create the file(s) on a temporary directory and then copy it(them).
         '''
-        kwargs['table']     = tab = hep_rfm.protocol_path(kwargs['table'])
-        kwargs['reference'] = ref = hep_rfm.protocol_path(kwargs['reference'], kwargs['refpid'])
+        kwargs['table'] = tab = hep_rfm.protocol_path(kwargs['table'])
+        kwargs['reference'] = ref = hep_rfm.protocol_path(
+            kwargs['reference'], kwargs['refpid'])
 
         if hep_rfm.is_remote(ref):
 
             with tempfile.TemporaryDirectory() as d:
 
-                tmp_ref = hep_rfm.protocol_path(os.path.join(d, 'tmp_reference.txt'))
+                tmp_ref = hep_rfm.protocol_path(
+                    os.path.join(d, 'tmp_reference.txt'))
 
                 logger.info('Copying reference table to a temporary directory')
 
@@ -99,7 +101,7 @@ def decorate_multitable_mode( mode ):
 
 
 @decorate_table_mode
-def add( table, name, path, bare, remote, backup ):
+def add(table, name, path, bare, remote, backup):
     '''
     Add a new file to the table in the given path
     '''
@@ -119,7 +121,7 @@ def add( table, name, path, bare, remote, backup ):
 
 
 @decorate_table_mode
-def add_massive( table, files, nproc, remote, bare, backup ):
+def add_massive(table, files, nproc, remote, bare, backup):
     '''
     Add a list of files to the given table.
     The name of the files will be used as name for the table index.
@@ -128,7 +130,7 @@ def add_massive( table, files, nproc, remote, bare, backup ):
 
     handler = hep_rfm.parallel.JobHandler()
 
-    def _file_info( obj, queue, bare ):
+    def _file_info(obj, queue, bare):
         '''
         Create a FileInfo from the inputs, and put it in the queue
         '''
@@ -165,7 +167,7 @@ def add_massive( table, files, nproc, remote, bare, backup ):
     t.write(table.path, backup=backup)
 
 
-def add_from_dir( directory, regex, **kwargs ):
+def add_from_dir(directory, regex, **kwargs):
     '''
     Add files from a given directory.
     A regular expression can be used to match those files.
@@ -192,18 +194,19 @@ def add_from_dir( directory, regex, **kwargs ):
 
 
 @decorate_table_mode
-def create( table, description ):
+def create(table, description):
     '''
     Create a new empty table
     '''
     if os.path.isfile(table.path):
         raise RuntimeError('File "{}" already exists'.format(table.path))
 
-    hep_rfm.Table(description=description, version=hep_rfm.__version__).write(table.path)
+    hep_rfm.Table(description=description,
+                  version=hep_rfm.__version__).write(table.path)
 
 
 @decorate_table_mode
-def display( table, fields, regex, full_fid, tmstp ):
+def display(table, fields, regex, full_fid, tmstp):
     '''
     Display the contents of the table at the given path.
     One can select the fields to show.
@@ -211,7 +214,8 @@ def display( table, fields, regex, full_fid, tmstp ):
     '''
     t = hep_rfm.Table.read(table.path)
 
-    logger.info('Running "{}" from {} {}'.format(os.path.basename(__file__), hep_rfm.__name__, hep_rfm.__version__))
+    logger.info('Running "{}" from {} {}'.format(
+        os.path.basename(__file__), hep_rfm.__name__, hep_rfm.__version__))
 
     logger.info('- Table created with {} {}'.format(hep_rfm.__name__, t.version))
 
@@ -235,7 +239,7 @@ def display( table, fields, regex, full_fid, tmstp ):
     if regex:
         m = re.compile(regex)
 
-    def get_field( file_proxy, field ):
+    def get_field(file_proxy, field):
         '''
         Get a field from a FileProxy instance, modifying it
         according to values in the parent scope.
@@ -253,12 +257,12 @@ def display( table, fields, regex, full_fid, tmstp ):
     lines = tuple(
         tuple(get_field(f, fi) for fi in fields)
         for k, f in sorted(t.items()) if not regex or m.match(k)
-        )
+    )
 
     frmt = '\t'.join(
         '{{:<{}}}'.format(max(len(fi), max(len(v) for v in values)))
         for fi, values in zip(fields, zip(*lines))
-        )
+    )
 
     # Display the information
     if len(lines) != 0:
@@ -267,11 +271,12 @@ def display( table, fields, regex, full_fid, tmstp ):
         for l in lines:
             logger.info(frmt.format(*l))
     else:
-        logger.info('No entries found matching regular expression "{}"'.format(regex))
+        logger.info(
+            'No entries found matching regular expression "{}"'.format(regex))
 
 
 @decorate_table_mode
-def remove( table, files, regex, backup ):
+def remove(table, files, regex, backup):
     '''
     Remove the given entries from the table.
     One can provide both a set of file names and a regular expression.
@@ -291,7 +296,7 @@ def remove( table, files, regex, backup ):
 
 
 @decorate_multitable_mode
-def replicate( table, location, reference, refpath, refpid, collisions, remote, backup ):
+def replicate(table, location, reference, refpath, refpid, collisions, remote, backup):
     '''
     Reproduce the structure of sub-directories of the files stored on a
     reference table into another one, creating bare entries for all of them.
@@ -311,17 +316,18 @@ def replicate( table, location, reference, refpath, refpid, collisions, remote, 
     trgtb = hep_rfm.Table.read(table.path)
     reftb = hep_rfm.Table.read(reference.path)
 
-    def add_to_table( table, key, finfo, location, remote ):
+    def add_to_table(table, key, finfo, location, remote):
         '''
         Add a new entry to the given table.
         '''
         if hep_rfm.is_remote(finfo.protocol_path):
-                _, p = finfo.protocol_path.split_path()
+            _, p = finfo.protocol_path.split_path()
         else:
             p = finfo.protocol_path.path
 
         if not p.startswith(refpath):
-            raise RuntimeError('Paths in the reference table must start by "refpath": "{}"'.format(refpath))
+            raise RuntimeError(
+                'Paths in the reference table must start by "refpath": "{}"'.format(refpath))
 
         pp, _ = _process_path(p.replace(refpath, location), remote, bare=True)
 
@@ -342,7 +348,7 @@ def replicate( table, location, reference, refpath, refpid, collisions, remote, 
             elif collisions == 'replace':
                 add_to_table(trgtb, rk, rv, location, remote)
 
-            else: # collisions == 'omit'
+            else:  # collisions == 'omit'
                 pass
 
         else:
@@ -350,14 +356,15 @@ def replicate( table, location, reference, refpath, refpid, collisions, remote, 
 
     # Do not copy the tables if a collision was found
     if not process:
-        raise RuntimeError('Colliding names in tables. See policy in "--collisions" argument.')
+        raise RuntimeError(
+            'Colliding names in tables. See policy in "--collisions" argument.')
         return
 
     trgtb.write(table.path, backup=backup)
 
 
 @decorate_table_mode
-def update( table, modifiers, nproc, regex, backup ):
+def update(table, modifiers, nproc, regex, backup):
     '''
     Update the table located in the given path. One can select the files
     to update using a regular expression.
@@ -368,13 +375,15 @@ def update( table, modifiers, nproc, regex, backup ):
 
         m = re.compile(regex)
 
-        t.updated(files=filter(m.match, t), modifiers=modifiers, parallelize=nproc).write(table.path, backup=backup)
+        t.updated(files=filter(m.match, t), modifiers=modifiers,
+                  parallelize=nproc).write(table.path, backup=backup)
     else:
-        t.updated(modifiers=modifiers, parallelize=nproc).write(table.path, backup=backup)
+        t.updated(modifiers=modifiers, parallelize=nproc).write(
+            table.path, backup=backup)
 
 
 @decorate_table_mode
-def update_data_fields( table, backup, **kwargs ):
+def update_data_fields(table, backup, **kwargs):
     '''
     Change the data fields of the given table.
     '''
@@ -392,11 +401,12 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(message)s')
     logging.getLogger().setLevel(logging.INFO)
 
-    def add_mode( subparsers, func ):
+    def add_mode(subparsers, func):
         '''
         Add a new mode to a parser.
         '''
-        s = subparsers.add_parser(func.__name__.replace('_', '-'), help=func.__doc__)
+        s = subparsers.add_parser(
+            func.__name__.replace('_', '-'), help=func.__doc__)
         s.set_defaults(func=func)
         return s
 
@@ -406,14 +416,14 @@ if __name__ == '__main__':
     subparsers = parser.add_subparsers(help='Mode to run')
 
     # Add the modes
-    parser_add                = add_mode(subparsers, add)
-    parser_add_from_dir       = add_mode(subparsers, add_from_dir)
-    parser_add_massive        = add_mode(subparsers, add_massive)
-    parser_create             = add_mode(subparsers, create)
-    parser_display            = add_mode(subparsers, display)
-    parser_remove             = add_mode(subparsers, remove)
-    parser_replicate          = add_mode(subparsers, replicate)
-    parser_update             = add_mode(subparsers, update)
+    parser_add = add_mode(subparsers, add)
+    parser_add_from_dir = add_mode(subparsers, add_from_dir)
+    parser_add_massive = add_mode(subparsers, add_massive)
+    parser_create = add_mode(subparsers, create)
+    parser_display = add_mode(subparsers, display)
+    parser_remove = add_mode(subparsers, remove)
+    parser_replicate = add_mode(subparsers, replicate)
+    parser_update = add_mode(subparsers, update)
     parser_update_data_fields = add_mode(subparsers, update_data_fields)
 
     for p in subparsers.choices.values():
@@ -470,13 +480,13 @@ if __name__ == '__main__':
     parser_update.add_argument('--regex', type=str, default=None,
                                help='Regular expression for the files to update')
     parser_update.add_argument('--ssh-hosts', nargs='*', default=[],
-                               help='Possible name(s) of the local host(s) where '\
-                               'the script is currently running. Needed if any '\
+                               help='Possible name(s) of the local host(s) where '
+                               'the script is currently running. Needed if any '
                                'of the entries in the table uses the SSH protocol.')
     parser_update.add_argument('--xrootd-servers', nargs='*', default=[],
-                               help='Possible name(s) of the XROOTD servers where '\
-                               'the script is currently running. Needed if any '\
-                               'of the entries to update uses the XROOTD '\
+                               help='Possible name(s) of the XROOTD servers where '
+                               'the script is currently running. Needed if any '
+                               'of the entries to update uses the XROOTD '
                                'protocol.')
 
     # Definition of the modifiers that are allowed to be used with this script
@@ -491,16 +501,16 @@ if __name__ == '__main__':
 
     for p in (parser_add, parser_add_massive, parser_add_from_dir, parser_replicate):
         p.add_argument('--remote', '-r', nargs=2, default=None, required=False,
-                       help='Remote protocol type and direction to prepend '\
-                       'to the files. If you are specifying it in the file path, '\
+                       help='Remote protocol type and direction to prepend '
+                       'to the files. If you are specifying it in the file path, '
                        'adding it as well here will cause an error.')
 
     for p in (parser_add, parser_add_massive):
         p.add_argument('--bare', '-b', action='store_true',
-                       help='Whether the to create a bare entry in '\
-                       'the file. A bare entry will not contain '\
-                       'file ID nor time-stamp. This must be called '\
-                       'when having multiple tables, for those '\
+                       help='Whether the to create a bare entry in '
+                       'the file. A bare entry will not contain '
+                       'file ID nor time-stamp. This must be called '
+                       'when having multiple tables, for those '
                        'which need to be updated.')
 
     for p in (parser_add,
@@ -511,20 +521,20 @@ if __name__ == '__main__':
               parser_update,
               parser_update_data_fields):
         p.add_argument('--backup', action='store_true',
-                       help='Whether to create a backup file for the '\
-                       'previous table. If it is added as an argument, '\
-                       'the name of the backup table will be '\
-                       '<file name>.backup, where the name of the previous '\
-                       'table will be used. To modify the path to the '\
+                       help='Whether to create a backup file for the '
+                       'previous table. If it is added as an argument, '
+                       'the name of the backup table will be '
+                       '<file name>.backup, where the name of the previous '
+                       'table will be used. To modify the path to the '
                        'backup file, use the --backup-path argument.')
         p.add_argument('--backup-path', type=str, default=None,
-                       help='Possible path to a backup file to be created. It '\
-                       'is not necessary to add "backup" as an argument if '\
+                       help='Possible path to a backup file to be created. It '
+                       'is not necessary to add "backup" as an argument if '
                        'the former is provided.')
 
     # Parse the arguments and call the function
     args = parser.parse_args()
-    dct  = dict(vars(args))
+    dct = dict(vars(args))
     dct.pop('func')
 
     # If a backup name is provided, it is passed to the calling function

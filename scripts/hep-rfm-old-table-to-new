@@ -5,18 +5,15 @@ format.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-import argparse
-import logging
-import os
-
-# Local
 import hep_rfm
+import os
+import logging
+import argparse
 
 
-def main( ifile, ofile, description ):
+def main(ifile, ofile, description):
     '''
     Main function to execute.
     '''
@@ -31,10 +28,10 @@ def main( ifile, ofile, description ):
             name, path, pid, tmstp, fid = l.split()
 
             fields = {
-                'name'          : name,
-                'protocol_path' : {'path': path, 'pid': pid},
-                'marks'         : {'tmstp': float(tmstp), 'fid': fid},
-                }
+                'name': name,
+                'protocol_path': {'path': path, 'pid': pid},
+                'marks': {'tmstp': float(tmstp), 'fid': fid},
+            }
 
             files.append(hep_rfm.FileInfo.from_fields(**fields))
 
@@ -51,7 +48,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('input', type=str,
-    			help='Input table in the old-style format')
+                        help='Input table in the old-style format')
     parser.add_argument('output', type=str,
                         help='Output table that will be written in the new format')
     parser.add_argument('--description', type=str, default='',

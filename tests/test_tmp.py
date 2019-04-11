@@ -3,18 +3,15 @@ Hold temporal tests.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-import os
-import tempfile
-
-# Local
-import hep_rfm
 import test_scripts
+import hep_rfm
+import tempfile
+import os
 
 
-def test_table_conversion( tmpdir ):
+def test_table_conversion(tmpdir):
     '''
     Test the conversion of the old table schema to the new table schema.
     '''
@@ -28,7 +25,8 @@ def test_table_conversion( tmpdir ):
         'file3 root://my-site//file3.txt xrootd 0 none\n'
     )
 
-    test_scripts.process('hep-rfm-old-table-to-new {} {}'.format(source, target))
+    test_scripts.process(
+        'hep-rfm-old-table-to-new {} {}'.format(source, target))
 
     table = hep_rfm.Table.read(target.strpath)
 

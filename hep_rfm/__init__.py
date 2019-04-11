@@ -1,10 +1,10 @@
-__author__  = ['Miguel Ramos Pernas']
-__email__   = ['miguel.ramos.pernas@cern.ch']
+__author__ = ['Miguel Ramos Pernas']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
-
-# Python
-import importlib, inspect, os, pkgutil
-
+import importlib
+import inspect
+import os
+import pkgutil
 
 __project_path__ = os.path.dirname(os.path.abspath(__file__))
 

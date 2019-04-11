@@ -3,14 +3,11 @@ Test functions for the "files" module.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-import pytest
-import tempfile
-
-# Local
 import hep_rfm
+import tempfile
+import pytest
 
 
 def test_fileinfobase():

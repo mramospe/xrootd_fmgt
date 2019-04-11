@@ -1,10 +1,19 @@
 language: python
+
 python:
-  - "3.5"
-  - "3.6"
-# Command to install dependencies
-install:
-  - pip install .
-# Command to run tests
-script:
-  - pytest -v tests
+  - 3.5
+  - 3.6
+
+install: pip install .
+
+script: pytest -v tests
+
+jobs:
+  include:
+    - stage: format
+      name: "Check format"
+      python: 3.6
+      script:
+        - bin/check-format . python
+        - bin/check-format bin all
+        - bin/check-format scripts all

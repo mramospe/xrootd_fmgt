@@ -3,18 +3,15 @@ Test functions for the "protocols" module.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-import os
-import pytest
-import socket
-
-# Custom
 import hep_rfm
+import socket
+import pytest
+import os
 
 
-def test_available_path( tmpdir ):
+def test_available_path(tmpdir):
     '''
     Test for the "available_path" function.
     '''
@@ -47,7 +44,7 @@ def test_available_path( tmpdir ):
     assert p == lp
 
 
-def test_available_working_path( tmpdir ):
+def test_available_working_path(tmpdir):
     '''
     Test for the "available_working_path" function.
     '''
@@ -58,11 +55,12 @@ def test_available_working_path( tmpdir ):
 
     nlocal_path = hep_rfm.protocol_path('non-existing-file.txt')
     xrootd_path = hep_rfm.protocol_path('root://my-site//file.txt', 'xrootd')
-    ssh_path    = hep_rfm.protocol_path('user@host:/file.txt', 'ssh')
+    ssh_path = hep_rfm.protocol_path('user@host:/file.txt', 'ssh')
 
     assert hep_rfm.available_working_path(local_path)
     assert not hep_rfm.available_working_path(nlocal_path)
-    assert hep_rfm.available_working_path(xrootd_path, allow_protocols=('xrootd',))
+    assert hep_rfm.available_working_path(
+        xrootd_path, allow_protocols=('xrootd',))
     assert not hep_rfm.available_working_path(xrootd_path)
     assert not hep_rfm.available_working_path(ssh_path)
 
@@ -75,7 +73,7 @@ def test_protocol_path():
             ('/local/path/file.txt', 'local'),
             ('root://my-site//file.txt', 'xrootd'),
             ('user@host:/file.txt', 'ssh'),
-            ):
+    ):
         p = hep_rfm.protocol_path(path, protocol)
 
 
@@ -104,7 +102,7 @@ def test_protocolpath():
     assert lp1.pid is lp2.pid
 
 
-def test_localpath( tmpdir ):
+def test_localpath(tmpdir):
     '''
     Test for the "LocalPath" class.
     '''
@@ -126,9 +124,10 @@ def test_register_protocol():
     '''
     @hep_rfm.register_protocol('special-protocol')
     class SpecialPath(hep_rfm.ProtocolPath):
-        def copy( self, path ):
+        def copy(self, path):
             return process('cp', path, self.target)
-        def mkdirs( self ):
+
+        def mkdirs(self):
             dpath = os.path.dirname(self.path)
             return process('mkdir', '-p', dpath if dpath != '' else './')
 
@@ -159,9 +158,10 @@ def test_register_protocol():
         # Some methods from RemotePath are missing
         @hep_rfm.register_protocol('another-protocol-3')
         class AnotherPath3(hep_rfm.RemotePath):
-            def copy( self, path ):
+            def copy(self, path):
                 return process('cp', path, self.target)
-            def mkdirs( self ):
+
+            def mkdirs(self):
                 dpath = os.path.dirname(self.path)
                 return process('mkdir', '-p', dpath if dpath != '' else './')
 
@@ -184,7 +184,7 @@ def test_is_remote():
     remotes = (
         hep_rfm.protocol_path('root://my-site//', 'xrootd'),
         hep_rfm.protocol_path('username@server', 'ssh'),
-        )
+    )
 
     for r in remotes:
         assert hep_rfm.is_remote(r)
@@ -192,7 +192,7 @@ def test_is_remote():
     assert not hep_rfm.is_remote(hep_rfm.protocol_path('/local/path/file.txt'))
 
 
-def test_process( tmpdir ):
+def test_process(tmpdir):
     '''
     Test for the "process" function.
     '''
@@ -208,8 +208,8 @@ def test_remote_protocol():
     '''
     Test for the "remote_protocol" function.
     '''
-    local  = hep_rfm.protocol_path('/local/path/file.txt')
-    ssh    = hep_rfm.protocol_path('user@host:/file.txt', 'ssh')
+    local = hep_rfm.protocol_path('/local/path/file.txt')
+    ssh = hep_rfm.protocol_path('user@host:/file.txt', 'ssh')
     xrootd = hep_rfm.protocol_path('root://server//file.txt', 'xrootd')
 
     assert hep_rfm.remote_protocol(local, local) == 'local'
@@ -272,8 +272,11 @@ def test_xrootdpath():
         hep_rfm.protocol_path('/local/file.txt', 'xrootd')
 
     for p in (
-            hep_rfm.XRootDPath.join_path('root://server', 'path/in/server/file.txt'),
-            hep_rfm.XRootDPath.join_path('root://server/', 'path/in/server/file.txt'),
-            hep_rfm.XRootDPath.join_path('root://server//', '/path/in/server/file.txt'),
-            ):
+            hep_rfm.XRootDPath.join_path(
+                'root://server', 'path/in/server/file.txt'),
+            hep_rfm.XRootDPath.join_path(
+                'root://server/', 'path/in/server/file.txt'),
+            hep_rfm.XRootDPath.join_path(
+                'root://server//', '/path/in/server/file.txt'),
+    ):
         assert p == 'root://server//path/in/server/file.txt'

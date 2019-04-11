@@ -3,31 +3,24 @@ Main classes and functions to manage files using the ssh protocol.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
-__email__  = ['miguel.ramos.pernas@cern.ch']
+__email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Custom
-from hep_rfm import protocols
-from hep_rfm import parallel
-from hep_rfm.exceptions import CopyFileError, MakeDirsError
+__all__ = ['copy_file', 'rfm_hash']
 
-# Python
-import hashlib
-import logging
-import os
-import subprocess
 import tempfile
-
-
-__all__ = [
-    'copy_file',
-    'rfm_hash',
-    ]
+import subprocess
+import os
+import logging
+import hashlib
+from hep_rfm.exceptions import CopyFileError, MakeDirsError
+from hep_rfm import parallel
+from hep_rfm import protocols
 
 # Buffer size to be able to hash large files
-__buffer_size__ = 10485760 # 10MB
+__buffer_size__ = 10485760  # 10MB
 
 
-def copy_file( source, target, wdir=None, loglock=None, modifiers=None ):
+def copy_file(source, target, wdir=None, loglock=None, modifiers=None):
     '''
     Main function to copy a file from a source to a target.
     The copy is done if the modification time of both files do not coincide.
@@ -81,13 +74,14 @@ def copy_file( source, target, wdir=None, loglock=None, modifiers=None ):
             return
 
         parallel.log(logging.getLogger(__name__).info,
-                     'Copying file\n source: {}\n target: {}'.format(source.path, target.path),
+                     'Copying file\n source: {}\n target: {}'.format(
+                         source.path, target.path),
                      loglock)
 
         protocols.ProtocolPath.__protocols__[dec].copy(source, target)
 
 
-def rfm_hash( path ):
+def rfm_hash(path):
     '''
     Use the SHA512 hash function to get the file ID of the file
     in the given path.

@@ -1,15 +1,15 @@
 #!/usr/bin/env python
+from setuptools import setup, find_packages
+import os
 '''
 Setup script for the "hep_rfm" package
 '''
 
 __author__ = 'Miguel Ramos Pernas'
-__email__  = 'miguel.ramos.pernas@cern.ch'
+__email__ = 'miguel.ramos.pernas@cern.ch'
 
 
 # Python
-import os
-from setuptools import setup, find_packages
 
 #
 # Version of the package. Before a new release is made
@@ -21,7 +21,9 @@ version_info = (0, 0, 0, 'dev', 4)
 
 tag = version_info[3]
 
-if tag != 'final':
+if tag == 'final':
+    version = '.'.join(map(str, version_info[:3]))
+else:
     if tag == 'alpha':
         frmt = '{}a{}'
     elif tag == 'beta':
@@ -35,38 +37,39 @@ if tag != 'final':
     else:
         raise ValueError('Unable to parse version information')
 
-version = frmt.format('.'.join(map(str, version_info[:3])), version_info[4])
+    version = frmt.format(
+        '.'.join(map(str, version_info[:3])), version_info[4])
 
 # Setup function
 setup(
 
-    name = 'hep_rfm',
+    name='hep_rfm',
 
-    version = version,
+    version=version,
 
-    description = 'Tools to manage remote and local files using the '\
+    description='Tools to manage remote and local files using the '
     'xrootd and ssh protocols',
 
     # Read the long description from the README
-    long_description = open('README.rst').read(),
+    long_description=open('README.rst').read(),
 
     # Keywords to search for the package
-    keywords = 'physics hep file management',
+    keywords='physics hep file management',
 
     # Find all the packages in this directory
-    packages = find_packages(),
+    packages=find_packages(),
 
     # Install scripts
-    scripts = ['scripts/{}'.format(f) for f in os.listdir('scripts')],
+    scripts=['scripts/{}'.format(f) for f in os.listdir('scripts')],
 
     # Requisites
-    install_requires = ['pytest'],
+    install_requires=['autopep8', 'pytest'],
 
     # Test requirements
-    setup_requires = ['pytest-runner'],
+    setup_requires=['pytest-runner'],
 
-    tests_require = ['pytest'],
-    )
+    tests_require=['pytest'],
+)
 
 
 # Create a module with the versions
