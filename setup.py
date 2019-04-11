@@ -21,7 +21,9 @@ version_info = (0, 0, 0, 'dev', 4)
 
 tag = version_info[3]
 
-if tag != 'final':
+if tag == 'final':
+    version = '.'.join(map(str, version_info[:3]))
+else:
     if tag == 'alpha':
         frmt = '{}a{}'
     elif tag == 'beta':
@@ -35,7 +37,8 @@ if tag != 'final':
     else:
         raise ValueError('Unable to parse version information')
 
-version = frmt.format('.'.join(map(str, version_info[:3])), version_info[4])
+    version = frmt.format(
+        '.'.join(map(str, version_info[:3])), version_info[4])
 
 # Setup function
 setup(
