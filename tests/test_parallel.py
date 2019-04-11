@@ -1,5 +1,3 @@
-import hep_rfm
-import multiprocessing as mp
 '''
 Test functions for the "parallel" module.
 '''
@@ -7,9 +5,8 @@ Test functions for the "parallel" module.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-# Local
+import hep_rfm
+import multiprocessing as mp
 
 
 def test_parallelization():

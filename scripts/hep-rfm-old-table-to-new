@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-import hep_rfm
-import os
-import logging
-import argparse
 '''
 Copy the contents of a table in the old format on another in the new (JSON)
 format.
@@ -11,9 +7,10 @@ format.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-# Local
+import hep_rfm
+import os
+import logging
+import argparse
 
 
 def main(ifile, ofile, description):

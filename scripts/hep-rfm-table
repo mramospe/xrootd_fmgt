@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+'''
+Create add elements or update tables.
+When using remote paths, no check is done to determine whether it corresponds
+to the current host.
+'''
+
 import hep_rfm
 import tempfile
 import subprocess
@@ -10,18 +16,10 @@ import json
 import functools
 import datetime
 import argparse
-'''
-Create add elements or update tables.
-When using remote paths, no check is done to determine whether it corresponds
-to the current host.
-'''
 
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-# Local
 
 # Logger instance for the script
 logger = logging.getLogger(__name__)

@@ -1,20 +1,9 @@
-from hep_rfm.parallel import Registry
-from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
-from hep_rfm.fields import function_with_fields
-import subprocess
-import os
-import logging
-import functools
 '''
 Define functions to manage protocols.
 '''
 
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
-
-# Python
-
-# Local
 
 
 __all__ = [
@@ -31,6 +20,14 @@ __all__ = [
     'register_protocol',
     'remote_protocol',
 ]
+
+from hep_rfm.parallel import Registry
+from hep_rfm.exceptions import AbstractMethodError, CopyFileError, MakeDirsError, MustOverrideError
+from hep_rfm.fields import function_with_fields
+import subprocess
+import os
+import logging
+import functools
 
 
 def decorate_copy(method):

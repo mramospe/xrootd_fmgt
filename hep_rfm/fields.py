@@ -1,5 +1,3 @@
-import logging
-import functools
 '''
 Module to process fields in functions and class constructors.
 '''
@@ -7,10 +5,10 @@ Module to process fields in functions and class constructors.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-
 __all__ = []
+
+import logging
+import functools
 
 
 def parse_fields(fields, expected, required='all'):

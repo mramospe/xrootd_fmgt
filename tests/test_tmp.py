@@ -1,7 +1,3 @@
-import test_scripts
-import hep_rfm
-import tempfile
-import os
 '''
 Hold temporal tests.
 '''
@@ -9,9 +5,10 @@ Hold temporal tests.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-# Local
+import test_scripts
+import hep_rfm
+import tempfile
+import os
 
 
 def test_table_conversion(tmpdir):

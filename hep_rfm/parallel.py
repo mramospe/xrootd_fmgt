@@ -2,13 +2,14 @@
 Tools and function to do parallelization of jobs.
 '''
 
-# Python
+__author__ = ['Miguel Ramos Pernas']
+__email__ = ['miguel.ramos.pernas@cern.ch']
+
+__all__ = []
+
 import logging
 import multiprocessing as mp
 from queue import Empty
-
-
-__all__ = []
 
 
 def log(logcall, string, lock=None):

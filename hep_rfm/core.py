@@ -1,3 +1,12 @@
+'''
+Main classes and functions to manage files using the ssh protocol.
+'''
+
+__author__ = ['Miguel Ramos Pernas']
+__email__ = ['miguel.ramos.pernas@cern.ch']
+
+__all__ = ['copy_file', 'rfm_hash']
+
 import tempfile
 import subprocess
 import os
@@ -6,22 +15,6 @@ import hashlib
 from hep_rfm.exceptions import CopyFileError, MakeDirsError
 from hep_rfm import parallel
 from hep_rfm import protocols
-'''
-Main classes and functions to manage files using the ssh protocol.
-'''
-
-__author__ = ['Miguel Ramos Pernas']
-__email__ = ['miguel.ramos.pernas@cern.ch']
-
-# Custom
-
-# Python
-
-
-__all__ = [
-    'copy_file',
-    'rfm_hash',
-]
 
 # Buffer size to be able to hash large files
 __buffer_size__ = 10485760  # 10MB

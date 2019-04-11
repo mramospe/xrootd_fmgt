@@ -1,6 +1,3 @@
-import hep_rfm
-import tempfile
-import pytest
 '''
 Test functions for the "files" module.
 '''
@@ -8,9 +5,9 @@ Test functions for the "files" module.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-# Local
+import hep_rfm
+import tempfile
+import pytest
 
 
 def test_fileinfobase():

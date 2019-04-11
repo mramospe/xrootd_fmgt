@@ -1,8 +1,3 @@
-import hep_rfm
-import os
-import inspect
-import importlib
-import ast
 '''
 Test functions to check that all the modules and members in the package have at
 least one test function.
@@ -11,10 +6,11 @@ least one test function.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-
-# Python
-
-# Local
+import hep_rfm
+import os
+import inspect
+import importlib
+import ast
 
 # Modules to exclude from having tests
 EXCLUDE_MODULES = {'core', 'cpython', 'version'}

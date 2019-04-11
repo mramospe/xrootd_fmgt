@@ -1,6 +1,3 @@
-import hep_rfm
-import subprocess
-import os
 '''
 Test the scripts under the "scripts" directory.
 '''
@@ -8,9 +5,9 @@ Test the scripts under the "scripts" directory.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-# Local
+import hep_rfm
+import subprocess
+import os
 
 
 def process(strfunc, code=0):

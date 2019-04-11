@@ -1,3 +1,13 @@
+'''
+Object and functions to define and work with tables of files.
+'''
+
+__author__ = ['Miguel Ramos Pernas']
+__email__ = ['miguel.ramos.pernas@cern.ch']
+
+
+__all__ = ['Table', 'Manager']
+
 import warnings
 import tempfile
 import os
@@ -11,19 +21,6 @@ from hep_rfm.files import FileInfo
 from hep_rfm.fields import construct_from_fields
 from hep_rfm.core import copy_file
 from hep_rfm import protocols
-'''
-Object and functions to define and work with tables of files.
-'''
-
-__author__ = ['Miguel Ramos Pernas']
-__email__ = ['miguel.ramos.pernas@cern.ch']
-
-# Local
-
-# Python
-
-
-__all__ = ['Table', 'Manager']
 
 
 class Manager(object):

@@ -1,7 +1,3 @@
-import hep_rfm
-import tempfile
-import pytest
-import os
 '''
 Test functions for the "core" module.
 '''
@@ -9,9 +5,10 @@ Test functions for the "core" module.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Python
-
-# Custom
+import hep_rfm
+import tempfile
+import pytest
+import os
 
 
 def test_copy_file(tmpdir):

@@ -1,8 +1,3 @@
-from collections import namedtuple
-import os
-from hep_rfm.fields import construct_from_fields
-from hep_rfm import protocols
-from hep_rfm import core
 '''
 Define classes and functions to manage files and information about files.
 '''
@@ -10,13 +5,13 @@ Define classes and functions to manage files and information about files.
 __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
-# Local
-
-# Python
-
-
 __all__ = ['FileInfoBase', 'FileInfo', 'FileMarksBase', 'FileMarks']
 
+from collections import namedtuple
+import os
+from hep_rfm.fields import construct_from_fields
+from hep_rfm import protocols
+from hep_rfm import core
 
 # Default names for the file marks
 __default_tmstp__ = 0
