@@ -81,7 +81,7 @@ Now let's create two more files and add them to the table as well.
 
    $ echo "This is the second file" >> file2.txt
    $ echo "This is the third file" >> file3.txt
-   $ hep-rfm-table add_massive table.db file2.txt file3.txt
+   $ hep-rfm-table add-massive table.db file2.txt file3.txt
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
    - Last update: 2019-04-12 12:54:42.226468
@@ -107,7 +107,7 @@ We can also specify a regular expression, so only the files whose names
    $ echo "This is the fourth file" >> subdir/file4.txt
    $ echo "This is the fifth file" >> subdir/subsubdir/file5.txt
    $ echo "This is the sixth file" >> subdir/subsubdir/file6.dt
-   $ hep-rfm-table add_from_dir table.db . --regex .*.txt
+   $ hep-rfm-table add-from-dir table.db . --regex .*.txt
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
@@ -126,7 +126,7 @@ If we remove the regular expression requirement, then it is included
 
 .. code-block:: console
 
-   $ hep-rfm-table add_from_dir table.db .
+   $ hep-rfm-table add-from-dir table.db .
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
@@ -166,7 +166,7 @@ new directory and add the files again.
    file6	/home/user/rfm/subdir/subsubdir/file6.dt 	local	2019-04-12 12:54:42.487090	5bd329091112ab1c7125...
    $ mkdir files
    $ mv subdir *.txt files/.
-   $ hep-rfm-table add_from_dir table.db files
+   $ hep-rfm-table add-from-dir table.db files
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
@@ -194,8 +194,8 @@ In the **remote host**, we will need to have **another table** with the paths
 in it.
 However, we should **specify the path but not the time-stamp or file ID**, since
 we will not have a file there.
-This is solved adding the *-\\-bare* option to *add* and *add_massive*.
-The mode *add_from_dir* will not make sense to be used here, since we do not
+This is solved adding the *-\\-bare* option to *add* and *add-massive*.
+The mode *add-from-dir* will not make sense to be used here, since we do not
 have files there.
 This means that we could type
 
@@ -221,7 +221,7 @@ The other files will be added in a row, by typing
 
 .. code-block:: console
 
-   $ hep-rfm-table add_massive table.db `for i in {2..6};do echo files/file$i.txt; done` --bare --remote ssh @host.com
+   $ hep-rfm-table add-massive table.db `for i in {2..6};do echo files/file$i.txt; done` --bare --remote ssh @host.com
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
