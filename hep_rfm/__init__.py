@@ -23,3 +23,6 @@ for loader, module_name, ispkg in pkgutil.walk_packages(__path__):
         for n, c in inspect.getmembers(mod):
             if n in mod.__all__:
                 globals()[n] = c
+
+# Sort the contents
+__all__ = list(sorted(__all__))
