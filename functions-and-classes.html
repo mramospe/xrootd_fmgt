@@ -17,7 +17,7 @@
     <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="copy_file" href="api/hep_rfm.copy_file.html" />
+    <link rel="next" title="available_path" href="api/hep_rfm.available_path.html" />
     <link rel="prev" title="Getting started" href="getting-started.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
@@ -47,32 +47,32 @@ of the <strong>hep_rfm</strong> package.</p>
 <col width="90%" />
 </colgroup>
 <tbody valign="top">
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;wdir,&nbsp;loglock,&nbsp;…])</td>
-<td>Main function to copy a file from a source to a target.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash" title="hep_rfm.rfm_hash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rfm_hash</span></code></a>(path)</td>
-<td>Use the SHA512 hash function to get the file ID of the file in the given path.</td>
-</tr>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.available_path.html#hep_rfm.available_path" title="hep_rfm.available_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_path</span></code></a>(paths[,&nbsp;modifiers,&nbsp;…])</td>
 <td>Return the first available path from a list of paths.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.available_working_path.html#hep_rfm.available_working_path" title="hep_rfm.available_working_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_working_path</span></code></a>(path[,&nbsp;modifiers,&nbsp;…])</td>
 <td>If an accessible path can be resolved from “path”, it returns it.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_remote</span></code></a>(path)</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.copy_file.html#hep_rfm.copy_file" title="hep_rfm.copy_file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">copy_file</span></code></a>(source,&nbsp;target[,&nbsp;wdir,&nbsp;loglock,&nbsp;…])</td>
+<td>Main function to copy a file from a source to a target.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_remote</span></code></a>(path)</td>
 <td>Return whether the given protocol path belongs to a remote protocol or not.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.process.html#hep_rfm.process" title="hep_rfm.process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process</span></code></a>(*args)</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.process.html#hep_rfm.process" title="hep_rfm.process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">process</span></code></a>(*args)</td>
 <td>Create a subprocess object where the output from “stdout” and “stderr” is redirected to subprocess.PIPE.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.protocol_path.html#hep_rfm.protocol_path" title="hep_rfm.protocol_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">protocol_path</span></code></a>(path[,&nbsp;protocol])</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.protocol_path.html#hep_rfm.protocol_path" title="hep_rfm.protocol_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">protocol_path</span></code></a>(path[,&nbsp;protocol])</td>
 <td>Return a instantiated protocol using the given path and protocol ID.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.register_protocol.html#hep_rfm.register_protocol" title="hep_rfm.register_protocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_protocol</span></code></a>(name)</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.register_protocol.html#hep_rfm.register_protocol" title="hep_rfm.register_protocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">register_protocol</span></code></a>(name)</td>
 <td>Decorator to register a protocol with the given name.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.remote_protocol.html#hep_rfm.remote_protocol" title="hep_rfm.remote_protocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_protocol</span></code></a>(a,&nbsp;b)</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.remote_protocol.html#hep_rfm.remote_protocol" title="hep_rfm.remote_protocol"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remote_protocol</span></code></a>(a,&nbsp;b)</td>
 <td>Determine the protocol to use given two paths to files.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash" title="hep_rfm.rfm_hash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rfm_hash</span></code></a>(path)</td>
+<td>Use the SHA512 hash function to get the file ID of the file in the given path.</td>
 </tr>
 </tbody>
 </table>
@@ -88,54 +88,54 @@ of the <strong>hep_rfm</strong> package.</p>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.AbstractMethodError.html#hep_rfm.AbstractMethodError" title="hep_rfm.AbstractMethodError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AbstractMethodError</span></code></a>()</td>
 <td>Define an error for base classes with abstract methods.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.ProcessError.html#hep_rfm.ProcessError" title="hep_rfm.ProcessError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessError</span></code></a>(msg,&nbsp;stderr)</td>
-<td>Define an error to be raised when a subprocess call fails.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.CopyFileError.html#hep_rfm.CopyFileError" title="hep_rfm.CopyFileError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyFileError</span></code></a>(ipath,&nbsp;opath,&nbsp;stderr)</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.CopyFileError.html#hep_rfm.CopyFileError" title="hep_rfm.CopyFileError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CopyFileError</span></code></a>(ipath,&nbsp;opath,&nbsp;stderr)</td>
 <td>Define an error to be raised when copying a file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileInfo.html#hep_rfm.FileInfo" title="hep_rfm.FileInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInfo</span></code></a></td>
+<td>Object to store the information about a file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileInfoBase.html#hep_rfm.FileInfoBase" title="hep_rfm.FileInfoBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInfoBase</span></code></a></td>
+<td>Base class for an object storing the information about a file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileMarks.html#hep_rfm.FileMarks" title="hep_rfm.FileMarks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileMarks</span></code></a></td>
+<td>Represent an object storing the time-stamp and file ID of a file.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileMarksBase.html#hep_rfm.FileMarksBase" title="hep_rfm.FileMarksBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileMarksBase</span></code></a></td>
+<td>Base class representing an object storing the time-stamp and file ID of a file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.LocalPath.html#hep_rfm.LocalPath" title="hep_rfm.LocalPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LocalPath</span></code></a>(path)</td>
+<td>Represent a path to a local file.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.MakeDirsError.html#hep_rfm.MakeDirsError" title="hep_rfm.MakeDirsError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MakeDirsError</span></code></a>(target,&nbsp;stderr)</td>
 <td>Error to be displayed when failing making directories.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileInfoBase.html#hep_rfm.FileInfoBase" title="hep_rfm.FileInfoBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInfoBase</span></code></a></td>
-<td>Base class for an object storing the information about a file.</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manager</span></code></a>()</td>
+<td>Represent a class to store tables in different local/remote hosts, being able to do updates among them.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileInfo.html#hep_rfm.FileInfo" title="hep_rfm.FileInfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileInfo</span></code></a></td>
-<td>Object to store the information about a file.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.FileMarksBase.html#hep_rfm.FileMarksBase" title="hep_rfm.FileMarksBase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileMarksBase</span></code></a></td>
-<td>Base class representing an object storing the time-stamp and file ID of a file.</td>
-</tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.FileMarks.html#hep_rfm.FileMarks" title="hep_rfm.FileMarks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FileMarks</span></code></a></td>
-<td>Represent an object storing the time-stamp and file ID of a file.</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.ProcessError.html#hep_rfm.ProcessError" title="hep_rfm.ProcessError"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessError</span></code></a>(msg,&nbsp;stderr)</td>
+<td>Define an error to be raised when a subprocess call fails.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProtocolPath</span></code></a>(path[,&nbsp;path_checker])</td>
 <td>Base class to represent a protocol to manage a path to a file.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.LocalPath.html#hep_rfm.LocalPath" title="hep_rfm.LocalPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LocalPath</span></code></a>(path)</td>
-<td>Represent a path to a local file.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.RemotePath.html#hep_rfm.RemotePath" title="hep_rfm.RemotePath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RemotePath</span></code></a>(path[,&nbsp;path_checker])</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.RemotePath.html#hep_rfm.RemotePath" title="hep_rfm.RemotePath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RemotePath</span></code></a>(path[,&nbsp;path_checker])</td>
 <td>Represent a remote path.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath" title="hep_rfm.SSHPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SSHPath</span></code></a>(path)</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.SSHPath.html#hep_rfm.SSHPath" title="hep_rfm.SSHPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SSHPath</span></code></a>(path)</td>
 <td>Represent a path to be handled using SSH.</td>
-</tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath" title="hep_rfm.XRootDPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XRootDPath</span></code></a>(path)</td>
-<td>Represent a path to be handled using XROOTD protocol.</td>
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Table</span></code></a>([files,&nbsp;description,&nbsp;last_update,&nbsp;version])</td>
 <td>Create a table storing the information about files.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manager</span></code></a>()</td>
-<td>Represent a class to store tables in different local/remote hosts, being able to do updates among them.</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath" title="hep_rfm.XRootDPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XRootDPath</span></code></a>(path)</td>
+<td>Represent a path to be handled using XROOTD protocol.</td>
 </tr>
 </tbody>
 </table>
 </div>
 <div class="section" id="class-inheritance-diagram">
 <h2>Class Inheritance Diagram<a class="headerlink" href="#class-inheritance-diagram" title="Permalink to this headline">¶</a></h2>
-<div class="graphviz"><img src="_images/inheritance-9a89c7510257187cfaa18eb625c62839de1d07eb.png" alt="Inheritance diagram of hep_rfm.exceptions.AbstractMethodError, hep_rfm.exceptions.ProcessError, hep_rfm.exceptions.CopyFileError, hep_rfm.exceptions.MakeDirsError, hep_rfm.files.FileInfoBase, hep_rfm.files.FileInfo, hep_rfm.files.FileMarksBase, hep_rfm.files.FileMarks, hep_rfm.protocols.ProtocolPath, hep_rfm.protocols.LocalPath, hep_rfm.protocols.RemotePath, hep_rfm.protocols.SSHPath, hep_rfm.protocols.XRootDPath, hep_rfm.tables.Table, hep_rfm.tables.Manager" class="inheritance graphviz" /></div>
+<div class="graphviz"><img src="_images/inheritance-0b04085bd468fcf3bda22b030688f2e03c641be3.png" alt="Inheritance diagram of hep_rfm.exceptions.AbstractMethodError, hep_rfm.exceptions.CopyFileError, hep_rfm.files.FileInfo, hep_rfm.files.FileInfoBase, hep_rfm.files.FileMarks, hep_rfm.files.FileMarksBase, hep_rfm.protocols.LocalPath, hep_rfm.exceptions.MakeDirsError, hep_rfm.tables.Manager, hep_rfm.exceptions.ProcessError, hep_rfm.protocols.ProtocolPath, hep_rfm.protocols.RemotePath, hep_rfm.protocols.SSHPath, hep_rfm.tables.Table, hep_rfm.protocols.XRootDPath" class="inheritance graphviz" /></div>
 </div>
 </div>
 
@@ -171,7 +171,7 @@ of the <strong>hep_rfm</strong> package.</p>
 <ul>
   <li><a href="index.html">Documentation overview</a><ul>
       <li>Previous: <a href="getting-started.html" title="previous chapter">Getting started</a></li>
-      <li>Next: <a href="api/hep_rfm.copy_file.html" title="next chapter">copy_file</a></li>
+      <li>Next: <a href="api/hep_rfm.available_path.html" title="next chapter">available_path</a></li>
   </ul></li>
 </ul>
 </div>
