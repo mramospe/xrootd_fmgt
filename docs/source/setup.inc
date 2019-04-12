@@ -52,7 +52,7 @@ We can see the contents on the table at any point by typing
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:20.313162
+   - Last update: 2019-04-12 12:54:41.593218
    - Contents:
    No entries found
 
@@ -67,10 +67,10 @@ We will start by creating a new file, with some content, and then we will add it
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:20.712565
+   - Last update: 2019-04-12 12:54:41.904134
    - Contents:
-   name 	path                                                	pid  	tmstp            	fid                                                                                                                             
-   file1	/home/user/rfm/file1.txt	local	1549548740.521796	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
+   name 	path                                                	pid  	tmstp                     	fid                    
+   file1	/home/user/file1.txt	local	2019-04-12 12:54:41.755092	202444300d48c9387406...
 
 So we have added our first file.
 In order to do this we had to give the name of the file and the path to it.
@@ -84,12 +84,12 @@ Now let's create two more files and add them to the table as well.
    $ hep-rfm-table add_massive table.db file2.txt file3.txt
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:21.107054
+   - Last update: 2019-04-12 12:54:42.226468
    - Contents:
-   name 	path                                                	pid  	tmstp            	fid                                                                                                                             
-   file1	/home/user/rfm/file1.txt	local	1549548740.521796	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
-   file2	/home/user/rfm/file2.txt	local	1549548740.909782	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
-   file3	/home/user/rfm/file3.txt	local	1549548740.909782	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
+   name 	path                                                	pid  	tmstp                     	fid                    
+   file1	/home/user/file1.txt	local	2019-04-12 12:54:41.755092	202444300d48c9387406...
+   file2	/home/user/file2.txt	local	2019-04-12 12:54:42.067091	cad9a71a7902d13f44db...
+   file3	/home/user/file3.txt	local	2019-04-12 12:54:42.067091	ce53225da9b363e3db71...
 
 With this command one can add easily new files, given only their paths, where
 the names will be extracted from the name of the files themselves, without
@@ -111,14 +111,14 @@ We can also specify a regular expression, so only the files whose names
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:21.511789
+   - Last update: 2019-04-12 12:54:42.643200
    - Contents:
-   name 	path                                                                 	pid  	tmstp             	fid                                                                                                                             
-   file1	/home/user/rfm/file1.txt                 	local	1549548740.521796 	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
-   file2	/home/user/rfm/file2.txt                 	local	1549548740.909782 	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
-   file3	/home/user/rfm/file3.txt                 	local	1549548740.909782 	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
-   file4	/home/user/rfm/subdir/file4.txt          	local	1549548741.3177671	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
-   file5	/home/user/rfm/subdir/subsubdir/file5.txt	local	1549548741.3177671	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
+   name 	path                                                                 	pid  	tmstp                     	fid                    
+   file1	/home/user/file1.txt                 	local	2019-04-12 12:54:41.755092	202444300d48c9387406...
+   file2	/home/user/file2.txt                 	local	2019-04-12 12:54:42.067091	cad9a71a7902d13f44db...
+   file3	/home/user/file3.txt                 	local	2019-04-12 12:54:42.067091	ce53225da9b363e3db71...
+   file4	/home/user/subdir/file4.txt          	local	2019-04-12 12:54:42.487090	8a9dcf90d2a0bcb95d8f...
+   file5	/home/user/subdir/subsubdir/file5.txt	local	2019-04-12 12:54:42.487090	86f2f9bb445df1e62818...
 
 You can see that we have included all files in the current directory, but from
 *file6.dt*, which did not match the given regular expression.
@@ -130,16 +130,16 @@ If we remove the regular expression requirement, then it is included
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:21.913163
+   - Last update: 2019-04-12 12:54:42.970372
    - Contents:
-   name 	path                                                                 	pid  	tmstp             	fid                                                                                                                             
-   file1	/home/user/rfm/file1.txt                 	local	1549548740.521796 	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
-   file2	/home/user/rfm/file2.txt                 	local	1549548740.909782 	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
-   file3	/home/user/rfm/file3.txt                 	local	1549548740.909782 	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
-   file4	/home/user/rfm/subdir/file4.txt          	local	1549548741.3177671	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
-   file5	/home/user/rfm/subdir/subsubdir/file5.txt	local	1549548741.3177671	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
-   file6	/home/user/rfm/subdir/subsubdir/file6.dt 	local	1549548741.3177671	5bd329091112ab1c712523d2064d0ca9e4dc2b52095852ae1d314924c0bf6e1d508e269d5a1f5a92d793ad5d285b7d2c44ba1840a9981e9a3c0a86ef24e7ad28
-   table	/home/user/rfm/table.db                  	local	1549548741.5057604	b7822a580db647da3ad0b5dfbea18d1c4ea5d9384b4ca1a1ce397dbd8eda318baedafd36f1b79d19b56bbff9316be82f64d21d898ddf07fd39590f04c2407f32
+   name 	path                                                                 	pid  	tmstp                     	fid                    
+   file1	/home/user/file1.txt                 	local	2019-04-12 12:54:41.755092	202444300d48c9387406...
+   file2	/home/user/file2.txt                 	local	2019-04-12 12:54:42.067091	cad9a71a7902d13f44db...
+   file3	/home/user/file3.txt                 	local	2019-04-12 12:54:42.067091	ce53225da9b363e3db71...
+   file4	/home/user/subdir/file4.txt          	local	2019-04-12 12:54:42.487090	8a9dcf90d2a0bcb95d8f...
+   file5	/home/user/subdir/subsubdir/file5.txt	local	2019-04-12 12:54:42.487090	86f2f9bb445df1e62818...
+   file6	/home/user/subdir/subsubdir/file6.dt 	local	2019-04-12 12:54:42.487090	5bd329091112ab1c7125...
+   table	/home/user/table.db                  	local	2019-04-12 12:54:42.639090	e00f13b293897a73ea58...
 
 You can see that we have also included the table itself.
 This is very dangerous, and must be avoided, since it will lead to a replacement
@@ -155,30 +155,30 @@ new directory and add the files again.
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:22.299355
+   - Last update: 2019-04-12 12:54:43.297370
    - Contents:
-   name 	path                                                                 	pid  	tmstp             	fid                                                                                                                             
-   file1	/home/user/rfm/file1.txt                 	local	1549548740.521796 	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
-   file2	/home/user/rfm/file2.txt                 	local	1549548740.909782 	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
-   file3	/home/user/rfm/file3.txt                 	local	1549548740.909782 	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
-   file4	/home/user/rfm/subdir/file4.txt          	local	1549548741.3177671	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
-   file5	/home/user/rfm/subdir/subsubdir/file5.txt	local	1549548741.3177671	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
-   file6	/home/user/rfm/subdir/subsubdir/file6.dt 	local	1549548741.3177671	5bd329091112ab1c712523d2064d0ca9e4dc2b52095852ae1d314924c0bf6e1d508e269d5a1f5a92d793ad5d285b7d2c44ba1840a9981e9a3c0a86ef24e7ad28
+   name 	path                                                                 	pid  	tmstp                     	fid                    
+   file1	/home/user/file1.txt                 	local	2019-04-12 12:54:41.755092	202444300d48c9387406...
+   file2	/home/user/file2.txt                 	local	2019-04-12 12:54:42.067091	cad9a71a7902d13f44db...
+   file3	/home/user/file3.txt                 	local	2019-04-12 12:54:42.067091	ce53225da9b363e3db71...
+   file4	/home/user/subdir/file4.txt          	local	2019-04-12 12:54:42.487090	8a9dcf90d2a0bcb95d8f...
+   file5	/home/user/subdir/subsubdir/file5.txt	local	2019-04-12 12:54:42.487090	86f2f9bb445df1e62818...
+   file6	/home/user/subdir/subsubdir/file6.dt 	local	2019-04-12 12:54:42.487090	5bd329091112ab1c7125...
    $ mkdir files
    $ mv subdir *.txt files/.
    $ hep-rfm-table add_from_dir table.db files
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:22.701739
+   - Last update: 2019-04-12 12:54:43.628105
    - Contents:
-   name 	path                                                                       	pid  	tmstp             	fid                                                                                                                             
-   file1	/home/user/rfm/files/file1.txt                 	local	1549548740.521796 	202444300d48c9387406493590cc693a81c011f1c112d7c8916b27ff9e5daad32a679e4471974b2169c4d22738a17a92405d8948bf5b1d2d8b69c235a65f991b
-   file2	/home/user/rfm/files/file2.txt                 	local	1549548740.909782 	cad9a71a7902d13f44db95a00ccc75a52ce12dd080a65d53e09736d652aa8048bc1e02e4a85508544f8578a0c6b245b9f6df23e6b909b4445bdfc2d4d41c4e63
-   file3	/home/user/rfm/files/file3.txt                 	local	1549548740.909782 	ce53225da9b363e3db71b188605a88c90ac9e6eb46a512775f2612ff09956f33c97fd2851b94d5812bb7b97e2e7ea7c9c2a66bd148f2c570ecbfdbf346189ff9
-   file4	/home/user/rfm/files/subdir/file4.txt          	local	1549548741.3177671	8a9dcf90d2a0bcb95d8fdbaf9c86e2beb0b4fe0825e823742f6f5808621e89f0b98a8266c6135e2e65fbb108ddac4448af668a88d5b736445f8e71065c0b434f
-   file5	/home/user/rfm/files/subdir/subsubdir/file5.txt	local	1549548741.3177671	86f2f9bb445df1e6281869a36b5c0f1d4cddc5edc722b2c458ec09053713a3836a8376d1421cc9c9329b60a4223812839e76d75702dc27d7c03bf0d00b054906
-   file6	/home/user/rfm/files/subdir/subsubdir/file6.dt 	local	1549548741.3177671	5bd329091112ab1c712523d2064d0ca9e4dc2b52095852ae1d314924c0bf6e1d508e269d5a1f5a92d793ad5d285b7d2c44ba1840a9981e9a3c0a86ef24e7ad28
+   name 	path                                                                       	pid  	tmstp                     	fid                    
+   file1	/home/user/files/file1.txt                 	local	2019-04-12 12:54:41.755092	202444300d48c9387406...
+   file2	/home/user/files/file2.txt                 	local	2019-04-12 12:54:42.067091	cad9a71a7902d13f44db...
+   file3	/home/user/files/file3.txt                 	local	2019-04-12 12:54:42.067091	ce53225da9b363e3db71...
+   file4	/home/user/files/subdir/file4.txt          	local	2019-04-12 12:54:42.487090	8a9dcf90d2a0bcb95d8f...
+   file5	/home/user/files/subdir/subsubdir/file5.txt	local	2019-04-12 12:54:42.487090	86f2f9bb445df1e62818...
+   file6	/home/user/files/subdir/subsubdir/file6.dt 	local	2019-04-12 12:54:42.487090	5bd329091112ab1c7125...
 
 So now the entry *table* has been removed.
 The idea behind this is not only to have a way to keep our data files organized,
@@ -208,7 +208,7 @@ This means that we could type
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:22.701739
+   - Last update: 2019-04-12 12:54:43.928512
    - Contents:
    name 	path                                	pid  	tmstp	fid 
    file1	@host.com:/home/user/files/file1.txt	local	0.0  	none
@@ -225,7 +225,7 @@ The other files will be added in a row, by typing
    $ hep-rfm-table display table.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:23.281089
+   - Last update: 2019-04-12 12:54:44.011354
    - Contents:
    name 	path                                	pid  	tmstp	fid 
    file1	@host.com:/home/user/files/file1.txt	local	0.0  	none
@@ -251,15 +251,16 @@ This is done through the *replicate* mode:
    $ hep-rfm-table display rtable.db
    Running "hep-rfm-table" from hep_rfm 0.0.0.dev4
    - Table created with hep_rfm 0.0.0.dev4
-   - Last update: 2019-02-07 15:12:23.281089
+   - Last update: 2019-04-12 12:54:44.123548
    - Contents:
-   name 	path                                                                        	pid  	tmstp	fid 
-   file1	/home/user/rfm/rfiles/file1.txt                 	local	0    	none
-   file2	/home/user/rfm/rfiles/file2.txt                 	local	0    	none
-   file3	/home/user/rfm/rfiles/file3.txt                 	local	0    	none
-   file4	/home/user/rfm/rfiles/subdir/file4.txt          	local	0    	none
-   file5	/home/user/rfm/rfiles/subdir/subsubdir/file5.txt	local	0    	none
-   file6	/home/user/rfm/rfiles/subdir/subsubdir/file6.dt 	local	0    	none
+   name 	path                                                                        	pid  	tmstp              	fid 
+   file1	/home/user/rfiles/file1.txt                 	local	1970-01-01 01:00:00	none
+   file2	/home/user/rfiles/file2.txt                 	local	1970-01-01 01:00:00	none
+   file3	/home/user/rfiles/file3.txt                 	local	1970-01-01 01:00:00	none
+   file4	/home/user/rfiles/subdir/file4.txt          	local	1970-01-01 01:00:00	none
+   file5	/home/user/rfiles/subdir/subsubdir/file5.txt	local	1970-01-01 01:00:00	none
+   file6	/home/user/rfiles/subdir/subsubdir/file6.dt 	local	1970-01-01 01:00:00	none
+
 
 You can see that we have created a new table *rtable.db* with the same
 structure as *table.txt*, but this time pointing to bare files in the directory

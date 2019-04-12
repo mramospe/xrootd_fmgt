@@ -246,9 +246,9 @@ def display(table, fields, regex, full_fid, tmstp):
         '''
         value = file_proxy.field(field)
         if field == 'fid':
-            if not full_fid:
+            if not full_fid and value != hep_rfm.files.__default_fid__:
                 # Show only the first 30 elements
-                value = value[:30] + '...'
+                value = value[:20] + '...'
         elif field == 'tmstp':
             if not tmstp:
                 value = datetime.datetime.fromtimestamp(value)
