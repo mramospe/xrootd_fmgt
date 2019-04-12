@@ -54,7 +54,6 @@ Thumbs.db
 ##########################
 .eggs/
 hep_rfm.egg-info/
-hep_rfm/version.py
 
 # Build files #
 ###############

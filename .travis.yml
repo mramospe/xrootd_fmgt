@@ -6,14 +6,16 @@ python:
 
 install: pip install .
 
-script: pytest -v tests
+script: python setup.py test
 
 jobs:
   include:
     - stage: format
       name: "Check format"
       python: 3.6
+      install: pip install autopep8
       script:
-        - bin/check-format . python
-        - bin/check-format bin all
-        - bin/check-format scripts all
+        - python setup.py check_format --directory docs --file-type python
+        - python setup.py check_format --directory hep_rfm --file-type python
+        - python setup.py check_format --directory scripts --file-type all
+        - python setup.py check_format --directory tests --file-type python

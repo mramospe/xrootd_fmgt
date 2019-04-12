@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-from setuptools import setup, find_packages
-import os
 '''
 Setup script for the "hep_rfm" package
 '''
@@ -8,53 +6,87 @@ Setup script for the "hep_rfm" package
 __author__ = 'Miguel Ramos Pernas'
 __email__ = 'miguel.ramos.pernas@cern.ch'
 
+import os
+import subprocess
+import sys
+from setuptools import Command, setup, find_packages
 
-# Python
 
-#
-# Version of the package. Before a new release is made
-# just the "version_info" must be changed. The options
-# for the fourth tag are "dev", "alpha", "beta",
-# "cand", "final" or "post".
-#
-version_info = (0, 0, 0, 'dev', 4)
+class CheckFormatCommand(Command):
+    '''
+    Check the format of the files in the given directory. This script takes only
+    one argument, the directory to process. A recursive look-up will be done to
+    look for python files in the sub-directories and determine whether the files
+    have the correct format.
+    '''
+    description = 'check the format of the files of a certain type in a given directory'
 
-tag = version_info[3]
+    user_options = [
+        ('directory=', 'd', 'directory to process'),
+        ('file-type=', 't', 'file type (python|all)'),
+    ]
 
-if tag == 'final':
-    version = '.'.join(map(str, version_info[:3]))
-else:
-    if tag == 'alpha':
-        frmt = '{}a{}'
-    elif tag == 'beta':
-        frmt = '{}b{}'
-    elif tag == 'cand':
-        frmt = '{}rc{}'
-    elif tag == 'post':
-        frmt = '{}.post{}'
-    elif tag == 'dev':
-        frmt = '{}.dev{}'
-    else:
-        raise ValueError('Unable to parse version information')
+    def initialize_options(self):
+        '''
+        Running at the begining of the configuration.
+        '''
+        self.directory = None
+        self.file_type = None
 
-    version = frmt.format(
-        '.'.join(map(str, version_info[:3])), version_info[4])
+    def finalize_options(self):
+        '''
+        Running at the end of the configuration.
+        '''
+        if self.directory is None:
+            raise Exception('Parameter --directory is missing')
+        if not os.path.isdir(self.directory):
+            raise Exception('Not a directory {}'.format(self.directory))
+        if self.file_type is None:
+            raise Exception('Parameter --file-type is missing')
+        if self.file_type not in ('python', 'all'):
+            raise Exception('File type must be either "python" or "all"')
+
+    def run(self):
+        '''
+        Execution of the command action.
+        '''
+        matched_files = []
+        for root, _, files in os.walk(self.directory):
+            for f in files:
+                if self.file_type == 'python' and not f.endswith('.py'):
+                    continue
+                matched_files.append(os.path.join(root, f))
+
+        process = subprocess.Popen(['autopep8', '--diff'] + matched_files,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+
+        stdout, stderr = process.communicate()
+
+        if process.returncode < 0:
+            raise RuntimeError('Call to autopep8 exited with error {}\nMessage:\n{}'.format(
+                abs(returncode), stderr))
+
+        if len(stdout):
+            raise RuntimeError(
+                'Found differences for files in directory "{}" with file type "{}"'.format(self.directory, self.file_type))
+
 
 # Setup function
 setup(
 
     name='hep_rfm',
 
-    version=version,
-
     description='Tools to manage remote and local files using the '
     'xrootd and ssh protocols',
+
+    cmdclass={'check_format': CheckFormatCommand},
 
     # Read the long description from the README
     long_description=open('README.rst').read(),
 
     # Keywords to search for the package
-    keywords='physics hep file management',
+    keywords='hep high energy physics file management',
 
     # Find all the packages in this directory
     packages=find_packages(),
@@ -62,26 +94,8 @@ setup(
     # Install scripts
     scripts=['scripts/{}'.format(f) for f in os.listdir('scripts')],
 
-    # Requisites
-    install_requires=['autopep8', 'pytest'],
-
     # Test requirements
     setup_requires=['pytest-runner'],
 
     tests_require=['pytest'],
 )
-
-
-# Create a module with the versions
-version_file = open('hep_rfm/version.py', 'wt')
-version_file.write("""\
-'''
-Auto-generated module holding the version of the "hep_rfm" package
-'''
-
-__version__ = "{}"
-__version_info__ = {}
-
-__all__ = ['__version__', '__version_info__']
-""".format(version, version_info))
-version_file.close()

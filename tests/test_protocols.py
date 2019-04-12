@@ -6,7 +6,6 @@ __author__ = ['Miguel Ramos Pernas']
 __email__ = ['miguel.ramos.pernas@cern.ch']
 
 import hep_rfm
-import socket
 import pytest
 import os
 
@@ -38,9 +37,9 @@ def test_available_path(tmpdir):
         hep_rfm.available_path(paths[:-1])
 
     # Test the function with modifiers
-    host = socket.gethostname()
-    remote_path = hep_rfm.protocol_path('user@{}:{}'.format(host, lp), 'ssh')
-    p = hep_rfm.available_path([remote_path], modifiers={'ssh_hosts': [host]})
+    remote_path = hep_rfm.protocol_path('user@host:{}'.format(lp), 'ssh')
+    p = hep_rfm.available_path([remote_path], modifiers={
+                               'ssh_hosts': ['host']})
     assert p == lp
 
 
@@ -242,10 +241,8 @@ def test_sshpath():
     pp = pp.with_modifiers({'ssh_usernames': {'my-site': 'user'}})
     assert pp.path == 'user@my-site:path/to/file.txt'
 
-    host = socket.gethostname()
-
-    pp = hep_rfm.protocol_path('user@{}:path/to/file.txt'.format(host), 'ssh')
-    pp = pp.with_modifiers({'ssh_hosts': [host]})
+    pp = hep_rfm.protocol_path('user@host:path/to/file.txt', 'ssh')
+    pp = pp.with_modifiers({'ssh_hosts': ['host']})
     assert pp.path == 'path/to/file.txt'
 
     pp = hep_rfm.protocol_path('@my-site:path/to/file.txt', 'ssh')
