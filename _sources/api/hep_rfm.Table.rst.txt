@@ -10,12 +10,16 @@ Table
 
    .. autosummary::
 
+      ~Table.from_fields
+      ~Table.from_files
       ~Table.read
       ~Table.updated
       ~Table.write
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: from_fields
+   .. automethod:: from_files
    .. automethod:: read
    .. automethod:: updated
    .. automethod:: write

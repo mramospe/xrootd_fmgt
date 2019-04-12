@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>hep_rfm.core &#8212; hep_rfm 0.0.0.dev3 documentation</title>
+    <title>hep_rfm.core &#8212; hep_rfm 0.0.0.dev4 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -39,31 +39,24 @@
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miguel Ramos Pernas&#39;</span><span class="p">]</span>
-<span class="n">__email__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
 
-<span class="c1"># Custom</span>
-<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
-<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">parallel</span>
-<span class="kn">from</span> <span class="nn">hep_rfm.exceptions</span> <span class="k">import</span> <span class="n">CopyFileError</span><span class="p">,</span> <span class="n">MakeDirsError</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;copy_file&#39;</span><span class="p">,</span> <span class="s1">&#39;rfm_hash&#39;</span><span class="p">]</span>
 
-<span class="c1"># Python</span>
-<span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">tempfile</span>
-
-
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">&#39;copy_file&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;rfm_hash&#39;</span><span class="p">,</span>
-    <span class="p">]</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">hashlib</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.exceptions</span> <span class="k">import</span> <span class="n">CopyFileError</span><span class="p">,</span> <span class="n">MakeDirsError</span>
+<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">parallel</span>
+<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
 
 <span class="c1"># Buffer size to be able to hash large files</span>
-<span class="n">__buffer_size__</span> <span class="o">=</span> <span class="mi">10485760</span> <span class="c1"># 10MB</span>
+<span class="n">__buffer_size__</span> <span class="o">=</span> <span class="mi">10485760</span>  <span class="c1"># 10MB</span>
 
 
-<div class="viewcode-block" id="copy_file"><a class="viewcode-back" href="../../api/hep_rfm.copy_file.html#hep_rfm.copy_file">[docs]</a><span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">wdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loglock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="kc">None</span> <span class="p">):</span>
+<div class="viewcode-block" id="copy_file"><a class="viewcode-back" href="../../api/hep_rfm.copy_file.html#hep_rfm.copy_file">[docs]</a><span class="k">def</span> <span class="nf">copy_file</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">wdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">loglock</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Main function to copy a file from a source to a target.</span>
 <span class="sd">    The copy is done if the modification time of both files do not coincide.</span>
@@ -117,13 +110,14 @@
             <span class="k">return</span>
 
         <span class="n">parallel</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">,</span>
-                     <span class="s1">&#39;Copying file</span><span class="se">\n</span><span class="s1"> source: </span><span class="si">{}</span><span class="se">\n</span><span class="s1"> target: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">path</span><span class="p">),</span>
+                     <span class="s1">&#39;Copying file</span><span class="se">\n</span><span class="s1"> source: </span><span class="si">{}</span><span class="se">\n</span><span class="s1"> target: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                         <span class="n">source</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">path</span><span class="p">),</span>
                      <span class="n">loglock</span><span class="p">)</span>
 
         <span class="n">protocols</span><span class="o">.</span><span class="n">ProtocolPath</span><span class="o">.</span><span class="n">__protocols__</span><span class="p">[</span><span class="n">dec</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="rfm_hash"><a class="viewcode-back" href="../../api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash">[docs]</a><span class="k">def</span> <span class="nf">rfm_hash</span><span class="p">(</span> <span class="n">path</span> <span class="p">):</span>
+<div class="viewcode-block" id="rfm_hash"><a class="viewcode-back" href="../../api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash">[docs]</a><span class="k">def</span> <span class="nf">rfm_hash</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Use the SHA512 hash function to get the file ID of the file</span>
 <span class="sd">    in the given path.</span>

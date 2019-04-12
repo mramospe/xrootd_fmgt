@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>available_path &#8212; hep_rfm 0.0.0.dev3 documentation</title>
+    <title>available_path &#8212; hep_rfm 0.0.0.dev4 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
@@ -39,8 +39,10 @@
 <h1>available_path<a class="headerlink" href="#available-path" title="Permalink to this headline">¶</a></h1>
 <dl class="function">
 <dt id="hep_rfm.available_path">
-<code class="descclassname">hep_rfm.</code><code class="descname">available_path</code><span class="sig-paren">(</span><em>paths</em>, <em>allow_protocols=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/protocols.html#available_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.available_path" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">hep_rfm.</code><code class="descname">available_path</code><span class="sig-paren">(</span><em>paths</em>, <em>modifiers=None</em>, <em>allow_protocols=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/protocols.html#available_path"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.available_path" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the first available path from a list of paths.
+If a local path results after applying “modifiers” to any of the
+given paths, then this is returned (as a local path).
 If any of the paths in “paths” is remote, then “allow_protocols” permits
 the user to make this function return a path if it belongs to one of the
 given protocols, that must be specified as a container of strings.
@@ -51,6 +53,7 @@ The first matching path will be returned.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>paths</strong> (<em>collection</em><em>(</em><a class="reference internal" href="hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath"><em>ProtocolPath</em></a><em>)</em>) – list of paths to process.</li>
+<li><strong>modifiers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – modifiers to be applied in the set of paths.</li>
 <li><strong>allow_protocols</strong> (<em>container</em><em>(</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a><em>)</em>) – possible protocols to consider.</li>
 </ul>
 </td>
@@ -66,6 +69,10 @@ The first matching path will be returned.</p>
 </tr>
 </tbody>
 </table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="hep_rfm.available_working_path.html#hep_rfm.available_working_path" title="hep_rfm.available_working_path"><code class="xref py py-func docutils literal notranslate"><span class="pre">available_working_path()</span></code></a></p>
+</div>
 <div class="admonition warning">
 <p class="first admonition-title">Warning</p>
 <p class="last">If the path to a file on a remote site matches that of a local file,

@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Functions and classes &#8212; hep_rfm 0.0.0.dev3 documentation</title>
+    <title>Functions and classes &#8212; hep_rfm 0.0.0.dev4 documentation</title>
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
@@ -53,10 +53,10 @@ of the <strong>hep_rfm</strong> package.</p>
 <tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.rfm_hash.html#hep_rfm.rfm_hash" title="hep_rfm.rfm_hash"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rfm_hash</span></code></a>(path)</td>
 <td>Use the SHA512 hash function to get the file ID of the file in the given path.</td>
 </tr>
-<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.available_path.html#hep_rfm.available_path" title="hep_rfm.available_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_path</span></code></a>(paths[,&nbsp;allow_protocols])</td>
+<tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.available_path.html#hep_rfm.available_path" title="hep_rfm.available_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_path</span></code></a>(paths[,&nbsp;modifiers,&nbsp;…])</td>
 <td>Return the first available path from a list of paths.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.available_working_path.html#hep_rfm.available_working_path" title="hep_rfm.available_working_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_working_path</span></code></a>(path[,&nbsp;allow_protocols])</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.available_working_path.html#hep_rfm.available_working_path" title="hep_rfm.available_working_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">available_working_path</span></code></a>(path[,&nbsp;modifiers,&nbsp;…])</td>
 <td>If an accessible path can be resolved from “path”, it returns it.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.is_remote.html#hep_rfm.is_remote" title="hep_rfm.is_remote"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_remote</span></code></a>(path)</td>
@@ -124,7 +124,7 @@ of the <strong>hep_rfm</strong> package.</p>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.XRootDPath.html#hep_rfm.XRootDPath" title="hep_rfm.XRootDPath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">XRootDPath</span></code></a>(path)</td>
 <td>Represent a path to be handled using XROOTD protocol.</td>
 </tr>
-<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Table</span></code></a>(files)</td>
+<tr class="row-even"><td><a class="reference internal" href="api/hep_rfm.Table.html#hep_rfm.Table" title="hep_rfm.Table"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Table</span></code></a>([files,&nbsp;description,&nbsp;last_update,&nbsp;version])</td>
 <td>Create a table storing the information about files.</td>
 </tr>
 <tr class="row-odd"><td><a class="reference internal" href="api/hep_rfm.Manager.html#hep_rfm.Manager" title="hep_rfm.Manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Manager</span></code></a>()</td>

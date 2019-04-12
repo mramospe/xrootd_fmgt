@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>hep_rfm.files &#8212; hep_rfm 0.0.0.dev3 documentation</title>
+    <title>hep_rfm.files &#8212; hep_rfm 0.0.0.dev4 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -39,23 +39,19 @@
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miguel Ramos Pernas&#39;</span><span class="p">]</span>
-<span class="n">__email__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
-
-<span class="c1"># Local</span>
-<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
-
-<span class="c1"># Python</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
-
+<span class="n">__email__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FileInfoBase&#39;</span><span class="p">,</span> <span class="s1">&#39;FileInfo&#39;</span><span class="p">,</span> <span class="s1">&#39;FileMarksBase&#39;</span><span class="p">,</span> <span class="s1">&#39;FileMarks&#39;</span><span class="p">]</span>
 
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.fields</span> <span class="k">import</span> <span class="n">construct_from_fields</span>
+<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
+<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">core</span>
 
 <span class="c1"># Default names for the file marks</span>
 <span class="n">__default_tmstp__</span> <span class="o">=</span> <span class="mi">0</span>
-<span class="n">__default_fid__</span>   <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+<span class="n">__default_fid__</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
 <span class="c1"># Store the time-stamp and a file ID</span>
 <span class="n">FileMarksBase</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;FileMarksBase&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;tmstp&#39;</span><span class="p">,</span> <span class="s1">&#39;fid&#39;</span><span class="p">])</span>
@@ -84,9 +80,9 @@
 
 <div class="viewcode-block" id="FileInfo"><a class="viewcode-back" href="../../api/hep_rfm.FileInfo.html#hep_rfm.FileInfo">[docs]</a><span class="k">class</span> <span class="nc">FileInfo</span><span class="p">(</span><span class="n">FileInfoBase</span><span class="p">):</span>
 
-    <span class="n">__fields__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="s1">&#39;tmstp&#39;</span><span class="p">,</span> <span class="s1">&#39;fid&#39;</span><span class="p">)</span>
+    <span class="n">__direct_access_fields__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="s1">&#39;tmstp&#39;</span><span class="p">,</span> <span class="s1">&#39;fid&#39;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">protocol_path</span><span class="p">,</span> <span class="n">marks</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">protocol_path</span><span class="p">,</span> <span class="n">marks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Object to store the information about a file.</span>
 
@@ -106,7 +102,7 @@
 
         <span class="k">return</span> <span class="n">fi</span>
 
-    <span class="k">def</span> <span class="nf">field</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">fi</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fi</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Get the value of field &quot;fi&quot;, that can be any of</span>
 <span class="sd">        (&#39;name&#39;, &#39;path&#39;, &#39;pid&#39;, &#39;tmstp&#39;, &#39;fid&#39;)</span>
@@ -124,28 +120,29 @@
         <span class="k">elif</span> <span class="n">fi</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;tmstp&#39;</span><span class="p">,</span> <span class="s1">&#39;fid&#39;</span><span class="p">):</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognized field &quot;</span><span class="si">{}</span><span class="s1">&quot;. Choose between </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognized field &quot;</span><span class="si">{}</span><span class="s1">&quot;. Choose between </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__direct_access_fields__</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fi</span><span class="p">)</span>
 
-    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_stream_line</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">line</span> <span class="p">):</span>
+    <span class="nd">@construct_from_fields</span><span class="p">([</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;protocol_path&#39;</span><span class="p">,</span> <span class="s1">&#39;marks&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">from_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Build the class from a line read from a table file.</span>
+<span class="sd">        Build the class from a set of fields, which might or not</span>
+<span class="sd">        coincide with those in the class constructor.</span>
 
-<span class="sd">        :param line: line to read.</span>
-<span class="sd">        :type line: str</span>
+<span class="sd">        :param fields: dictionary of fields to process.</span>
+<span class="sd">        :type fields: dict</span>
 <span class="sd">        :returns: :class:`FileInfo` instance.</span>
 <span class="sd">        :rtype: FileInfo</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">tmstp</span><span class="p">,</span> <span class="n">fid</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+        <span class="n">pp</span> <span class="o">=</span> <span class="n">protocols</span><span class="o">.</span><span class="n">protocol_path_from_fields</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;protocol_path&#39;</span><span class="p">])</span>
+        <span class="n">mk</span> <span class="o">=</span> <span class="n">FileMarks</span><span class="o">.</span><span class="n">from_fields</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;marks&#39;</span><span class="p">])</span>
 
-        <span class="n">pp</span> <span class="o">=</span> <span class="n">protocols</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">pid</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pp</span><span class="p">,</span> <span class="n">FileMarks</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">tmstp</span><span class="p">),</span> <span class="n">fid</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span> <span class="n">pp</span><span class="p">,</span> <span class="n">mk</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_name_and_path</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_name_and_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build from a name and a path to the file.</span>
 <span class="sd">        The path must point to a local file or, in case of being a</span>
@@ -164,22 +161,25 @@
         <span class="n">pp</span> <span class="o">=</span> <span class="n">protocols</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_remote</span><span class="p">(</span><span class="n">pp</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unable to extract a local path from &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Unable to extract a local path from &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
 
         <span class="n">marks</span> <span class="o">=</span> <span class="n">FileMarks</span><span class="o">.</span><span class="n">from_local_path</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">pp</span><span class="p">,</span> <span class="n">marks</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This method defines the way this class is saved to a file.</span>
 
 <span class="sd">        :returns: tuple with the information of this class</span>
 <span class="sd">        :rtype: tuple(str, str, str, str)</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">tmstp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">fid</span><span class="p">)</span>
+        <span class="n">pp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">pid</span><span class="p">}</span>
+        <span class="n">mk</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;tmstp&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">tmstp</span><span class="p">,</span> <span class="s1">&#39;fid&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">fid</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;protocol_path&#39;</span><span class="p">:</span> <span class="n">pp</span><span class="p">,</span> <span class="s1">&#39;marks&#39;</span><span class="p">:</span> <span class="n">mk</span><span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">is_bare</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">is_bare</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Return whether this is a bare file.</span>
 
@@ -188,7 +188,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">tmstp</span> <span class="o">==</span> <span class="n">__default_tmstp__</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span><span class="o">.</span><span class="n">fid</span> <span class="o">==</span> <span class="n">__default_fid__</span>
 
-    <span class="k">def</span> <span class="nf">newer_than</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">other</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">newer_than</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Return whether this object corresponds to a newer version than that</span>
 <span class="sd">        given.</span>
@@ -201,29 +201,29 @@
 
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="k">def</span> <span class="nf">updated</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Return the updated version of this file.</span>
 
+<span class="sd">        :param modifiers: information to modify the path of this class.</span>
+<span class="sd">        :type modifiers: dict</span>
 <span class="sd">        :returns: updated version of this file.</span>
 <span class="sd">        :rtype: FileInfo</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">protocols</span><span class="o">.</span><span class="n">is_remote</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">):</span>
-            <span class="n">_</span><span class="p">,</span> <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">split_path</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">path</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">with_modifiers</span><span class="p">(</span><span class="n">modifiers</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-            <span class="n">marks</span> <span class="o">=</span> <span class="n">FileMarks</span><span class="o">.</span><span class="n">from_local_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">):</span>
+            <span class="n">marks</span> <span class="o">=</span> <span class="n">FileMarks</span><span class="o">.</span><span class="n">from_local_path</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">marks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marks</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s1">&#39;Unable to resolve &quot;</span><span class="si">{}</span><span class="s1">&quot; to a LocalPath; can not update file information&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">FileInfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">,</span> <span class="n">marks</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="FileMarks"><a class="viewcode-back" href="../../api/hep_rfm.FileMarks.html#hep_rfm.FileMarks">[docs]</a><span class="k">class</span> <span class="nc">FileMarks</span><span class="p">(</span><span class="n">FileMarksBase</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">tmstp</span> <span class="o">=</span> <span class="n">__default_tmstp__</span><span class="p">,</span> <span class="n">fid</span> <span class="o">=</span> <span class="n">__default_fid__</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tmstp</span><span class="o">=</span><span class="n">__default_tmstp__</span><span class="p">,</span> <span class="n">fid</span><span class="o">=</span><span class="n">__default_fid__</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represent an object storing the time-stamp and file ID of a file.</span>
 
@@ -236,8 +236,21 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileMarks</span><span class="p">,</span> <span class="bp">cls</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">tmstp</span><span class="p">,</span> <span class="n">fid</span><span class="p">)</span>
 
+    <span class="nd">@construct_from_fields</span><span class="p">([</span><span class="s1">&#39;tmstp&#39;</span><span class="p">,</span> <span class="s1">&#39;fid&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">from_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class from a set of fields, which might or not</span>
+<span class="sd">        coincide with those in the class constructor.</span>
+
+<span class="sd">        :param fields: dictionary of fields to process.</span>
+<span class="sd">        :type fields: dict</span>
+<span class="sd">        :returns: :class:`FileMarks` instance.</span>
+<span class="sd">        :rtype: FileMarks</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">)</span>
+
     <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">from_local_path</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">from_local_path</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build the class from a local path to a file.</span>
 

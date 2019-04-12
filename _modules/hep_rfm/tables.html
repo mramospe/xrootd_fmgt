@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>hep_rfm.tables &#8212; hep_rfm 0.0.0.dev3 documentation</title>
+    <title>hep_rfm.tables &#8212; hep_rfm 0.0.0.dev4 documentation</title>
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
@@ -39,27 +39,29 @@
 <span class="sd">&#39;&#39;&#39;</span>
 
 <span class="n">__author__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Miguel Ramos Pernas&#39;</span><span class="p">]</span>
-<span class="n">__email__</span>  <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
-
-<span class="c1"># Local</span>
-<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">core</span>
-<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
-<span class="kn">from</span> <span class="nn">hep_rfm.files</span> <span class="k">import</span> <span class="n">FileInfo</span>
-<span class="kn">from</span> <span class="nn">hep_rfm.parallel</span> <span class="k">import</span> <span class="n">JobHandler</span><span class="p">,</span> <span class="n">Worker</span>
-
-<span class="c1"># Python</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">multiprocessing</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="n">__email__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;miguel.ramos.pernas@cern.ch&#39;</span><span class="p">]</span>
 
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Table&#39;</span><span class="p">,</span> <span class="s1">&#39;Manager&#39;</span><span class="p">]</span>
 
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">multiprocessing</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.parallel</span> <span class="k">import</span> <span class="n">JobHandler</span><span class="p">,</span> <span class="n">Worker</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.version</span> <span class="k">import</span> <span class="n">__version__</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.files</span> <span class="k">import</span> <span class="n">FileInfo</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.fields</span> <span class="k">import</span> <span class="n">construct_from_fields</span>
+<span class="kn">from</span> <span class="nn">hep_rfm.core</span> <span class="k">import</span> <span class="n">copy_file</span>
+<span class="kn">from</span> <span class="nn">hep_rfm</span> <span class="k">import</span> <span class="n">protocols</span>
+
 
 <div class="viewcode-block" id="Manager"><a class="viewcode-back" href="../../api/hep_rfm.Manager.html#hep_rfm.Manager">[docs]</a><span class="k">class</span> <span class="nc">Manager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Represent a class to store tables in different local/remote hosts, being</span>
 <span class="sd">        able to do updates among them.</span>
@@ -70,7 +72,7 @@
 
         <span class="nb">super</span><span class="p">(</span><span class="n">Manager</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Manager.add_table"><a class="viewcode-back" href="../../api/hep_rfm.Manager.html#hep_rfm.Manager.add_table">[docs]</a>    <span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+<div class="viewcode-block" id="Manager.add_table"><a class="viewcode-back" href="../../api/hep_rfm.Manager.html#hep_rfm.Manager.add_table">[docs]</a>    <span class="k">def</span> <span class="nf">add_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Add a new table to the list of tables.</span>
 <span class="sd">        The path is automatically transformed into the corresponding</span>
@@ -83,19 +85,23 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Manager.available_table"><a class="viewcode-back" href="../../api/hep_rfm.Manager.html#hep_rfm.Manager.available_table">[docs]</a>    <span class="k">def</span> <span class="nf">available_table</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">allow_protocols</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+<div class="viewcode-block" id="Manager.available_table"><a class="viewcode-back" href="../../api/hep_rfm.Manager.html#hep_rfm.Manager.available_table">[docs]</a>    <span class="k">def</span> <span class="nf">available_table</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_protocols</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Get the path to the first available table.</span>
 <span class="sd">        The behavior is similar to that of :class:`hep_rfm.available_path`.</span>
 
+<span class="sd">        :param modifiers: modifiers to be applied in the set of paths.</span>
+<span class="sd">        :type modifiers: dict</span>
 <span class="sd">        :param allow_protocols: possible protocols to consider.</span>
 <span class="sd">        :type allow_protocols: container(str)</span>
 <span class="sd">        :returns: path to the first available table.</span>
 <span class="sd">        :rtype: str</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">return</span> <span class="n">protocols</span><span class="o">.</span><span class="n">available_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">,</span> <span class="n">allow_protocols</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Manager.update"><a class="viewcode-back" href="../../api/hep_rfm.Manager.html#hep_rfm.Manager.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">wdir</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">modifiers</span> <span class="o">=</span> <span class="kc">None</span> <span class="p">):</span>
+<span class="sd">        .. seealso:: :func:`available_path`</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">protocols</span><span class="o">.</span><span class="n">available_path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">,</span> <span class="n">modifiers</span><span class="p">,</span> <span class="n">allow_protocols</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Manager.update"><a class="viewcode-back" href="../../api/hep_rfm.Manager.html#hep_rfm.Manager.update">[docs]</a>    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">wdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Update the different tables registered within this manager.</span>
 
@@ -126,7 +132,8 @@
         <span class="c1"># Copy the tables to a temporary directory to work with them,</span>
         <span class="c1"># and get the names of all the files</span>
 
-        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Copying tables to a temporary directory&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Copying tables to a temporary directory&#39;</span><span class="p">)</span>
 
         <span class="n">tmp</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tables</span><span class="p">):</span>
@@ -134,7 +141,7 @@
             <span class="n">fpath</span> <span class="o">=</span> <span class="n">protocols</span><span class="o">.</span><span class="n">LocalPath</span><span class="p">(</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">tmp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;table_</span><span class="si">{}</span><span class="s1">.txt&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
 
-            <span class="n">core</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">fpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">copy_file</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">fpath</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="n">tu</span> <span class="o">=</span> <span class="n">TableUpdater</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">fpath</span><span class="p">)</span>
 
@@ -144,7 +151,8 @@
 
         <span class="c1"># Loop over the tables to get the more recent versions of the files</span>
 
-        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Determining most recent version of files&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;Determining most recent version of files&#39;</span><span class="p">)</span>
 
         <span class="n">more_recent</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -162,7 +170,8 @@
 
                     <span class="n">name_error</span> <span class="o">=</span> <span class="kc">True</span>
 
-                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Table in &quot;</span><span class="si">{}</span><span class="s1">&quot; does not have file &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tu</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+                    <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s1">&#39;Table in &quot;</span><span class="si">{}</span><span class="s1">&quot; does not have file &quot;</span><span class="si">{}</span><span class="s1">&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">tu</span><span class="o">.</span><span class="n">protocol_path</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">name_error</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Missing files in some tables&#39;</span><span class="p">)</span>
@@ -200,7 +209,7 @@
         <span class="c1"># files and, in the last step, update the information in the tables.</span>
         <span class="k">if</span> <span class="n">parallelize</span><span class="p">:</span>
 
-            <span class="n">func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">core</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="o">*</span><span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">copy_file</span><span class="p">(</span><span class="o">*</span><span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sync_files</span><span class="p">,</span> <span class="n">sync_tables</span><span class="p">):</span>
 
@@ -219,27 +228,83 @@
                 <span class="n">handler</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sync_files</span> <span class="o">+</span> <span class="n">sync_tables</span><span class="p">:</span>
-                <span class="n">core</span><span class="o">.</span><span class="n">copy_file</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
+                <span class="n">copy_file</span><span class="p">(</span><span class="o">*</span><span class="n">i</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="Table"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table">[docs]</a><span class="k">class</span> <span class="nc">Table</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">files</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">last_update</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a table storing the information about files.</span>
 
 <span class="sd">        :param files: files to store in the table.</span>
-<span class="sd">        :type files: collection(FileInfo)</span>
+<span class="sd">        :type files: dict(str, FileInfo)</span>
+<span class="sd">        :param description: string to explain the contents of the table.</span>
+<span class="sd">        :type description: str</span>
+<span class="sd">        :param last_update: date and time of the last update of the table.</span>
+<span class="sd">        :type last_update: str</span>
+<span class="sd">        :param version: version of this package used to create the table.</span>
+<span class="sd">        :type version: str</span>
+
+<span class="sd">        :ivar description: string with a description of the values contained \</span>
+<span class="sd">        in the table.</span>
+<span class="sd">        :ivar last_update: data and time of the last update done to the \</span>
+<span class="sd">        table. The value is only filled for tables read from a file. If the \</span>
+<span class="sd">        table is created from scratch, then it is set to None.</span>
+<span class="sd">        :ivar version: version of the package used to create the table. The \</span>
+<span class="sd">        value is only filled for tables read from a file. If the table is \</span>
+<span class="sd">        created from scratch, then it is set to None.</span>
+
+<span class="sd">        .. note:: For tables built from a file, the version corresponds to that</span>
+<span class="sd">           of the hep_rfm package used to create them, although the structure</span>
+<span class="sd">           corresponds to that of the current. The information of the last update</span>
+<span class="sd">           is set to None for just created tables, and it is set only for tables</span>
+<span class="sd">           read from files.</span>
+
+<span class="sd">        .. warning:: If a dictionary of files is provided in &quot;files&quot;, then</span>
+<span class="sd">           it is necessary for each key to be equal to the name of its related</span>
+<span class="sd">           file.</span>
 
 <span class="sd">        .. seealso:: :class:`hep_rfm.Manager`, :func:`hep_rfm.copy_file`</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Table</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Table</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">files</span> <span class="ow">or</span> <span class="p">{})</span>
 
-        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-            <span class="bp">self</span><span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">f</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_update</span> <span class="o">=</span> <span class="n">last_update</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">version</span> <span class="o">=</span> <span class="n">version</span>
+
+<div class="viewcode-block" id="Table.from_fields"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table.from_fields">[docs]</a>    <span class="nd">@construct_from_fields</span><span class="p">([</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="s1">&#39;last_update&#39;</span><span class="p">,</span> <span class="s1">&#39;version&#39;</span><span class="p">],</span> <span class="n">required</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">])</span>
+    <span class="k">def</span> <span class="nf">from_fields</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">fields</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class from a set of fields, which might or not</span>
+<span class="sd">        coincide with those in the class constructor.</span>
+
+<span class="sd">        :param fields: dictionary of fields to process.</span>
+<span class="sd">        :type fields: dict</span>
+<span class="sd">        :returns: built table.</span>
+<span class="sd">        :rtype: Table</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Table.from_files"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table.from_files">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_files</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">files</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">last_update</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Build the class from a list of :class:`hep_rfm.FileInfo` instances.</span>
+<span class="sd">        The names of the files are used as keys for the table.</span>
+
+<span class="sd">        :param files: files to store in the table.</span>
+<span class="sd">        :type files: collection(FileInfo)</span>
+<span class="sd">        :param description: string to explain the contents of the table.</span>
+<span class="sd">        :type description: str</span>
+<span class="sd">        :param last_update: date and time of the last update of the table.</span>
+<span class="sd">        :type last_update: str</span>
+<span class="sd">        :param version: version of this package used to create the table.</span>
+<span class="sd">        :type version: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">({</span><span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">},</span> <span class="n">description</span><span class="p">,</span> <span class="n">last_update</span><span class="p">,</span> <span class="n">version</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Table.read"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table.read">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">path</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Build a table from the information in the file at the given local path.</span>
 
@@ -248,22 +313,31 @@
 <span class="sd">        :returns: built table.</span>
 <span class="sd">        :rtype: Table</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fi</span><span class="p">:</span>
 
-            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">fi</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">fi</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
-                <span class="n">fp</span> <span class="o">=</span> <span class="n">FileInfo</span><span class="o">.</span><span class="n">from_stream_line</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fields</span> <span class="o">=</span> <span class="p">{}</span>
 
-                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+            <span class="n">fields</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">FileInfo</span><span class="o">.</span><span class="n">from_fields</span><span class="p">(</span>
+                <span class="o">**</span><span class="n">fs</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">fs</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;files&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">files</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_fields</span><span class="p">(</span><span class="o">**</span><span class="n">fields</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Table.updated"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table.updated">[docs]</a>    <span class="k">def</span> <span class="nf">updated</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">parallelize</span> <span class="o">=</span> <span class="kc">False</span> <span class="p">):</span>
+<div class="viewcode-block" id="Table.updated"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table.updated">[docs]</a>    <span class="k">def</span> <span class="nf">updated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modifiers</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parallelize</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Return an updated version of this table, checking again all the</span>
 <span class="sd">        properties of the files within it.</span>
 
+<span class="sd">        :param files: files to update within the table. The returned table \</span>
+<span class="sd">        will contain the same entries as the parent, but with the files \</span>
+<span class="sd">        specified in &quot;files&quot; updated.</span>
+<span class="sd">        :type files: collection(str)</span>
+<span class="sd">        :param modifiers: information to modify the path of this class.</span>
+<span class="sd">        :type modifiers: dict</span>
 <span class="sd">        :param parallelize: number of processes allowed to parallelize the \</span>
 <span class="sd">        synchronization of all the proxies. By default it is set to 0, so no \</span>
 <span class="sd">        parallelization  is done.</span>
@@ -271,14 +345,16 @@
 <span class="sd">        :returns: updated version of the table.</span>
 <span class="sd">        :rtype: Table</span>
 <span class="sd">        &#39;&#39;&#39;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">files</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
         <span class="k">if</span> <span class="n">parallelize</span><span class="p">:</span>
 
             <span class="n">handler</span> <span class="o">=</span> <span class="n">JobHandler</span><span class="p">()</span>
 
-            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
-                <span class="n">handler</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">handler</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">f</span><span class="p">])</span>
 
-            <span class="n">func</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">:</span> <span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">updated</span><span class="p">())</span>
+            <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">q</span><span class="p">):</span> <span class="k">return</span> <span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">updated</span><span class="p">(</span><span class="n">modifiers</span><span class="o">=</span><span class="n">modifiers</span><span class="p">))</span>
 
             <span class="n">queue</span> <span class="o">=</span> <span class="n">multiprocessing</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
 
@@ -287,38 +363,63 @@
 
             <span class="n">handler</span><span class="o">.</span><span class="n">process</span><span class="p">()</span>
 
-            <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))]</span>
+            <span class="n">ufiles</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)))</span>
 
             <span class="n">queue</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span><span class="o">.</span><span class="n">updated</span><span class="p">()</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="n">ufiles</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">f</span><span class="p">]</span><span class="o">.</span><span class="n">updated</span><span class="p">(</span><span class="n">modifiers</span><span class="o">=</span><span class="n">modifiers</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">output</span><span class="p">)</span></div>
+        <span class="c1"># We must add the rest of the files in case &quot;files&quot; is provided</span>
+        <span class="n">ufiles</span> <span class="o">+=</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">f</span><span class="p">]</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">files</span><span class="p">))</span>
 
-<div class="viewcode-block" id="Table.write"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">path</span> <span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">from_files</span><span class="p">(</span><span class="n">ufiles</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_update</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">version</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Table.write"><a class="viewcode-back" href="../../api/hep_rfm.Table.html#hep_rfm.Table.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">backup</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Write this table in the following location.</span>
 <span class="sd">        Must be a local path.</span>
+<span class="sd">        The current version of the package will be used.</span>
 
 <span class="sd">        :param path: where to write this table to.</span>
 <span class="sd">        :type path: str</span>
+<span class="sd">        :param backup: if a table in &quot;path&quot; already exists and this \</span>
+<span class="sd">        argument is set to True, then the previous file is renamed \</span>
+<span class="sd">        to &lt;filename&gt;.backup before modifying it. If it is set to \</span>
+<span class="sd">        a string, then that is used as file name to write the backup.</span>
+<span class="sd">        :type backup: bool or str</span>
+<span class="sd">        :raises IOError: if the output path exists and it does not correspond \</span>
+<span class="sd">        to a file.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fo</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="n">dct</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;version&#39;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="s1">&#39;last_update&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()),</span>
+            <span class="s1">&#39;files&#39;</span><span class="p">:</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">info</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">f</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">())},</span>
+        <span class="p">}</span>
 
-                <span class="n">info</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span>
+                <span class="s1">&#39;Attempt to write a table to an existing path not corresponding to a file.&#39;</span><span class="p">)</span>
 
-                <span class="n">frmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
-                    <span class="n">frmt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\t</span><span class="si">{}</span><span class="s1">&#39;</span>
-                <span class="n">frmt</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">if</span> <span class="n">backup</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="s1">&#39;No previous table is present in the given path; backup has not been generated&#39;</span><span class="p">,</span> <span class="ne">Warning</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">backup</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">backup_name</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;.backup&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">backup_name</span> <span class="o">=</span> <span class="n">backup</span>
 
-                <span class="n">fo</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">frmt</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">*</span><span class="n">info</span><span class="p">))</span></div></div>
+                <span class="n">os</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">backup_name</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dct</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span></div></div>
 
 
 <span class="k">class</span> <span class="nc">TableUpdater</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">tmp_path</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Class to ease the procedure of updating tables.</span>
 
@@ -333,12 +434,12 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">TableUpdater</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">path</span>     <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tmp_path</span> <span class="o">=</span> <span class="n">tmp_path</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">table</span>    <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">tmp_path</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">Table</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">tmp_path</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_changes</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">def</span> <span class="nf">changes</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">changes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Returns the changes to apply.</span>
 
@@ -347,7 +448,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="p">(</span><span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_changes</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">check_changed</span><span class="p">(</span> <span class="bp">self</span><span class="p">,</span> <span class="n">f</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">check_changed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Determine if a content of the table needs to be updated.</span>
 
@@ -358,7 +459,7 @@
         <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">newer_than</span><span class="p">(</span><span class="n">sf</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_changes</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">f</span><span class="p">,</span> <span class="n">sf</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">needs_update</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">needs_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Return whether the associated table needs to be updated.</span>
 
@@ -367,13 +468,14 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changes</span> <span class="o">!=</span> <span class="p">[])</span>
 
-    <span class="k">def</span> <span class="nf">update_table</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="k">def</span> <span class="nf">update_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Update the table stored within this class.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">for</span> <span class="n">src</span><span class="p">,</span> <span class="n">tgt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_changes</span><span class="p">:</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="n">tgt</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">FileInfo</span><span class="p">(</span><span class="n">tgt</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tgt</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">,</span> <span class="n">src</span><span class="o">.</span><span class="n">marks</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="p">[</span><span class="n">tgt</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">FileInfo</span><span class="p">(</span>
+                <span class="n">tgt</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tgt</span><span class="o">.</span><span class="n">protocol_path</span><span class="p">,</span> <span class="n">src</span><span class="o">.</span><span class="n">marks</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tmp_path</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
 </pre></div>

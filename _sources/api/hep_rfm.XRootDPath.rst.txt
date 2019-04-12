@@ -20,6 +20,7 @@ XRootDPath
       ~XRootDPath.join_path
       ~XRootDPath.mkdirs
       ~XRootDPath.split_path
+      ~XRootDPath.with_modifiers
 
    .. rubric:: Attributes Documentation
 
@@ -31,3 +32,4 @@ XRootDPath
    .. automethod:: join_path
    .. automethod:: mkdirs
    .. automethod:: split_path
+   .. automethod:: with_modifiers

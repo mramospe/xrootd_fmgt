@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>XRootDPath &#8212; hep_rfm 0.0.0.dev3 documentation</title>
+    <title>XRootDPath &#8212; hep_rfm 0.0.0.dev4 documentation</title>
     <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../_static/graphviz.css" />
@@ -80,6 +80,9 @@
 </tr>
 <tr class="row-even"><td><a class="reference internal" href="#hep_rfm.XRootDPath.split_path" title="hep_rfm.XRootDPath.split_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">split_path</span></code></a>()</td>
 <td>Split the remote path in the server specifications and path in the server.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="#hep_rfm.XRootDPath.with_modifiers" title="hep_rfm.XRootDPath.with_modifiers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">with_modifiers</span></code></a>([modifiers])</td>
+<td>Return an instance of this class after applying modifications.</td>
 </tr>
 </tbody>
 </table>
@@ -162,6 +165,31 @@ server.</p>
 <tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">server specifications and path in the server.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a>, <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)">str</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="hep_rfm.XRootDPath.with_modifiers">
+<code class="descname">with_modifiers</code><span class="sig-paren">(</span><em>modifiers=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/hep_rfm/protocols.html#XRootDPath.with_modifiers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#hep_rfm.XRootDPath.with_modifiers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an instance of this class after applying modifications.
+The input dictionary “modifiers” might contain information about the
+user-name for the host in the stored path.
+The allowed keys for this dictionary are:
+- “xrootd_servers”: list containing the XRootD servers accessible from
+the place where the operation is being done. If the path stored in this
+class has a host that coincides with any of those here specified, it
+will return a <a class="reference internal" href="hep_rfm.LocalPath.html#hep_rfm.LocalPath" title="hep_rfm.LocalPath"><code class="xref py py-class docutils literal notranslate"><span class="pre">hep_rfm.LocalPath</span></code></a> instance.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>modifiers</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – information to modify the path of this class.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">modified instance if a modification is applied. Otherwise         same instance.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference internal" href="hep_rfm.ProtocolPath.html#hep_rfm.ProtocolPath" title="hep_rfm.ProtocolPath">ProtocolPath</a></td>
 </tr>
 </tbody>
 </table>
