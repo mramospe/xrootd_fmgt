@@ -14,6 +14,7 @@ import os
 import multiprocessing
 import logging
 import json
+import itertools
 import datetime
 from hep_rfm.parallel import JobHandler, Worker
 from hep_rfm.version import __version__
@@ -21,6 +22,73 @@ from hep_rfm.files import FileInfo
 from hep_rfm.fields import construct_from_fields
 from hep_rfm.core import copy_file
 from hep_rfm import protocols
+
+
+def _compute_changes(tables, most_recent):
+    '''
+    Compute the changes among a set of tables given the most recent version
+    of each file.
+    The output will be a list containing the changes for each table.
+    The first entry for each change will correspond to the
+    :class:`hep_rfm.FileInfo` instance related to the most recent
+    version of the file, whilst the second will correspond to the version
+    in the table.
+
+    :param tables: tables to process.
+    :type tables: colection(Table)
+    :param most_recent: most recent version of the files.
+    :type most_recent: collection(FileInfo)
+    :returns: changes for each table.
+    :rtype: list(tuple(FileInfo, FileInfo))
+    '''
+    changes_by_table = []
+
+    for table in tables:
+
+        changes = []
+
+        for f in most_recent:
+            sf = table[f.name]
+            if f.newer_than(sf):
+                changes.append((f, sf))
+
+        changes_by_table.append(changes)
+
+    return changes_by_table
+
+
+def _filenames_from_tables(tables, sources):
+    '''
+    Get the file names from a given collection of tables, checking that
+    all of them have the same entries.
+
+    :param tables: tables to process.
+    :type tables: collection(Table)
+    :param sources: paths to the location of the tables. This is the path \
+    that will be displayed in case :class:`RuntimeError` is raised. Must \
+    be of the same length as "tables".
+    :type sources: collection(str)
+    :returns: reference names for the files in the tables.
+    :rtype: set(str)
+    :raises RuntimeError: if any of the tables containes a different set \
+    of entries.
+    '''
+    names = set(itertools.chain.from_iterable(t.keys() for t in tables))
+
+    name_error = False
+
+    for table, source in zip(tables, sources):
+        for name in names:
+
+            if name not in table.keys():
+                logging.getLogger(__name__).error(
+                    'Table in "{}" does not have file "{}"'.format(source, name))
+                name_error = True
+
+    if name_error:
+        raise RuntimeError('Missing files in some tables')
+
+    return names
 
 
 class Manager(object):
@@ -89,9 +157,6 @@ class Manager(object):
         #
         # Determine the files to update
         #
-        update_tables = []
-
-        names = set()
 
         # Copy the tables to a temporary directory to work with them,
         # and get the names of all the files
@@ -99,70 +164,68 @@ class Manager(object):
         logging.getLogger(__name__).info(
             'Copying tables to a temporary directory')
 
-        tmp = tempfile.TemporaryDirectory()
+        source_tables = []
+        tmp_tables = []
+        tables = []
+
+        tmpdir = tempfile.TemporaryDirectory()
         for i, n in enumerate(self.tables):
 
             fpath = protocols.LocalPath(
-                os.path.join(tmp.name, 'table_{}.txt'.format(i)))
+                os.path.join(tmpdir.name, 'table_{}.txt'.format(i)))
 
             copy_file(n, fpath, **kwargs)
 
-            tu = TableUpdater(n, fpath)
+            table = Table.read(fpath.path)
 
-            update_tables.append(tu)
-
-            names = names.union(tu.table.keys())
+            source_tables.append(n)
+            tmp_tables.append(fpath)
+            tables.append(table)
 
         # Loop over the tables to get the more recent versions of the files
 
         logging.getLogger(__name__).info(
             'Determining most recent version of files')
 
-        more_recent = {}
-
-        name_error = False
-        for name in names:
-            for tu in update_tables:
-
-                try:
-                    f = tu.table[name]
-
-                    if name not in more_recent or f.newer_than(more_recent[name]):
-                        more_recent[name] = f
-
-                except KeyError:
-
-                    name_error = True
-
-                    logging.getLogger(__name__).error(
-                        'Table in "{}" does not have file "{}"'.format(tu.protocol_path.path, name))
-
-        if name_error:
-            raise RuntimeError('Missing files in some tables')
+        most_recent = []
+        for name in _filenames_from_tables(tables, source_tables):
+            mr = None
+            for t in tables:
+                f = t[name]
+                if mr is None or f.newer_than(mr):
+                    mr = f
+            most_recent.append(mr)
 
         # Loop over the information with the more recent versions and mark the
         # the files to update in each table.
-        for f in more_recent.values():
-            for u in update_tables:
-                u.check_changed(f)
-
-        # The update tables notify the tables to change their hash values and
-        # timestamps
-        for u in update_tables:
-            u.update_table()
+        changes_by_table = _compute_changes(tables, most_recent)
 
         #
         # Synchronize files and tables.
         #
-        sync_files, sync_tables = [], []
+
+        sync_files = [(f.protocol_path, s.protocol_path)
+                      for f, s in itertools.chain.from_iterable(changes_by_table)]
+        sync_tables = []
 
         # Get the list of sources/targets to process from the update tables
-        for u in update_tables:
+        for i, changes in enumerate(changes_by_table):
 
-            sync_files += u.changes()
+            if not len(changes):
+                continue
 
-            if u.needs_update():
-                sync_tables.append((u.tmp_path, u.path))
+            tmp = tmp_tables[i]
+            source = source_tables[i]
+            table = tables[i]
+
+            sync_tables.append((tmp, source))
+
+            # Change hash values and timestamps
+            for src, tgt in changes:
+                table[tgt.name] = FileInfo(
+                    tgt.name, tgt.protocol_path, src.marks)
+
+            table.write(tmp.path)
 
         if len(sync_files):
             logging.getLogger(__name__).info('Starting to synchronize files')
@@ -379,66 +442,3 @@ class Table(dict):
 
         with open(path, 'wt') as f:
             f.write(json.dumps(dct, indent=4, sort_keys=True))
-
-
-class TableUpdater(object):
-
-    def __init__(self, path, tmp_path):
-        '''
-        Class to ease the procedure of updating tables.
-
-        :param path: path where the information of the given table is holded.
-        :type path: str
-        :param tmp_path: path to the temporal input table.
-        :type tmp_path: str
-
-        :ivar path: path where the real input table is located.
-        :ivar tmp_path: path to the temporal input table.
-        :ivar table: table holding the information about the files.
-        '''
-        super(TableUpdater, self).__init__()
-
-        self.path = path
-        self.tmp_path = tmp_path
-        self.table = Table.read(tmp_path.path)
-        self._changes = []
-
-    def changes(self):
-        '''
-        Returns the changes to apply.
-
-        :returns: changes to apply (input and output paths).
-        :rtype: list(tuple(str, str))
-        '''
-        return list(map(lambda t: (t[0].protocol_path, t[1].protocol_path), self._changes))
-
-    def check_changed(self, f):
-        '''
-        Determine if a content of the table needs to be updated.
-
-        :param f: information of the file to process.
-        :type f: FileInfo
-        '''
-        sf = self.table[f.name]
-        if f.newer_than(sf):
-            self._changes.append((f, sf))
-
-    def needs_update(self):
-        '''
-        Return whether the associated table needs to be updated.
-
-        :returns: whether the associated table needs to be updated.
-        :rtype: bool
-        '''
-        return (self._changes != [])
-
-    def update_table(self):
-        '''
-        Update the table stored within this class.
-        '''
-        for src, tgt in self._changes:
-
-            self.table[tgt.name] = FileInfo(
-                tgt.name, tgt.protocol_path, src.marks)
-
-        self.table.write(self.tmp_path.path)
