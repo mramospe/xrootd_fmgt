@@ -397,10 +397,6 @@ def update_data_fields(table, backup, **kwargs):
 
 if __name__ == '__main__':
 
-    # Logging configuration
-    logging.basicConfig(format='%(message)s')
-    logging.getLogger().setLevel(logging.INFO)
-
     def add_mode(subparsers, func):
         '''
         Add a new mode to a parser.
@@ -532,10 +528,27 @@ if __name__ == '__main__':
                        'is not necessary to add "backup" as an argument if '
                        'the former is provided.')
 
+    # To modify the verbosity
+    for p in subparsers.choices.values():
+        p.add_argument('--verbosity', '-v', choices=('debug', 'info', 'warning', 'error', 'critical'),
+                       default='info',
+                       help='Control the verbosity')
+
     # Parse the arguments and call the function
     args = parser.parse_args()
     dct = dict(vars(args))
     dct.pop('func')
+
+    # Logging configuration
+    logging.basicConfig(format='%(message)s')
+    verbosity_dct = {
+        'info': logging.INFO,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'debug': logging.DEBUG,
+        'critical': logging.CRITICAL,
+    }
+    logging.getLogger().setLevel(verbosity_dct[dct.pop('verbosity')])
 
     # If a backup name is provided, it is passed to the calling function
     # as "backup"
