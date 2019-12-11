@@ -38,7 +38,7 @@
 *.root
 *.pickle
 *.pkl
-*.ini
+.coverage
 
 # OS generated files #
 ######################
