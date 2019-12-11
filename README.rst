@@ -8,6 +8,9 @@ hep_rfm
 .. image:: https://img.shields.io/badge/documentation-link-blue.svg
    :target: https://mramospe.github.io/hep_rfm/
 
+.. image:: https://codecov.io/gh/mramospe/hep_rfm/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/mramospe/hep_rfm
+
 .. inclusion-marker-do-not-remove
 
 Provides tools to manage remote and local files using the XROOTD and/or SSH
